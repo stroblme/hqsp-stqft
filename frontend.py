@@ -3,12 +3,15 @@ from numpy import pi
 import matplotlib.pyplot as plt
 
 plt.style.use('seaborn-poster')
+plt.ion()
 
 class signal():
     def __init__(self, samplingRate=100) -> None:
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
         self.t = np.arange(0,1,self.samplingInterval)
+        
+        self.sample()
         
     def sample(self, frequency=2.):
         self.frequency = frequency
@@ -57,3 +60,7 @@ class transform():
         plt.xlim(0, 10)
         plt.tight_layout()
         plt.show()
+
+def primeTime():
+    plt.ioff()
+    plt.show()
