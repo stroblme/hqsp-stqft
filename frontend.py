@@ -5,19 +5,49 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-poster')
 plt.ion()
 
+    # frequencies = list()
+
+    # def __init__(self, samplingRate=100) -> None:
+    #     self.samplingRate = samplingRate
+    #     self.samplingInterval = 1/self.samplingRate
+    #     self.t = np.arange(0,1,self.samplingInterval)
+        
+    #     self.y = np.zeros(self.t.size)
+
+    # def addFrequency(self, frequency):
+    #     self.frequencies.append(frequency)
+        
+    # def sample(self):
+    #     for frequency in self.frequencies:
+    #         self.y += np.sin(2*np.pi*frequency*self.t)
+
+    #     return self.y
+
 class signal():
+    frequencies = list()
+
     def __init__(self, samplingRate=100) -> None:
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
         self.t = np.arange(0,1,self.samplingInterval)
         
-        self.sample()
+        self.y = np.zeros(self.t.size)
+
+    def addFrequency(self, frequency):
+        self.frequencies.append(frequency)
         
-    def sample(self, frequency=2.):
-        self.frequency = frequency
-        self.y = np.sin(2*np.pi*self.frequency*self.t)
+    def sample(self):
+        self.y = np.zeros(self.t.size)
+        for frequency in self.frequencies:
+            self.y += np.sin(2*np.pi*frequency*self.t)
 
         return self.y
+        
+    # def sample(self, frequency=2.):
+    #     self.frequency = frequency
+    #     self.y = np.sin(2*np.pi*self.frequency*self.t)
+
+    #     return self.y
     
     def show(self):
         plt.figure(figsize = (8, 6))

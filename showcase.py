@@ -3,6 +3,9 @@ from dft import dft_framework
 from frontend import signal, transform, primeTime
 
 y = signal()
+y.addFrequency(2.)
+
+y.sample()
 y.show()
 
 

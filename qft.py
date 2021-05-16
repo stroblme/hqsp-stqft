@@ -83,12 +83,13 @@ def accumulate(buffer, value):
 def processQFT(y, ciruit_size):
     y_hat = np.zeros(y.size)
 
+    circuit = QuantumCircuit(ciruit_size, ciruit_size)
+    qft(circuit,ciruit_size)
+    circuit.reset(range(ciruit_size))
+
     for i in range(0,y.size):
-        circuit = QuantumCircuit(ciruit_size, ciruit_size)
-        circuit.reset(range(ciruit_size))
 
         circuit = encodeInteger(circuit, int(y[i]))
-        qft(circuit,ciruit_size)
         
 
         output = runCircuit(circuit)
@@ -103,14 +104,18 @@ def processQFT(y, ciruit_size):
 
 # %%
 class qft_framework():
-        
-    def transform(self, y, scaler=10):
-        scaler = 10
-        y_preprocessed = preprocessSignal(y, scaler)
+    def __init__(self) -> None:
+        self.setScaler()
+
+    def setScaler (self, scaler=10):
+        self.scaler = scaler
+
+    def transform(self, y):
+        y_preprocessed = preprocessSignal(y, self.scaler)
 
         # x_processed = x_processed[2:4]
         ciruit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-        print(f"Using Scaler {scaler} resulted in Circuit Size {ciruit_size}")
+        print(f"Using Scaler {self.scaler} resulted in Circuit Size {ciruit_size}")
 
         y_hat = processQFT(y_preprocessed, ciruit_size)
 
