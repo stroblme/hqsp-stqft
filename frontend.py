@@ -25,6 +25,7 @@ plt.ion()
 
 class signal():
     frequencies = list()
+    phases = list()
 
     def __init__(self, samplingRate=100) -> None:
         self.samplingRate = samplingRate
@@ -33,13 +34,14 @@ class signal():
         
         self.y = np.zeros(self.t.size)
 
-    def addFrequency(self, frequency):
+    def addFrequency(self, frequency, phase=0):
         self.frequencies.append(frequency)
+        self.phases.append(phase)
         
     def sample(self):
         self.y = np.zeros(self.t.size)
-        for frequency in self.frequencies:
-            self.y += np.sin(2*np.pi*frequency*self.t)
+        for frequency, phase in zip(self.frequencies, self.phases):
+            self.y += np.sin(2*np.pi*frequency*self.t-phase)
 
         return self.y
         
@@ -93,4 +95,5 @@ class transform():
 
 def primeTime():
     plt.ioff()
-    plt.show()
+    input("Press any key to close all figures")
+    plt.close('all')

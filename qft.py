@@ -1,22 +1,16 @@
-# To add a new cell, type '# %%'
-# To add a new markdown cell, type '# %% [markdown]'
-# %%
 from IPython import get_ipython
 
-
-# %%
 import numpy as np
-from numpy import pi, sign
+from numpy import pi
+
 import matplotlib.pyplot as plt
-# importing Qiskit
+
 from qiskit import *
 from qiskit.visualization import plot_histogram
 
 plt.style.use('seaborn-poster')
-# get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# %%
 def qft_rotations(circuit, n):
     """Performs qft on the first n qubits in circuit (without swaps)"""
     if n == 0:
@@ -72,7 +66,7 @@ def runCircuit(circuit):
     
     return output
         
-# def decodeInteger(integer):
+# def decodeInteger(buffer, integer):
 #     return int(integer,2)
 
 def accumulate(buffer, value):
@@ -80,13 +74,15 @@ def accumulate(buffer, value):
 
     return buffer
 
-def processQFT(y, ciruit_size):
+def processQFT(y, circuit_size):
     y_hat = np.zeros(y.size)
 
-    circuit = QuantumCircuit(ciruit_size, ciruit_size)
-    qft(circuit,ciruit_size)
-    circuit.reset(range(ciruit_size))
+    print(f"Generating circuit consisting of {circuit_size} qubits")
+    circuit = QuantumCircuit(circuit_size, circuit_size)
+    qft(circuit,circuit_size)
+    circuit.reset(range(circuit_size))
 
+    print(f"Encoding {y.size} input values")
     for i in range(0,y.size):
 
         circuit = encodeInteger(circuit, int(y[i]))
@@ -94,15 +90,14 @@ def processQFT(y, ciruit_size):
 
         output = runCircuit(circuit)
         
-        y_hat = accumulate(y_hat, output.argmax(axis=0))
+        # y_hat = accumulate(y_hat, output.argmax(axis=0))
+        y_hat = accumulate(y_hat, int(bin(output.argmax(axis=0)),2))
 
-        print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
+        # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
 
     return y_hat
 
 
-
-# %%
 class qft_framework():
     def __init__(self) -> None:
         self.setScaler()
@@ -111,12 +106,13 @@ class qft_framework():
         self.scaler = scaler
 
     def transform(self, y):
+        print(f"Stretching signal with scalar {self.scaler}")
         y_preprocessed = preprocessSignal(y, self.scaler)
 
         # x_processed = x_processed[2:4]
-        ciruit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-        print(f"Using Scaler {self.scaler} resulted in Circuit Size {ciruit_size}")
+        print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
+        circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
-        y_hat = processQFT(y_preprocessed, ciruit_size)
+        y_hat = processQFT(y_preprocessed, circuit_size)
 
         return y_hat
