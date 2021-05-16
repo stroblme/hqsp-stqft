@@ -6,7 +6,7 @@ from IPython import get_ipython
 
 # %%
 import numpy as np
-from numpy import pi
+from numpy import pi, sign
 import matplotlib.pyplot as plt
 # importing Qiskit
 from qiskit import *
@@ -15,10 +15,6 @@ from qiskit.visualization import plot_histogram
 plt.style.use('seaborn-poster')
 # get_ipython().run_line_magic('matplotlib', 'inline')
 
-# %% [markdown]
-# # Quantum FT
-# 
-# Next, we let's try to achieve the same result with the qft circuit
 
 # %%
 def qft_rotations(circuit, n):
@@ -43,7 +39,7 @@ def swap_registers(circuit, n):
 def measure(circuit, n):
     for qubit in range(n):
         circuit.barrier(qubit)
-        circuit.measure_all()
+    circuit.measure_all()
 
 def qft(circuit, n):
     """QFT on the first n qubits in circuit"""
@@ -52,33 +48,12 @@ def qft(circuit, n):
     measure(circuit,n)
     return circuit
 
+def preprocessSignal(y, scaler):
+    y = y*scaler
+    y = y + abs(min(y))
 
-# %%
+    return y
 
-def preprocessSignal(signal):
-    signal = signal*SCALER
-    signal = signal + abs(min(signal))
-
-    return signal
-
-
-# %%
-#Parameters:
-SCALER = 10
-
-signal = preprocessSignal(x)
-# x_processed = x_processed[2:4]
-CIRCUIT_SIZE = int(max(signal)).bit_length() # this basically defines the "adc resolution"
-print(f"Using Scaler {SCALER} resulted in Circuit Size {CIRCUIT_SIZE}")
-
-
-# %%
-# qc = QuantumCircuit(CIRCUIT_SIZE)
-# qft(qc,CIRCUIT_SIZE)
-# qc.draw()
-
-
-# %%
 def encodeInteger(circuit, integer):
     if integer.bit_length() > circuit.width():
         raise RuntimeError("Integer too large")
@@ -97,75 +72,45 @@ def runCircuit(circuit):
     
     return output
         
-def decodeInteger(integer):
-    return int(integer,2)
+# def decodeInteger(integer):
+#     return int(integer,2)
 
 def accumulate(buffer, value):
     buffer[value] += 1
 
     return buffer
 
-def processQFT(circuit, signal):
-    signal_hat = np.zeros(signal.size)
+def processQFT(y, ciruit_size):
+    y_hat = np.zeros(y.size)
 
-    for i in range(0,signal.size):
-        circuit = QuantumCircuit(CIRCUIT_SIZE, CIRCUIT_SIZE)
-        circuit.reset(range(CIRCUIT_SIZE))
+    for i in range(0,y.size):
+        circuit = QuantumCircuit(ciruit_size, ciruit_size)
+        circuit.reset(range(ciruit_size))
 
-        circuit = encodeInteger(circuit, int(signal[i]))
-        qft(circuit,CIRCUIT_SIZE)
+        circuit = encodeInteger(circuit, int(y[i]))
+        qft(circuit,ciruit_size)
         
 
         output = runCircuit(circuit)
         
-        signal_hat = accumulate(signal_hat, output.argmax(axis=0))
+        y_hat = accumulate(y_hat, output.argmax(axis=0))
 
-        print(f"Processing index {i} with value {int(signal[i])} yielded {output.argmax(axis=0)}")
+        print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
 
-    return signal_hat
+    return y_hat
 
-
-# %%
-i=0
-circuit = QuantumCircuit(CIRCUIT_SIZE, CIRCUIT_SIZE)
-circuit.reset(range(CIRCUIT_SIZE))
-
-circuit = encodeInteger(circuit, int(signal[i]))
-qft(circuit,CIRCUIT_SIZE)
-
-backend = Aer.get_backend("qasm_simulator")
-job = execute(circuit, backend, shots=1, memory=True)
-output = job.result().get_memory()[0]
-# circuit.draw()
-
-
-# %%
-signal_hat = processQFT(circuit, signal)
-
-
-# %%
-n_oneside = N//2
-# get the one side frequency
-f_oneside = freq[:n_oneside]/(2*np.pi)
-
-# normalize the amplitude
-X_oneside =signal_hat[:n_oneside]/n_oneside
-
-plt.figure(figsize = (12, 6))
-plt.subplot(121)
-plt.stem(f_oneside, abs(X_oneside), 'b', markerfmt=" ", basefmt="-b")
-plt.xlabel('Normalized Freq (Hz)')
-plt.ylabel('DFT Amplitude |X(freq)|')
-
-plt.subplot(122)
-plt.stem(f_oneside, abs(X_oneside), 'b', markerfmt=" ", basefmt="-b")
-plt.xlabel('Freq (Hz)')
-plt.xlim(0, 10)
-plt.tight_layout()
-plt.show()
 
 
 # %%
 
+def qft_framework(y, scaler=10):
+    scaler = 10
+    y_preprocessed = preprocessSignal(y, scaler)
 
+    # x_processed = x_processed[2:4]
+    ciruit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
+    print(f"Using Scaler {scaler} resulted in Circuit Size {ciruit_size}")
 
+    y_hat = processQFT(y_preprocessed, ciruit_size)
+
+    return y_hat
