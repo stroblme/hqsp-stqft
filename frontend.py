@@ -29,10 +29,10 @@ class signal():
 
 class transform():
     def __init__(self, transformation) -> None:
-        self.transformation = transformation
+        self.transformation = transformation()
 
     def forward(self, y):
-        y_hat = self.transformation(y.sample())
+        y_hat = self.transformation.transform(y.sample())
 
         n = np.arange(len(y_hat))
         T = len(y_hat)/y.samplingRate
@@ -50,12 +50,12 @@ class transform():
 
         plt.figure(figsize = (12, 6))
         plt.subplot(121)
-        plt.stem(f_oneside, abs(y_hat_oneside), 'b',          markerfmt=" ", basefmt="-b")
+        plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq (Hz)')
-        plt.ylabel('DFT Amplitude |X(freq)|')
+        plt.ylabel('Amplitude |y_hat(freq)|')
 
         plt.subplot(122)
-        plt.stem(f_oneside, abs(y_hat_oneside), 'b',          markerfmt=" ", basefmt="-b")
+        plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq (Hz)')
         plt.xlim(0, 10)
         plt.tight_layout()

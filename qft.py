@@ -102,15 +102,16 @@ def processQFT(y, ciruit_size):
 
 
 # %%
+class qft_framework():
+        
+    def transform(self, y, scaler=10):
+        scaler = 10
+        y_preprocessed = preprocessSignal(y, scaler)
 
-def qft_framework(y, scaler=10):
-    scaler = 10
-    y_preprocessed = preprocessSignal(y, scaler)
+        # x_processed = x_processed[2:4]
+        ciruit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
+        print(f"Using Scaler {scaler} resulted in Circuit Size {ciruit_size}")
 
-    # x_processed = x_processed[2:4]
-    ciruit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-    print(f"Using Scaler {scaler} resulted in Circuit Size {ciruit_size}")
+        y_hat = processQFT(y_preprocessed, ciruit_size)
 
-    y_hat = processQFT(y_preprocessed, ciruit_size)
-
-    return y_hat
+        return y_hat

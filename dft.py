@@ -18,21 +18,23 @@ plt.style.use('seaborn-poster')
 # First let's do a classical dft on a toy-signal to get familiar again with this whole signal processing topic
 
 # %%
-def dft_framework(x):
-    """
-    Function to calculate the 
-    discrete Fourier Transform 
-    of a 1D real-valued signal x
-    """
 
-    N = len(x)
-    n = np.arange(N)
-    k = n.reshape((N, 1))
-    e = np.exp(-2j * np.pi * k * n / N)
-    
-    X = np.dot(e, x)
-    
-    return X
+class dft_framework():
+    def transform(self, x):
+        """
+        Function to calculate the 
+        discrete Fourier Transform 
+        of a 1D real-valued signal x
+        """
+
+        N = len(x)
+        n = np.arange(N)
+        k = n.reshape((N, 1))
+        e = np.exp(-2j * np.pi * k * n / N)
+        
+        X = np.dot(e, x)
+        
+        return X
 
 
 
