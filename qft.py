@@ -151,6 +151,17 @@ class qft_framework():
 
         return y_hat
 
+    def dense(self, y_hat, D=3):
+        
+        y_hat_densed = np.zeros(int(y_hat.size/D))
+
+        for i in range(y_hat.size-1):
+            if i%D != 0:
+                y_hat_densed[int(i/D)] += y_hat[i]
+
+        return y_hat_densed
+
+
     def processQFT_layerwise(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)
         maxY = y.max()
@@ -177,7 +188,7 @@ class qft_framework():
 
             # circuit = self.qft(circuit,circuit_size)
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
-            circuit.measure()
+            circuit.measure(qreg_q[9], creg_c)
             if b==1:
                 output_vector = np.array(self.runCircuit(circuit))
 
@@ -192,7 +203,7 @@ class qft_framework():
 
 
 
-        return y_hat
+        return self.dense(output_vector)
 
 
         # 1. iterative encode but use results from prev. qft

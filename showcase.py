@@ -6,7 +6,8 @@ print("Initializing Signal")
 
 y = signal()
 y.addFrequency(2.)
-# y.addFrequency(5.)
+y.addFrequency(5.)
+
 
 y.sample()
 y.show()
