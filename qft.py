@@ -1,12 +1,13 @@
 from IPython import get_ipython
 
 import numpy as np
-from numpy import pi
+from numpy import array, pi
 
 import matplotlib.pyplot as plt
 
 from qiskit import *
 from qiskit.visualization import plot_histogram
+from qiskit.circuit.library import QFT as qiskit_qft
 
 plt.style.use('seaborn-poster')
 
@@ -17,7 +18,7 @@ class qft_framework():
     def __init__(self) -> None:
         self.setScaler()
 
-    def transform(self, y):
+    def transform(self, y, show=-1):
         """Apply QFT on a given Signal
 
         Args:
@@ -33,7 +34,8 @@ class qft_framework():
         print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
         circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
-        y_hat = self.processQFT(y_preprocessed, circuit_size)
+        # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
+        y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         return y_hat
 
     def setScaler(self, scaler=10):
@@ -45,22 +47,8 @@ class qft_framework():
         Args:
             y (signal): signal instance used for circuit configuration
         """        
-        print(f"Stretching signal with scalar {self.scaler}")
-        y_preprocessed = self.preprocessSignal(y, self.scaler)
+        self.transform(y,int(y.size / 3))
 
-        # x_processed = x_processed[2:4]
-        print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
-        circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-
-
-        print(f"Generating circuit consisting of {circuit_size} qubits")
-        circuit = QuantumCircuit(circuit_size, circuit_size)
-        self.qft(circuit,circuit_size)
-        circuit.reset(range(circuit_size))
-
-        circuit = self.encodeInteger(circuit, int(y_preprocessed[int(len(y_preprocessed)/4)]))
-
-        circuit.draw('mpl', style='iqx')
 
     def qft_rotations(self, circuit, n):
         """Performs qft on the first n qubits in circuit (without swaps)"""
@@ -103,7 +91,7 @@ class qft_framework():
 
         return y
 
-    def encodeInteger(self, circuit, integer):
+    def encode(self, circuit, integer):
         if integer.bit_length() > circuit.width():
             raise RuntimeError("Integer too large")
 
@@ -121,33 +109,90 @@ class qft_framework():
         
         return output
             
-    # def decodeInteger(buffer, integer):
-    #     return int(integer,2)
+    def decode(self, buffer, value):
+        # buffer = value.argmax(axis=0)
+        buffer = self.accumulate(buffer, value.argmax(axis=0))
+        # buffer = self.accumulate(buffer, int(bin(value.argmax(axis=0)),2))
+
+        return buffer
 
     def accumulate(self, buffer, value):
         buffer[value] += 1
 
         return buffer
 
-    def processQFT(self, y, circuit_size):
+    def processQFT_dumb(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)
 
         print(f"Generating circuit consisting of {circuit_size} qubits")
+
         circuit = QuantumCircuit(circuit_size, circuit_size)
-        self.qft(circuit,circuit_size)
         circuit.reset(range(circuit_size))
-
         print(f"Encoding {y.size} input values")
+        circuit = self.qft(circuit,circuit_size)
+        
         for i in range(0,y.size):
+            circuit = self.encode(circuit, int(y[i]))
 
-            circuit = self.encodeInteger(circuit, int(y[i]))
-            
+
+            # self.iqft(circuit,circuit_size)
+
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
 
             output = self.runCircuit(circuit)
             
-            # y_hat = accumulate(y_hat, output.argmax(axis=0))
-            y_hat = self.accumulate(y_hat, int(bin(output.argmax(axis=0)),2))
+            y_hat = self.decode(y_hat, output)
 
             # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
+            if show!=-1 and i==show:
+                circuit.draw('mpl', style='iqx')
+                return None
 
         return y_hat
+
+    def processQFT_layerwise(self, y, circuit_size, show=-1):
+        y_hat = np.zeros(y.size)
+        maxY = y.max()
+
+        print(f"Generating circuit consisting of {circuit_size} qubits")
+
+        
+        # circuit = self.qft(circuit,circuit_size)
+        # circuit = self.encode(circuit, int(y[0]))
+        output_vector = None
+        batch_size = 10
+        circuit_size = int(y.size/batch_size)
+
+        for b in range(1, batch_size-1):
+            qreg_q = QuantumRegister(circuit_size, 'q')
+            creg_c = ClassicalRegister(1, 'c')
+            circuit = QuantumCircuit(qreg_q, creg_c)
+            circuit.reset(range(circuit_size))
+
+            for i in range(1,circuit_size-1):
+                theta = 2*np.pi*y[i*b]/maxY
+                print(theta)
+                circuit.rx(2*np.pi*y[i*b]/maxY,qreg_q[i-1])
+
+            # circuit = self.qft(circuit,circuit_size)
+            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
+            circuit.measure()
+            if b==1:
+                output_vector = np.array(self.runCircuit(circuit))
+
+            else:
+                output_vector += np.array(self.runCircuit(circuit))
+
+
+            # self.iqft(circuit,circuit_size)
+
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
+
+
+
+        return y_hat
+
+
+        # 1. iterative encode but use results from prev. qft

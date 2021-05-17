@@ -6,7 +6,7 @@ print("Initializing Signal")
 
 y = signal()
 y.addFrequency(2.)
-y.addFrequency(5.)
+# y.addFrequency(5.)
 
 y.sample()
 y.show()
@@ -21,7 +21,7 @@ print("Processing QFT")
 
 qft = transform(qft_framework)
 
-qft.transformation.showCircuit(y.sample())
+# qft.transformation.showCircuit(y.sample())
 
 y_hat, f = qft.forward(y)
 qft.show(y_hat, f)
