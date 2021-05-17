@@ -21,7 +21,7 @@ print("Processing QFT")
 
 qft = transform(qft_framework)
 
-qft.transformation.showCiruit(y)
+qft.transformation.showCircuit(y.sample())
 
 y_hat, f = qft.forward(y)
 qft.show(y_hat, f)

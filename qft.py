@@ -18,6 +18,14 @@ class qft_framework():
         self.setScaler()
 
     def transform(self, y):
+        """Apply QFT on a given Signal
+
+        Args:
+            y (signal): signal to be transformed
+
+        Returns:
+            signal: transformeed signal
+        """        
         print(f"Stretching signal with scalar {self.scaler}")
         y_preprocessed = self.preprocessSignal(y, self.scaler)
 
@@ -32,6 +40,11 @@ class qft_framework():
         self.scaler = scaler
 
     def showCircuit(self, y):
+        """Display the circuit for a signal y
+
+        Args:
+            y (signal): signal instance used for circuit configuration
+        """        
         print(f"Stretching signal with scalar {self.scaler}")
         y_preprocessed = self.preprocessSignal(y, self.scaler)
 
@@ -45,9 +58,9 @@ class qft_framework():
         self.qft(circuit,circuit_size)
         circuit.reset(range(circuit_size))
 
-        circuit = self.encodeInteger(circuit, int(y))
+        circuit = self.encodeInteger(circuit, int(y_preprocessed[int(len(y_preprocessed)/4)]))
 
-        circuit.draw()
+        circuit.draw('mpl', style='iqx')
 
     def qft_rotations(self, circuit, n):
         """Performs qft on the first n qubits in circuit (without swaps)"""
