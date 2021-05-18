@@ -38,7 +38,7 @@ class qft_framework():
         y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         return y_hat
 
-    def setScaler(self, scaler=10):
+    def setScaler(self, scaler=1):
         self.scaler = scaler
 
     def showCircuit(self, y):
@@ -81,13 +81,14 @@ class qft_framework():
         self.measure(circuit,n)
         return circuit
 
-    def preprocessSignal(self, y, scaler):
+    def preprocessSignal(self, y, scaler, shift=False):
         '''
         Preprocessing signal using a provided scaler
         '''
 
         y = y*scaler
-        y = y + abs(min(y))
+        if shift:
+            y = y + abs(min(y))
 
         return y
 
@@ -172,10 +173,10 @@ class qft_framework():
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
         output_vector = None
-        batches = 10    # the higher the less qubits
+        batches = 4    # the higher the less qubits
         circuit_size = int(y.size/batches)
 
-        for b in range(1, y.size, batches):
+        for b in range(1, y.size, circuit_size):
             qreg_q = QuantumRegister(circuit_size, 'q')
             creg_c = ClassicalRegister(1, 'c')
             circuit = QuantumCircuit(qreg_q, creg_c)

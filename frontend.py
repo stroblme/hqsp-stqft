@@ -27,7 +27,7 @@ class signal():
     frequencies = list()
     phases = list()
 
-    def __init__(self, samplingRate=100) -> None:
+    def __init__(self, samplingRate=80) -> None:
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
         self.t = np.arange(0,1,self.samplingInterval)
