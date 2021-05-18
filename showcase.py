@@ -5,8 +5,9 @@ from frontend import signal, transform, primeTime
 print("Initializing Signal")
 
 y = signal()
-y.addFrequency(2.)
+y.addFrequency(3.)
 y.addFrequency(5.)
+y.addFrequency(7.)
 
 
 y.sample()
