@@ -167,33 +167,34 @@ class qft_framework():
 
 
     def processQFT_layerwise(self, y, circuit_size, show=-1):
-        y_hat = np.zeros(y.size)
-        maxY = y.max()
-
-        print(f"Generating circuit consisting of {circuit_size} qubits")
-
-        
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
-        output_vector = None
-        batchSize = 20
-        
-        batches = self.samplingRate/batchSize    # the higher the less qubits
+        batchSize = 20  # This inherently defines the number of qubits
+
         if self.samplingRate%batchSize != 0:
             raise ValueError(f"Sampling Rate {self.samplingRate} must be a multiple of the batch size {batchSize}")
 
+        maxY = y.max()
+        output_vector = None
+        batches = self.samplingRate/batchSize
         circuit_size = int(y.size/batches)
 
+        print(f"Generating circuit consisting of {circuit_size} qubits")
+
+
         for b in range(1, y.size, circuit_size):
+             
             qreg_q = QuantumRegister(circuit_size, 'q')
-            creg_c = ClassicalRegister(1, 'c')
+            # creg_c = ClassicalRegister(1, 'c')
             circuit = QuantumCircuit(qreg_q, creg_c)
             circuit.reset(range(circuit_size))
 
             for i in range(0,circuit_size):
                 theta = 2*np.pi*y[b+i-1]/maxY # (i+1)*b-1 is [0,..,]
-                print(b+i-1)
+                # print(b+i-1)
+                circuit.x(qreg_q[i])
                 circuit.rx(2*np.pi*y[b+i-1]/maxY,qreg_q[i])
+
 
             # circuit = self.qft(circuit,circuit_size)
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')

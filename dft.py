@@ -20,21 +20,23 @@ plt.style.use('seaborn-poster')
 # %%
 
 class dft_framework():
-    def transform(self, x):
+    def transform(self, y_signal):
         """
         Function to calculate the 
         discrete Fourier Transform 
         of a 1D real-valued signal x
         """
 
-        N = len(x)
+        y = y_signal.sample()
+
+        N = len(y)
         n = np.arange(N)
         k = n.reshape((N, 1))
         e = np.exp(-2j * np.pi * k * n / N)
         
-        X = np.dot(e, x)
+        Y = np.dot(e, y)
         
-        return X
+        return Y
 
 
 

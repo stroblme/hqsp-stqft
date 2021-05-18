@@ -64,7 +64,7 @@ class transform():
         self.transformation = transformation()
 
     def forward(self, y):
-        y_hat = self.transformation.transform(y.sample())
+        y_hat = self.transformation.transform(y)
 
         n = np.arange(len(y_hat))
         T = len(y_hat)/y.samplingRate
