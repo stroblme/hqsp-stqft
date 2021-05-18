@@ -172,23 +172,24 @@ class qft_framework():
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
         output_vector = None
-        batch_size = 10
-        circuit_size = int(y.size/batch_size)
+        batches = 10    # the higher the less qubits
+        circuit_size = int(y.size/batches)
 
-        for b in range(1, batch_size-1):
+        for b in range(1, y.size, batches):
             qreg_q = QuantumRegister(circuit_size, 'q')
             creg_c = ClassicalRegister(1, 'c')
             circuit = QuantumCircuit(qreg_q, creg_c)
             circuit.reset(range(circuit_size))
 
-            for i in range(1,circuit_size-1):
-                theta = 2*np.pi*y[i*b]/maxY
-                print(theta)
-                circuit.rx(2*np.pi*y[i*b]/maxY,qreg_q[i-1])
-
+            for i in range(0,circuit_size):
+                theta = 2*np.pi*y[b+i-1]/maxY # (i+1)*b-1 is [0,..,]
+                print(b+i-1)
+                circuit.rx(2*np.pi*y[b+i-1]/maxY,qreg_q[i])
             # circuit = self.qft(circuit,circuit_size)
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
-            circuit.measure(qreg_q[9], creg_c)
+            # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
+            circuit.measure_all()
+
             if b==1:
                 output_vector = np.array(self.runCircuit(circuit))
 
@@ -202,6 +203,7 @@ class qft_framework():
             # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
 
 
+        circuit.draw('mpl', style='iqx')
 
         return self.dense(output_vector)
 
