@@ -18,7 +18,7 @@ class qft_framework():
     def __init__(self) -> None:
         self.setScaler()
 
-    def transform(self, y, show=-1):
+    def transform(self, y_signal, show=-1):
         """Apply QFT on a given Signal
 
         Args:
@@ -27,6 +27,9 @@ class qft_framework():
         Returns:
             signal: transformeed signal
         """        
+        self.samplingRate = y_signal.samplingRate
+        y = y_signal.sample()
+
         print(f"Stretching signal with scalar {self.scaler}")
         y_preprocessed = self.preprocessSignal(y, self.scaler)
 
@@ -173,7 +176,12 @@ class qft_framework():
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
         output_vector = None
-        batches = 4    # the higher the less qubits
+        batchSize = 20
+        
+        batches = self.samplingRate/batchSize    # the higher the less qubits
+        if self.samplingRate%batchSize != 0:
+            raise ValueError(f"Sampling Rate {self.samplingRate} must be a multiple of the batch size {batchSize}")
+
         circuit_size = int(y.size/batches)
 
         for b in range(1, y.size, circuit_size):
@@ -186,6 +194,7 @@ class qft_framework():
                 theta = 2*np.pi*y[b+i-1]/maxY # (i+1)*b-1 is [0,..,]
                 print(b+i-1)
                 circuit.rx(2*np.pi*y[b+i-1]/maxY,qreg_q[i])
+
             # circuit = self.qft(circuit,circuit_size)
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
             # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
