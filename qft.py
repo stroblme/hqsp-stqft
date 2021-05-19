@@ -160,8 +160,8 @@ class qft_framework():
         y_hat_densed = np.zeros(int(y_hat.size/D))
 
         for i in range(y_hat.size-1):
-            if i%D != 0:
-                y_hat_densed[int(i/D)] += y_hat[i]
+            # if i%D != 0:
+            y_hat_densed[int(i/D)] += abs(y_hat[i])
 
         return y_hat_densed
 
@@ -169,36 +169,37 @@ class qft_framework():
     def processQFT_layerwise(self, y, circuit_size, show=-1):
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
-        batchSize = 10  # This inherently defines the number of qubits
-
+        batchSize = 20  # This inherently defines the number of qubits
         if self.samplingRate%batchSize != 0:
             raise ValueError(f"Sampling Rate {self.samplingRate} must be a multiple of the batch size {batchSize}")
 
-        maxY = y.max()
+        absMaxY = max(y.max(), abs(y.min()))
         sizeY = y.size
 
         output_vector = None
-        batches = self.samplingRate/batchSize
+        batches = int(self.samplingRate/batchSize)
         circuit_size = int(sizeY/batches)
 
-        print(f"Generating circuit consisting of {circuit_size} qubits")
+        print(f"Using {batches} batches with a size of {batchSize}")
 
+        THETA_RANGE = np.pi/2
 
-        for b in range(1, sizeY, circuit_size):
+        for b in range(1, sizeY, circuit_size): #from 1 to sizeY in steps of circuit_size
              
             qreg_q = QuantumRegister(circuit_size, 'q')
             creg_c = ClassicalRegister(1, 'c')
             circuit = QuantumCircuit(qreg_q, creg_c)
             circuit.reset(range(circuit_size))
 
-            for i in range(0,circuit_size):
-                idx = b+i-1             #normal
+            for i in range(0, circuit_size, 1): #explicit step size to prevent confusion
+                idx = b+i-1             #normal b+i-1 is [0,..,ciruit_size*sizeY]
                 # idx = sizeY-1-(b+i-1) #inverse
 
-                theta = 2*np.pi*y[idx]/maxY # (i+1)*b-1 is [0,..,]
+                theta = THETA_RANGE*y[idx]/absMaxY+np.pi/2 #is [0,..,PI/2) for y<0 and [PI/2,..,2PI) for y<0
                 # print(b+i-1)
                 # circuit.x(qreg_q[i])
-                circuit.rx(2*np.pi*y[idx]/maxY,qreg_q[i])
+                print(theta)
+                circuit.rx(theta,qreg_q[i])
 
 
             # circuit = self.qft(circuit,circuit_size)
@@ -219,7 +220,7 @@ class qft_framework():
             # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
 
 
-        circuit.draw('mpl', style='iqx')
+        # circuit.draw('mpl', style='iqx')
 
         return self.dense(output_vector)
 
