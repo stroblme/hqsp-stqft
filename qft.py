@@ -165,6 +165,35 @@ class qft_framework():
 
         return y_hat_densed
 
+    def processQFT_geometric(self, y, circuit_size, show=-1):
+        y_hat = np.zeros(y.size)
+
+        print(f"Generating circuit consisting of {circuit_size} qubits")
+
+        circuit = QuantumCircuit(circuit_size, circuit_size)
+        circuit.reset(range(circuit_size))
+        print(f"Encoding {y.size} input values")
+        circuit = self.qft(circuit,circuit_size)
+        
+        for i in range(0,y.size):
+            circuit = self.encode(circuit, int(y[i]))
+
+
+            # self.iqft(circuit,circuit_size)
+
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
+            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
+
+            output = self.runCircuit(circuit)
+            
+            y_hat = self.decode(y_hat, output)
+
+            # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
+            if show!=-1 and i==show:
+                circuit.draw('mpl', style='iqx')
+                return None
+
+        return y_hat
 
     def processQFT_layerwise(self, y, circuit_size, show=-1):
         # circuit = self.qft(circuit,circuit_size)
@@ -203,9 +232,9 @@ class qft_framework():
 
 
             # circuit = self.qft(circuit,circuit_size)
-            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
-            # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
-            circuit.measure_all()
+            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
+            circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
+            # circuit.measure_all()
 
             if b==1:
                 output_vector = np.array(self.runCircuit(circuit))
