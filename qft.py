@@ -38,7 +38,8 @@ class qft_framework():
         circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
 
     def setScaler(self, scaler=1):
@@ -173,7 +174,7 @@ class qft_framework():
         circuit = QuantumCircuit(circuit_size, circuit_size)
         circuit.reset(range(circuit_size))
         print(f"Encoding {y.size} input values")
-        circuit = self.qft(circuit,circuit_size)
+        # circuit = self.qft(circuit,circuit_size)
         
         for i in range(0,y.size):
             circuit = self.encode(circuit, int(y[i]))
@@ -181,8 +182,8 @@ class qft_framework():
 
             # self.iqft(circuit,circuit_size)
 
-            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
-            # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
+            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
+            circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
 
             output = self.runCircuit(circuit)
             
