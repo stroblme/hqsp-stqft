@@ -38,8 +38,8 @@ class qft_framework():
         circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
-        y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
+        y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
 
     def setScaler(self, scaler=1):
@@ -110,7 +110,8 @@ class qft_framework():
     def runCircuit(self, circuit):
         backend = Aer.get_backend("statevector_simulator")
         qobj = assemble(circuit)
-        output = backend.run(qobj).result().get_statevector()
+        results = backend.run(qobj).result()
+        output = results.get_statevector()
         
         return output
             
@@ -121,10 +122,21 @@ class qft_framework():
 
         return buffer
 
-    def accumulate(self, buffer, value):
-        buffer[value] += 1
+    def accumulate(self, buffer, value, intense=1):
+        buffer[value] += intense
 
         return buffer
+
+
+    def dense(self, y_hat, D=3):
+        
+        y_hat_densed = np.zeros(int(y_hat.size/D))
+
+        for i in range(y_hat.size-1):
+            # if i%D != 0:
+            y_hat_densed[int(i/D)] += abs(y_hat[i])
+
+        return y_hat_densed
 
     def processQFT_dumb(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)
@@ -156,22 +168,14 @@ class qft_framework():
 
         return y_hat
 
-    def dense(self, y_hat, D=3):
-        
-        y_hat_densed = np.zeros(int(y_hat.size/D))
-
-        for i in range(y_hat.size-1):
-            # if i%D != 0:
-            y_hat_densed[int(i/D)] += abs(y_hat[i])
-
-        return y_hat_densed
-
     def processQFT_geometric(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)
 
         print(f"Generating circuit consisting of {circuit_size} qubits")
 
-        circuit = QuantumCircuit(circuit_size, circuit_size)
+        qreg_q = QuantumRegister(circuit_size, 'q')
+        creg_c = ClassicalRegister(1, 'c')
+        circuit = QuantumCircuit(qreg_q, creg_c)
         circuit.reset(range(circuit_size))
         print(f"Encoding {y.size} input values")
         # circuit = self.qft(circuit,circuit_size)
@@ -183,11 +187,12 @@ class qft_framework():
             # self.iqft(circuit,circuit_size)
 
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
-            circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
+            circuit.measure(qreg_q[0], creg_c) #measure first or last one?
+            # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
 
             output = self.runCircuit(circuit)
             
-            y_hat = self.decode(y_hat, output)
+            y_hat 
 
             # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
             if show!=-1 and i==show:
@@ -197,6 +202,7 @@ class qft_framework():
         return y_hat
 
     def processQFT_layerwise(self, y, circuit_size, show=-1):
+        #https://algassert.com/quirk#circuit={%22cols%22:[[{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22}],[],[],[],[],[{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22}],[],[],[],[],[%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22],[%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22],[%22Swap%22,1,1,1,1,1,1,%22Swap%22],[1,%22Swap%22,1,1,1,1,%22Swap%22],[1,1,%22Swap%22,1,1,%22Swap%22],[1,1,1,%22Swap%22,%22Swap%22],[%22H%22],[%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,%22H%22],[%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,%22H%22],[%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%86%E2%82%84%22,%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%81%E2%82%82%E2%82%88%22,%22Z^%E2%85%9F%E2%82%86%E2%82%84%22,%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,1,1,%22H%22],[%22Chance8%22]]}
         # circuit = self.qft(circuit,circuit_size)
         # circuit = self.encode(circuit, int(y[0]))
         batchSize = 20  # This inherently defines the number of qubits
@@ -212,7 +218,7 @@ class qft_framework():
 
         print(f"Using {batches} batches with a size of {batchSize}")
 
-        THETA_RANGE = np.pi/2
+        THETA_RANGE = np.pi/2 * 0.2
 
         for b in range(1, sizeY, circuit_size): #from 1 to sizeY in steps of circuit_size
              
@@ -230,18 +236,21 @@ class qft_framework():
                 # circuit.x(qreg_q[i])
                 print(theta)
                 circuit.rx(theta,qreg_q[i])
+                circuit.barrier(qreg_q[i])
 
 
             # circuit = self.qft(circuit,circuit_size)
-            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
-            circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
+            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
+            # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
+            circuit.measure(qreg_q[0], creg_c) #measure first or last one?
             # circuit.measure_all()
 
+            result = self.runCircuit(circuit)
             if b==1:
-                output_vector = np.array(self.runCircuit(circuit))
+                output_vector = np.array(result)
 
             else:
-                output_vector += np.array(self.runCircuit(circuit))
+                output_vector += np.array(result)
 
 
             # self.iqft(circuit,circuit_size)
