@@ -237,7 +237,7 @@ class qft_framework():
                 print(theta)
                 circuit.rx(theta,qreg_q[i])
                 circuit.barrier(qreg_q[i])
-
+                # circuit.cx()
 
             # circuit = self.qft(circuit,circuit_size)
             circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=True, name='qft')
