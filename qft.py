@@ -82,8 +82,17 @@ class qft_framework():
         """QFT on the first n qubits in circuit"""
         self.qft_rotations(circuit, n)
         self.swap_registers(circuit, n)
-        self.measure(circuit,n)
+        # self.measure(circuit,n)
         return circuit
+
+    def inverseQft(self, circuit, n):
+        """Inverse QFT on the first n qubits in the circuit"""
+        q_circuit = self.qft(QuantumCircuit(n), n)
+        inv_q_ciruit = q_circuit.inverse()
+        circuit.append(inv_q_ciruit, circuit.qubits[:n])
+
+        return circuit.decompose()
+
 
     def preprocessSignal(self, y, scaler, shift=False):
         '''

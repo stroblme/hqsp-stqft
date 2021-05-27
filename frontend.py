@@ -51,13 +51,16 @@ class signal():
 
     #     return self.y
     
-    def show(self):
-        plt.figure(figsize = (8, 6))
+    def show(self, path=None):
+        plt.figure(figsize = (10, 6))
         plt.plot(self.t, self.y, 'r')
         plt.ylabel('Amplitude')
         plt.xlabel('Normalized Time')
 
         plt.show()
+
+        if path != None:
+            plt.savefig(path)
 
 class transform():
     def __init__(self, transformation) -> None:
@@ -72,7 +75,7 @@ class transform():
 
         return y_hat, f
 
-    def show(self, y_hat, f):
+    def show(self, y_hat, f, path=None):
         n_oneside = len(y_hat)//2
         # get the one side frequency
         f_oneside = f[:n_oneside]
@@ -80,18 +83,21 @@ class transform():
         # normalize the amplitude
         y_hat_oneside =y_hat[:n_oneside]/n_oneside
 
-        plt.figure(figsize = (12, 6))
-        plt.subplot(121)
+        plt.figure(figsize = (10, 6))
+        # plt.subplot(121)
         plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq (Hz)')
         plt.ylabel('Amplitude |y_hat(freq)|')
 
-        plt.subplot(122)
-        plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
-        plt.xlabel('Freq (Hz)')
-        plt.xlim(0, 10)
-        plt.tight_layout()
-        plt.show()
+        # plt.subplot(122)
+        # plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
+        # plt.xlabel('Freq (Hz)')
+        # plt.xlim(0, 10)
+        # plt.tight_layout()
+        # plt.show()
+
+        if path != None:
+            plt.savefig(path)
 
 def primeTime():
     plt.ioff()
