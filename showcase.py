@@ -31,11 +31,7 @@ qft = transform(qft_framework)
 
 y_hat, f = qft.forward(y)
 
-import numpy as np
-
-y_hat = np.array(y_hat)
-
-qft.show(y_hat, f, isOneSided=True)
+qft.show(y_hat, f)
 
 
 primeTime() # Show all with blocking
