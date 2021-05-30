@@ -68,7 +68,7 @@ class signal():
         plt.figure(figsize = (10, 6))
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
-        plt.xlabel('Normalized Time')
+        plt.xlabel('Time [s]')
         plt.title(type(self).__name__)
 
 
@@ -102,8 +102,8 @@ class transform():
         plt.figure(figsize = (10, 6))
         # plt.subplot(121)
         plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-        plt.xlabel('Freq (Hz)')
-        plt.ylabel('Amplitude |y_hat(freq)|')
+        plt.xlabel('Freq [Hz]')
+        plt.ylabel('Amplitude (abs)')
         plt.title(type(self.transformation).__name__)
 
         # plt.subplot(122)
@@ -118,5 +118,5 @@ class transform():
 
 def primeTime():
     plt.ioff()
-    input("Press any key to close all figures")
+    input("Press any key to close all figures\n")
     plt.close('all')

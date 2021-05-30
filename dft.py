@@ -17,8 +17,9 @@ class dft_framework():
         N = len(y)
         n = np.arange(N)
         k = n.reshape((N, 1))
+
         e = np.exp(-2j * np.pi * k * n / N)
-        
+
         Y = np.dot(e, y)
         
         return Y

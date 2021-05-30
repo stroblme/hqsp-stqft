@@ -18,11 +18,14 @@ y.addFrequency(5000)
 y.sample()
 y.show()
 
-# print("Processing DFT")
+print("Processing DFT")
 
-# dft = transform(dft_framework)
-# y_hat, f = dft.forward(y)
-# dft.show(y_hat, f)
+try:
+    dft = transform(dft_framework)
+    y_hat, f = dft.forward(y)
+    dft.show(y_hat, f)
+except Exception as e:
+    print(e)
 
 print("Processing FFT")
 
@@ -33,12 +36,9 @@ fft.show(y_hat, f)
 print("Processing QFT")
 
 qft = transform(qft_framework)
-
-# qft.transformation.showCircuit(y.sample())
-
 y_hat, f = qft.forward(y)
-
 qft.show(y_hat, f)
 
 
+print("Showing all figures")
 primeTime() # Show all with blocking
