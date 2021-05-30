@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 import matplotlib.pyplot as plt
+from math import log, ceil, floor
 
 plt.style.use('seaborn-poster')
 plt.ion()
@@ -27,26 +28,38 @@ class signal():
     frequencies = list()
     phases = list()
 
-    def __init__(self, samplingRate=40, amplification=1, duration=1, nSamples=None) -> None:
+    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80) -> None:
         """Signal Init
 
         Args:
             samplingRate (int, optional): [description]. Defaults to 40.
             amplification (int, optional): [description]. Defaults to 1.
-            duration (int, optional): Duration of the created signal. Defaults to 1.
-            nSamples ([type], optional): Sample length of the signal. Defaults to None.
+            duration (int, optional): Duration of the created signal. Defaults to 2.
+            nSamples ([type], optional): Sample length of the signal. Defaults to 80.
         """
-        
+        # Set the class attributes
         self.amplification = amplification
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
-        self.duration = duration
         
-        t_max = min(duration, nSamples/samplingRate)
-        
+        # Either use the duration or the number of samples depending on what's longer
+        t_max = max(duration, nSamples*self.samplingInterval)
+
+        # Get the closest min. int which is a power of 2
+        nSamples = int(t_max/self.samplingInterval)
+        nSamples_log2_min = floor(log(nSamples, 2))
+
+        # Update the number of samples and the duration based on the previous modifications
+        self.nSamples = 2**nSamples_log2_min
+        self.duration = self.nSamples*self.samplingRate
+        t_max = self.nSamples*self.samplingInterval
+
+        print(f"Signal duration set to {t_max}")
+
+        # Create time vector
         self.t = np.arange(0,t_max,self.samplingInterval)
-        self.nSamples = self.t.size
         
+        # Create the signal
         self.y = np.zeros(self.nSamples)
 
     def addFrequency(self, frequency, phase=0):
@@ -68,7 +81,7 @@ class signal():
         plt.figure(figsize = (10, 6))
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
-        plt.xlabel('Time [s]')
+        plt.xlabel('Time (excerp) [s]')
         plt.title(type(self).__name__)
 
 
