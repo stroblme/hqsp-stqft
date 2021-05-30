@@ -67,7 +67,7 @@ class qft_framework():
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
         # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
-        y_hat = self.processQFT_schmidt(y_preprocessed)
+        y_hat = self.processQFT_schmidt(y)
         # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
 
@@ -236,16 +236,15 @@ class qft_framework():
         #substitute with the desired backend
         out = execute(qc, qasm_backend, shots=8192).result()
         counts = out.get_counts()
-        fft = np.array(get_fft_from_counts(counts, n_qubits))
+        y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
-        fft = self.dense(fft, D=n_qubits/(self.samplingRate/n_samples))
-        top_indices = np.argsort(-np.array(fft))
-        freqs = top_indices*self.samplingRate/n_samples
+        y_hat = self.dense(y_hat, D=n_qubits/(self.samplingRate/n_samples))
+        # top_indices = np.argsort(-np.array(fft))
+        # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
-        print(freqs[:10])
 
 
-        return fft
+        return y_hat
 
     def processQFT_geometric(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)

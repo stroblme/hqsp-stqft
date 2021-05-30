@@ -69,6 +69,8 @@ class signal():
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
         plt.xlabel('Normalized Time')
+        plt.title(type(self).__name__)
+
 
         plt.show()
 
@@ -102,6 +104,7 @@ class transform():
         plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq (Hz)')
         plt.ylabel('Amplitude |y_hat(freq)|')
+        plt.title(type(self.transformation).__name__)
 
         # plt.subplot(122)
         # plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
