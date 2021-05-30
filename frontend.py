@@ -27,10 +27,13 @@ class signal():
     frequencies = list()
     phases = list()
 
-    def __init__(self, samplingRate=40) -> None:
+    def __init__(self, samplingRate=40, amplification=1, duration=1, nSamples=None) -> None:
+        self.amplification = amplification
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
-        self.t = np.arange(0,1,self.samplingInterval)
+
+        t_max = min(duration, nSamples/samplingRate)
+        self.t = np.arange(0,t_max,self.samplingInterval)
         
         self.y = np.zeros(self.t.size)
 
@@ -41,7 +44,7 @@ class signal():
     def sample(self):
         self.y = np.zeros(self.t.size)
         for frequency, phase in zip(self.frequencies, self.phases):
-            self.y += np.sin(2*np.pi*frequency*self.t-phase)
+            self.y += self.amplification*np.sin(2*np.pi*frequency*self.t-phase)
 
         return self.y
         

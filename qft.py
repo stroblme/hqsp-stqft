@@ -3,6 +3,8 @@ from IPython import get_ipython
 import numpy as np
 from numpy import array, pi
 
+from math import log2
+
 import matplotlib.pyplot as plt
 
 from qiskit import *
@@ -11,9 +13,43 @@ from qiskit.circuit.library import QFT as qiskit_qft
 
 plt.style.use('seaborn-poster')
 
+def isPow2(x):
+    return (x!=0) and (x & (x-1)) == 0
 
+def getlog2(x):
 
+    return (log2(x)/log2(2))
 
+def truncate_samples(samples, n_qubits):
+
+    if(len(samples) <= 2**n_qubits):
+        pass
+    else:
+        samples = samples[:2**n_qubits]
+    return samples
+def get_bit_string(n, n_qubits):
+    """
+    Returns the binary string of an integer with n_qubits characters
+    """
+
+    assert n < 2**n_qubits, 'n too big to binarise, increase n_qubits or decrease n'
+
+    bs = "{0:b}".format(n)
+    bs = "0"*(n_qubits - len(bs)) + bs
+
+    return bs
+def get_fft_from_counts(counts, n_qubits):
+
+    out = []
+    keys = counts.keys()
+    for i in range(2**n_qubits):
+        id = get_bit_string(i, n_qubits)
+        if(id in keys):
+            out.append(counts[id])
+        else:
+            out.append(0)
+
+    return out
 class qft_framework():
     def __init__(self) -> None:
         self.setScaler()
@@ -38,7 +74,8 @@ class qft_framework():
         circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        y_hat = self.processQFT_schmidt(y_preprocessed)
         # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
 
@@ -176,6 +213,49 @@ class qft_framework():
                 return None
 
         return y_hat
+
+
+    def processQFT_schmidt(self, samples):
+
+        """
+        Args:
+        amplitudes: List - A list of amplitudes with length equal to power of 2
+        normalize: Bool - Optional flag to control normalization of samples, True by default
+        Returns:
+        circuit: QuantumCircuit - a quantum circuit initialized to the state given by amplitudes
+        """
+        n_samples = len(samples)
+        assert isPow2(n_samples)
+
+        n_qubits = int(getlog2(n_samples))
+        q = QuantumRegister(n_qubits)
+        qc = QuantumCircuit(q)
+
+        ampls = samples / np.linalg.norm(samples)
+
+        qc.initialize(ampls, [q[i] for i in range(n_qubits)])
+
+        qc = self.qft(qc, n_qubits)
+        qc.measure_all()
+
+        qasm_backend = Aer.get_backend('qasm_simulator')
+        # real_backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+        #                                        and not x.configuration().simulator
+        #                                        and x.status().operational==True))
+
+
+        #substitute with the desired backend
+        out = execute(qc, qasm_backend, shots=8192).result()
+        counts = out.get_counts()
+        fft = get_fft_from_counts(counts, n_qubits)[:n_samples//2]
+
+        top_indices = np.argsort(-np.array(fft))
+        freqs = top_indices*self.samplingRate/n_samples
+        # get top 5 detected frequencies
+        print(freqs[:10])
+
+
+        return (fft, n_samples)
 
     def processQFT_geometric(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)
