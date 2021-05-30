@@ -28,6 +28,15 @@ class signal():
     phases = list()
 
     def __init__(self, samplingRate=40, amplification=1, duration=1, nSamples=None) -> None:
+        """Signal Init
+
+        Args:
+            samplingRate (int, optional): [description]. Defaults to 40.
+            amplification (int, optional): [description]. Defaults to 1.
+            duration (int, optional): Duration of the created signal. Defaults to 1.
+            nSamples ([type], optional): Sample length of the signal. Defaults to None.
+        """
+        
         self.amplification = amplification
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate

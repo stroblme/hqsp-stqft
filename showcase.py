@@ -4,7 +4,7 @@ from frontend import signal, transform, primeTime
 
 print("Initializing Signal")
 
-y = signal(samplingRate=44100, amplification=3000, duration=10, nSamples=65536)
+y = signal(samplingRate=44100, amplification=1, duration=10, nSamples=65536)
 
 y.addFrequency(600)
 y.addFrequency(800)
