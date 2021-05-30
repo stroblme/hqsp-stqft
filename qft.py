@@ -16,17 +16,7 @@ plt.style.use('seaborn-poster')
 def isPow2(x):
     return (x!=0) and (x & (x-1)) == 0
 
-def getlog2(x):
 
-    return (log2(x)/log2(2))
-
-def truncate_samples(samples, n_qubits):
-
-    if(len(samples) <= 2**n_qubits):
-        pass
-    else:
-        samples = samples[:2**n_qubits]
-    return samples
 def get_bit_string(n, n_qubits):
     """
     Returns the binary string of an integer with n_qubits characters
@@ -38,6 +28,7 @@ def get_bit_string(n, n_qubits):
     bs = "0"*(n_qubits - len(bs)) + bs
 
     return bs
+
 def get_fft_from_counts(counts, n_qubits):
 
     out = []
@@ -50,6 +41,7 @@ def get_fft_from_counts(counts, n_qubits):
             out.append(0)
 
     return out
+
 class qft_framework():
     def __init__(self) -> None:
         self.setScaler()
@@ -227,7 +219,7 @@ class qft_framework():
         n_samples = len(samples)
         assert isPow2(n_samples)
 
-        n_qubits = int(getlog2(n_samples))
+        n_qubits = int((log2(n_samples)/log2(2)))
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 
@@ -247,15 +239,15 @@ class qft_framework():
         #substitute with the desired backend
         out = execute(qc, qasm_backend, shots=8192).result()
         counts = out.get_counts()
-        fft = get_fft_from_counts(counts, n_qubits)[:n_samples//2]
-
+        fft = np.array(get_fft_from_counts(counts, n_qubits))
+        # [:n_samples//2]
         top_indices = np.argsort(-np.array(fft))
         freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
         print(freqs[:10])
 
 
-        return (fft, n_samples)
+        return fft
 
     def processQFT_geometric(self, y, circuit_size, show=-1):
         y_hat = np.zeros(y.size)

@@ -56,12 +56,6 @@ class signal():
             self.y += self.amplification*np.sin(2*np.pi*frequency*self.t-phase)
 
         return self.y
-        
-    # def sample(self, frequency=2.):
-    #     self.frequency = frequency
-    #     self.y = np.sin(2*np.pi*self.frequency*self.t)
-
-    #     return self.y
     
     def show(self, path=None):
         plt.figure(figsize = (10, 6))
@@ -87,22 +81,23 @@ class transform():
 
         return y_hat, f
 
-    def show(self, y_hat, f, path=None):
-        n_oneside = len(y_hat)//2
-        # get the one side frequency
-        f_oneside = f[:n_oneside]
+    def show(self, y_hat, f, isOneSided=False, path=None):
+        if not isOneSided:
+            n = len(y_hat)//2
+            # get the one side frequency
+            f = f[:n]
 
-        # normalize the amplitude
-        y_hat_oneside =y_hat[:n_oneside]/n_oneside
+            # normalize the amplitude
+            y_hat =y_hat[:n]/n
 
         plt.figure(figsize = (10, 6))
         # plt.subplot(121)
-        plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
+        plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq (Hz)')
         plt.ylabel('Amplitude |y_hat(freq)|')
 
         # plt.subplot(122)
-        # plt.stem(f_oneside, abs(y_hat_oneside), 'b', markerfmt=" ", basefmt="-b")
+        # plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         # plt.xlabel('Freq (Hz)')
         # plt.xlim(0, 10)
         # plt.tight_layout()
