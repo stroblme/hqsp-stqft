@@ -44,7 +44,7 @@ def get_fft_from_counts(counts, n_qubits):
 
 class qft_framework():
     def __init__(self) -> None:
-        self.setScaler()
+        pass
 
     def transform(self, y_signal, show=-1):
         """Apply QFT on a given Signal
@@ -58,21 +58,18 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
-        print(f"Stretching signal with scalar {self.scaler}")
-        y_preprocessed = self.preprocessSignal(y, self.scaler)
+        # print(f"Stretching signal with scalar {self.scaler}")
+        # y_preprocessed = self.preprocessSignal(y, self.scaler)
 
         # x_processed = x_processed[2:4]
-        print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
-        circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
+        # print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
+        # circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
         # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         y_hat = self.processQFT_schmidt(y_preprocessed)
         # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
-
-    def setScaler(self, scaler=1):
-        self.scaler = scaler
 
     def showCircuit(self, y):
         """Display the circuit for a signal y
