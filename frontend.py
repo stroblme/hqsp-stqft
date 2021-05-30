@@ -40,26 +40,33 @@ class signal():
         self.amplification = amplification
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
-
-        t_max = min(duration, nSamples/samplingRate)
-        self.t = np.arange(0,t_max,self.samplingInterval)
+        self.duration = duration
         
-        self.y = np.zeros(self.t.size)
+        t_max = min(duration, nSamples/samplingRate)
+        
+        self.t = np.arange(0,t_max,self.samplingInterval)
+        self.nSamples = self.t.size
+        
+        self.y = np.zeros(self.nSamples)
 
     def addFrequency(self, frequency, phase=0):
         self.frequencies.append(frequency)
         self.phases.append(phase)
         
     def sample(self):
-        self.y = np.zeros(self.t.size)
+        self.y = np.zeros(self.nSamples)
         for frequency, phase in zip(self.frequencies, self.phases):
             self.y += self.amplification*np.sin(2*np.pi*frequency*self.t-phase)
 
         return self.y
     
     def show(self, path=None):
+        minF = min(self.frequencies)
+        maxT = 1/minF
+        minSamples = int(maxT*self.samplingRate)
+
         plt.figure(figsize = (10, 6))
-        plt.plot(self.t, self.y, 'r')
+        plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
         plt.xlabel('Normalized Time')
 
@@ -101,7 +108,7 @@ class transform():
         # plt.xlabel('Freq (Hz)')
         # plt.xlim(0, 10)
         # plt.tight_layout()
-        # plt.show()
+        plt.show()
 
         if path != None:
             plt.savefig(path)
