@@ -1,5 +1,6 @@
 from qft import qft_framework
 from dft import dft_framework
+from fft import fft_framework
 from frontend import signal, transform, primeTime
 
 print("Initializing Signal")
@@ -22,6 +23,12 @@ y.show()
 # dft = transform(dft_framework)
 # y_hat, f = dft.forward(y)
 # dft.show(y_hat, f)
+
+print("Processing FFT")
+
+fft = transform(fft_framework)
+y_hat, f = fft.forward(y)
+fft.show(y_hat, f)
 
 print("Processing QFT")
 
