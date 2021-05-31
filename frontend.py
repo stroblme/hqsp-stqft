@@ -4,8 +4,14 @@ import matplotlib.pyplot as plt
 from math import log, ceil, floor
 
 plt.style.use('seaborn-poster')
-plt.ion()
 
+def enableInteractive():
+    global plt
+    plt.ion()
+
+def disableInteractive():
+    global plt
+    plt.ioff()
     # frequencies = list()
 
     # def __init__(self, samplingRate=100) -> None:
@@ -74,6 +80,8 @@ class signal():
         return self.y
     
     def show(self, path=None):
+        self.sample()
+
         minF = min(self.frequencies)
         maxT = 1/minF
         minSamples = int(maxT*self.samplingRate)
@@ -130,6 +138,6 @@ class transform():
             plt.savefig(path)
 
 def primeTime():
-    plt.ioff()
+    disableInteractive()
     input("Press any key to close all figures\n")
     plt.close('all')
