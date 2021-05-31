@@ -43,7 +43,7 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    def __init__(self) -> None:
+    def __init__(self):
         pass
 
     def transform(self, y_signal, show=-1):
@@ -54,7 +54,7 @@ class qft_framework():
 
         Returns:
             signal: transformeed signal
-        """        
+        """
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
@@ -76,7 +76,7 @@ class qft_framework():
 
         Args:
             y (signal): signal instance used for circuit configuration
-        """        
+        """
         self.transform(y,int(y.size / 3))
 
 
@@ -88,8 +88,8 @@ class qft_framework():
         circuit.h(n)
         for qubit in range(n):
             circuit.cp(pi/2**(n-qubit), qubit, n)
-        
-        
+
+
         # At the end of our function, we call the same function again on
         # the next qubits (we reduced n by one earlier in the function)
         self.qft_rotations(circuit, n)
@@ -147,9 +147,9 @@ class qft_framework():
         qobj = assemble(circuit)
         results = backend.run(qobj).result()
         output = results.get_statevector()
-        
+
         return output
-            
+
     def decode(self, buffer, value):
         # buffer = value.argmax(axis=0)
         buffer = self.accumulate(buffer, value.argmax(axis=0))
@@ -182,7 +182,7 @@ class qft_framework():
         circuit.reset(range(circuit_size))
         print(f"Encoding {y.size} input values")
         circuit = self.qft(circuit,circuit_size)
-        
+
         for i in range(0,y.size):
             circuit = self.encode(circuit, int(y[i]))
 
@@ -193,7 +193,7 @@ class qft_framework():
             # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
 
             output = self.runCircuit(circuit)
-            
+
             y_hat = self.decode(y_hat, output)
 
             # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
@@ -220,6 +220,7 @@ class qft_framework():
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 
+        # Normalize ampl
         ampls = samples / np.linalg.norm(samples)
 
         qc.initialize(ampls, [q[i] for i in range(n_qubits)])
@@ -257,7 +258,7 @@ class qft_framework():
         circuit.reset(range(circuit_size))
         print(f"Encoding {y.size} input values")
         # circuit = self.qft(circuit,circuit_size)
-        
+
         for i in range(0,y.size):
             circuit = self.encode(circuit, int(y[i]))
 
@@ -269,8 +270,8 @@ class qft_framework():
             # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
 
             output = self.runCircuit(circuit)
-            
-            y_hat 
+
+            y_hat
 
             # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
             if show!=-1 and i==show:
@@ -299,7 +300,7 @@ class qft_framework():
         THETA_RANGE = np.pi/2 * 0.2
 
         for b in range(1, sizeY, circuit_size): #from 1 to sizeY in steps of circuit_size
-             
+
             qreg_q = QuantumRegister(circuit_size, 'q')
             creg_c = ClassicalRegister(1, 'c')
             circuit = QuantumCircuit(qreg_q, creg_c)

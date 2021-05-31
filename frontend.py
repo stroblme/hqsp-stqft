@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import pi
+from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
 from math import log, ceil, floor
 
@@ -34,7 +35,7 @@ class signal():
     frequencies = list()
     phases = list()
 
-    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80) -> None:
+    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin') -> None:
         """Signal Init
 
         Args:
@@ -47,6 +48,8 @@ class signal():
         self.amplification = amplification
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
+
+        self.signalType = signalType
         
         # Either use the duration or the number of samples depending on what's longer
         t_max = max(duration, nSamples*self.samplingInterval)
@@ -74,16 +77,32 @@ class signal():
         
     def sample(self):
         self.y = np.zeros(self.nSamples)
-        for frequency, phase in zip(self.frequencies, self.phases):
-            self.y += self.amplification*np.sin(2*np.pi*frequency*self.t-phase)
+        if self.signalType == 'sin':
+            for frequency, phase in zip(self.frequencies, self.phases):
+                self.y += self.amplification*np.sin(2*np.pi*frequency*self.t-phase)
+        elif self.signalType == 'chirp':
+            f0 = -1
+            f1 = -1
 
+            for frequency, phase in zip(self.frequencies, self.phases):
+                if f0 == -1:
+                    f0 = frequency
+                elif f1 == -1 and f0 != -1:
+                    f1 = frequency
+                if f0 != -1 and f1 != -1:
+                    self.y += self.amplification*scipySignal.chirp(self.t, f0=f0, f1=f1, t1=phase, method='linear')
+                    f0 = -1
+                    f1 = -1
+        else:
+            print('Must be either sin, chirp')
         return self.y
     
     def show(self, path=None):
         self.sample()
 
         minF = min(self.frequencies)
-        maxT = 1/minF
+        maxP = max(self.phases)
+        maxT = (1/minF + maxP)*2
         minSamples = int(maxT*self.samplingRate)
 
         plt.figure(figsize = (10, 6))
