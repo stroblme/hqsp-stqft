@@ -221,9 +221,11 @@ class qft_framework():
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 
-        # Normalize ampl
+        # Normalize ampl, which is required for squared sum of amps=1
         ampls = samples / np.linalg.norm(samples)
 
+        # for 2^n amplitudes, we have n qubits for initialization
+        # this means that the binary representation happens exactly here
         qc.initialize(ampls, [q[i] for i in range(n_qubits)])
 
         qc = self.qft(qc, n_qubits)
