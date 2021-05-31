@@ -217,6 +217,7 @@ class qft_framework():
         assert isPow2(n_samples)
 
         n_qubits = int((log2(n_samples)/log2(2)))
+        print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")        
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 

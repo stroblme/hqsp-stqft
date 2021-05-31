@@ -10,10 +10,9 @@ print("Initializing Signal")
 y = signal(samplingRate=16000, amplification=1, duration=1, nSamples=65536, signalType='chirp')
 
 y.addFrequency(100)
-y.addFrequency(1000, 0.01)
+y.addFrequency(500, 0.01)
 
 y.show()
-primeTime()
 print("Processing DFT")
 
 try:
