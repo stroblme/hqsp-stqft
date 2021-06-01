@@ -42,7 +42,7 @@ def get_fft_from_counts(counts, n_qubits):
 
     return out
 
-class qft_framework():
+class stqft_framework():
     def __init__(self):
         pass
 
@@ -205,7 +205,6 @@ class qft_framework():
 
 
     def processQFT_schmidt(self, samples):
-
         """
         Args:
         amplitudes: List - A list of amplitudes with length equal to power of 2
@@ -250,38 +249,6 @@ class qft_framework():
 
         return y_hat
 
-    def processQFT_geometric(self, y, circuit_size, show=-1):
-        y_hat = np.zeros(y.size)
-
-        print(f"Generating circuit consisting of {circuit_size} qubits")
-
-        qreg_q = QuantumRegister(circuit_size, 'q')
-        creg_c = ClassicalRegister(1, 'c')
-        circuit = QuantumCircuit(qreg_q, creg_c)
-        circuit.reset(range(circuit_size))
-        print(f"Encoding {y.size} input values")
-        # circuit = self.qft(circuit,circuit_size)
-
-        for i in range(0,y.size):
-            circuit = self.encode(circuit, int(y[i]))
-
-
-            # self.iqft(circuit,circuit_size)
-
-            circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
-            circuit.measure(qreg_q[0], creg_c) #measure first or last one?
-            # circuit.measure(qreg_q[circuit_size-1], creg_c) #measure first or last one?
-
-            output = self.runCircuit(circuit)
-
-            y_hat
-
-            # print(f"Processing index {i} with value {int(y[i])} yielded {output.argmax(axis=0)}")
-            if show!=-1 and i==show:
-                circuit.draw('mpl', style='iqx')
-                return None
-
-        return y_hat
 
     def processQFT_layerwise(self, y, circuit_size, show=-1):
         #https://algassert.com/quirk#circuit={%22cols%22:[[{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%20t)%20+%20pi/4%22}],[],[],[],[],[{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22},{%22id%22:%22Rxft%22,%22arg%22:%221/2%20sin(pi%202t)%20+%20pi/4%22}],[],[],[],[],[%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22,%22Bloch%22],[%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22,%22%E2%80%A6%22],[%22Swap%22,1,1,1,1,1,1,%22Swap%22],[1,%22Swap%22,1,1,1,1,%22Swap%22],[1,1,%22Swap%22,1,1,%22Swap%22],[1,1,1,%22Swap%22,%22Swap%22],[%22H%22],[%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,%22H%22],[%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,%22H%22],[%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%86%E2%82%84%22,%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,1,%22H%22],[%22Z^%E2%85%9F%E2%82%81%E2%82%82%E2%82%88%22,%22Z^%E2%85%9F%E2%82%86%E2%82%84%22,%22Z^%E2%85%9F%E2%82%83%E2%82%82%22,%22Z^%E2%85%9F%E2%82%81%E2%82%86%22,%22Z^%E2%85%9B%22,%22Z^%C2%BC%22,%22Z^%C2%BD%22,%22%E2%80%A2%22],[1,1,1,1,1,1,1,%22H%22],[%22Chance8%22]]}
@@ -341,7 +308,7 @@ class qft_framework():
             # circuit += qiskit_qft(num_qubits=circuit_size, approximation_degree=0, do_swaps=True, inverse=True, insert_barriers=True, name='qft')
 
 
-        # circuit.draw('mpl', style='iqx')
+        # circuit.draw('mpl', style='iqx')  
 
         return self.dense(output_vector)
 
