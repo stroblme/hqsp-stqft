@@ -72,6 +72,9 @@ class signal():
         self.y = np.zeros(self.nSamples)
 
     def addFrequency(self, frequency, phase=0):
+        if frequency > self.samplingRate/2:
+            print("WARNING: Nyquist not fulfilled!")
+            
         self.frequencies.append(frequency)
         self.phases.append(phase)
         
