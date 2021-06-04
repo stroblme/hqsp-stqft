@@ -164,6 +164,8 @@ class qft_framework():
 
 
     def dense(self, y_hat, D=3):
+        if D==0:
+            return y_hat
         D = int(D)
         y_hat_densed = np.zeros(int(y_hat.size/D))
 
@@ -238,11 +240,11 @@ class qft_framework():
 
 
         #substitute with the desired backend
-        out = execute(qc, qasm_backend, shots=1024).result()
+        out = execute(qc, qasm_backend, shots=512).result()
         counts = out.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
-        y_hat = self.dense(y_hat, D=n_qubits/(self.samplingRate/n_samples))
+        y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
         # top_indices = np.argsort(-np.array(fft))
         # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies

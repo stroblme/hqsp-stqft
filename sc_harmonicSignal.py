@@ -7,7 +7,7 @@ enableInteractive()
 
 print("Initializing Signal")
 
-y = signal(samplingRate=16000, amplification=1, duration=1, nSamples=65536)
+y = signal(samplingRate=16000, amplification=1, duration=1, nSamples=2**16)
 
 y.addFrequency(600)
 y.addFrequency(800)
