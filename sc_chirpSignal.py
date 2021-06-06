@@ -7,7 +7,7 @@ enableInteractive()
 
 print("Initializing Signal")
 
-y = signal(samplingRate=16000, amplification=1, duration=1, nSamples=65536, signalType='chirp')
+y = signal(samplingRate=8000, amplification=1, duration=1, nSamples=2**4, signalType='chirp')
 
 y.addFrequency(100)
 y.addFrequency(500, 0.01)
@@ -30,7 +30,7 @@ fft.show(y_hat, f)
 
 print("Processing QFT")
 
-qft = transform(qft_framework)
+qft = transform(qft_framework, numOfShots=512)
 y_hat, f = qft.forward(y)
 qft.show(y_hat, f)
 

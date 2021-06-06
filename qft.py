@@ -43,7 +43,8 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    def __init__(self):
+    def __init__(self, numOfShots=1024):
+        self.numOfShots = numOfShots
         pass
 
     def transform(self, y_signal, show=-1):
@@ -240,7 +241,7 @@ class qft_framework():
 
 
         #substitute with the desired backend
-        out = execute(qc, qasm_backend, shots=512).result()
+        out = execute(qc, qasm_backend, shots=self.numOfShots).result()
         counts = out.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]

@@ -121,8 +121,8 @@ class signal():
             plt.savefig(path)
 
 class transform():
-    def __init__(self, transformation) -> None:
-        self.transformation = transformation()
+    def __init__(self, transformation, **kwargs):
+        self.transformation = transformation(**kwargs)
 
     def forward(self, y):
         y_hat = self.transformation.transform(y)
