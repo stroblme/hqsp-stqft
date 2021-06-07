@@ -100,7 +100,7 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, path=None):
+    def show(self, subplot=None, path=None):
         self.sample()
 
         minF = min(self.frequencies)
@@ -108,16 +108,19 @@ class signal():
         maxT = (1/minF + maxP)*2
         minSamples = int(maxT*self.samplingRate)
 
-        plt.figure(figsize = (10, 6))
+        if subplot is not None:
+            plt.subplot(*subplot,frameon=False)
+        else:
+            plt.figure(figsize = (10, 6))
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
         plt.xlabel('Time (excerp) [s]')
         plt.title(type(self).__name__)
 
+        if subplot is None:
+            plt.show()
 
-        plt.show()
-
-        if path != None:
+        if path is not None:
             plt.savefig(path)
 
 class transform():
@@ -133,7 +136,7 @@ class transform():
 
         return y_hat, f
 
-    def show(self, y_hat, f, isOneSided=False, path=None):
+    def show(self, y_hat, f, isOneSided=False, subplot=None, path=None):
         if not isOneSided:
             n = len(y_hat)//2
             # get the one side frequency
@@ -142,7 +145,10 @@ class transform():
             # normalize the amplitude
             y_hat =y_hat[:n]/n
 
-        plt.figure(figsize = (10, 6))
+        if subplot is not None:
+            plt.subplot(*subplot,frameon=False)
+        else:
+            plt.figure(figsize = (10, 6))
         # plt.subplot(121)
         plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq [Hz]')
@@ -154,12 +160,15 @@ class transform():
         # plt.xlabel('Freq (Hz)')
         # plt.xlim(0, 10)
         # plt.tight_layout()
-        plt.show()
+        if subplot is None:
+            plt.show()
 
-        if path != None:
+        if path is not None:
             plt.savefig(path)
 
-def primeTime():
+def primeTime(subplots=False):
+    if subplots:
+        plt.show()
     disableInteractive()
     input("Press any key to close all figures\n")
     plt.close('all')
