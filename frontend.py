@@ -165,17 +165,25 @@ class transform():
     def forward(self, y, *kwargs):
         y_hat = self.transformation.transform(y, *kwargs)
 
-        n = np.arange(len(y_hat))
-        T = len(y_hat)/y.samplingRate
-        f = n/T
+        n = np.arange(y_hat.shape[0])
+        F = y_hat.shape[0]/y.samplingRate
+        f = n/F
+        
+        if len(y_hat.shape) == 2:
+            n = np.arange(y_hat.shape[1])
+            T = y_hat.shape[1]/y.samplingRate
+            t = n/T
+            return y_hat, f, t
+        else:
+            return y_hat, f
 
-        return y_hat, f
-
-    def show(self, y_hat, f, isOneSided=False, subplot=None, path=None):
-        if not isOneSided:
+    def show(self, y_hat, f, t=None, isOneSided=False, subplot=None, path=None):
+        if not isOneSided and t is None:
             n = len(y_hat)//2
             # get the one side frequency
             f = f[:n]
+
+            t = t[:n] if t is not None else None
 
             # normalize the amplitude
             y_hat =y_hat[:n]/n
@@ -185,7 +193,11 @@ class transform():
         else:
             plt.figure(figsize = (10, 6))
 
-        plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
+        if t is None:
+            plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
+        else:
+            plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis')
+                
         plt.xlabel('Freq [Hz]')
         plt.ylabel('Amplitude (abs)')
         plt.title(type(self.transformation).__name__)

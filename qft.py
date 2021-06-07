@@ -43,6 +43,13 @@ class qft_framework():
         self.numOfShots = numOfShots
         pass
 
+    def estimateSize(self, y_signal):
+        assert isPow2(y_signal.nSamples)
+
+        n_qubits = int((log2(y_signal.nSamples)/log2(2)))
+
+        return 2**n_qubits
+
     def transform(self, y_signal, show=-1, suppressPrint=False):
         """Apply QFT on a given Signal
 

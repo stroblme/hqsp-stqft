@@ -9,8 +9,8 @@ setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 print("Initializing Signal")
 
-# y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10, signalType='chirp')
-y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10)
+y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10, signalType='chirp')
+# y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10)
 
 y.addFrequency(100)
 y.addFrequency(500, 0.01)
@@ -25,8 +25,8 @@ fft.show(y_hat, f, subplot=[1,3,2])
 
 print("Processing STQFT")
 stqft = transform(stqft_framework)
-y_hat, f = stqft.forward(y, 2**2)
-stqft.show(y_hat, f, subplot=[1,3,3])
+y_hat, f, t = stqft.forward(y, 2**4)
+stqft.show(y_hat, f, t, subplot=[1,3,3])
 
 
 print("Showing all figures")
