@@ -36,4 +36,4 @@ qft.show(y_hat, f, subplot=[2,2,4])
 
 
 print("Showing all figures")
-primeTime(subplots=True) # Show all with blocking
+primeTime() # Show all with blocking

@@ -112,13 +112,12 @@ class signal():
             plt.subplot(*subplot,frameon=False)
         else:
             plt.figure(figsize = (10, 6))
+
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
         plt.xlabel('Time (excerp) [s]')
         plt.title(type(self).__name__)
 
-        if subplot is None:
-            plt.show()
 
         if path is not None:
             plt.savefig(path)
@@ -149,26 +148,17 @@ class transform():
             plt.subplot(*subplot,frameon=False)
         else:
             plt.figure(figsize = (10, 6))
-        # plt.subplot(121)
+            
         plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq [Hz]')
         plt.ylabel('Amplitude (abs)')
         plt.title(type(self.transformation).__name__)
 
-        # plt.subplot(122)
-        # plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-        # plt.xlabel('Freq (Hz)')
-        # plt.xlim(0, 10)
-        # plt.tight_layout()
-        if subplot is None:
-            plt.show()
-
         if path is not None:
             plt.savefig(path)
 
-def primeTime(subplots=False):
-    if subplots:
-        plt.show()
+def primeTime():
+    plt.show()
     disableInteractive()
     input("Press any key to close all figures\n")
     plt.close('all')
