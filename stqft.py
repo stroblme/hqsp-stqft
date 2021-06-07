@@ -28,12 +28,12 @@ class stqft_framework():
         Returns:
             signal: transformeed signal
         """
-        y_split_list = y_signal.split(nParts)
+        y_split_list = y_signal.split(nSplits)
 
         print("Processing STQFT")
         y_hat = np.array([])
         for y_split in y_split_list:
-            y_hat_split = self.qftInst.transform(y_split)
+            y_hat_split = self.qftInst.transform(y_split, suppressPrint=True)
 
             # qft.show(y_hat, f, subplot=[2,2,4])
             y_hat = np.append(y_hat, y_hat_split)

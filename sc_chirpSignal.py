@@ -5,7 +5,7 @@ from stqft import stqft_framework
 from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
 
 enableInteractive()
-setStylesheet('dark_background')
+setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 print("Initializing Signal")
 

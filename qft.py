@@ -43,7 +43,7 @@ class qft_framework():
         self.numOfShots = numOfShots
         pass
 
-    def transform(self, y_signal, show=-1):
+    def transform(self, y_signal, show=-1, suppressPrint=False):
         """Apply QFT on a given Signal
 
         Args:
@@ -52,6 +52,7 @@ class qft_framework():
         Returns:
             signal: transformeed signal
         """
+        self.suppressPrint = suppressPrint
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
@@ -216,7 +217,8 @@ class qft_framework():
         assert isPow2(n_samples)
 
         n_qubits = int((log2(n_samples)/log2(2)))
-        print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")        
+        if not self.suppressPrint:
+            print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")        
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 

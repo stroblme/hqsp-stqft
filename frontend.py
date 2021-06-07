@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from math import log, ceil, floor
 from copy import deepcopy
 
-plt.style.use('seaborn-poster')
-
 def enableInteractive():
     global plt
     plt.ion()
@@ -16,7 +14,7 @@ def disableInteractive():
     plt.ioff()
 
 def setStylesheet(theme):
-    plt.style.use('seaborn-poster')
+    plt.style.use(theme)
 
     # frequencies = list()
 
