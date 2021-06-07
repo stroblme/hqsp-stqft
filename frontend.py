@@ -136,11 +136,11 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, path=None):
+    def show(self, subplot=None, path=None, ignorePhaseShift=False):
         self.sample()
 
         minF = min(self.frequencies)
-        maxP = max(self.phases)
+        maxP = max(self.phases) if not ignorePhaseShift else 0
         maxT = (1/minF + maxP)*2
         minSamples = int(maxT*self.samplingRate)
 
@@ -171,7 +171,7 @@ class transform():
         
         if len(y_hat.shape) == 2:
             n = np.arange(y_hat.shape[1])
-            T = y_hat.shape[1]/y.samplingRate
+            T = y_hat.shape[1]/y.duration
             t = n/T
             return y_hat, f, t
         else:
@@ -195,11 +195,13 @@ class transform():
 
         if t is None:
             plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
+            plt.xlabel('Freq [Hz]')
+            plt.ylabel('Amplitude (abs)')
         else:
             plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis')
+            plt.xlabel('Time [s]')
+            plt.ylabel('Freq [Hz]')
                 
-        plt.xlabel('Freq [Hz]')
-        plt.ylabel('Amplitude (abs)')
         plt.title(type(self.transformation).__name__)
 
         if path is not None:

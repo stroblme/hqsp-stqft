@@ -10,10 +10,9 @@ setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 print("Initializing Signal")
 
 y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10, signalType='chirp')
-# y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**10)
 
-y.addFrequency(100)
-y.addFrequency(500, 0.01)
+y.addFrequency(900)
+y.addFrequency(1050, 0.008)
 
 y.show(subplot=[1,3,1])
 
