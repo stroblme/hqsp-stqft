@@ -2,7 +2,6 @@ from IPython import get_ipython
 
 import numpy as np
 from numpy import pi
-import matplotlib.pyplot as plt
 
 class dft_framework():
     def transform(self, y_signal):

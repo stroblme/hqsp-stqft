@@ -3,6 +3,7 @@ from numpy import pi
 from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
 from math import log, ceil, floor
+from copy import deepcopy
 
 plt.style.use('seaborn-poster')
 
@@ -13,6 +14,10 @@ def enableInteractive():
 def disableInteractive():
     global plt
     plt.ioff()
+
+def setStylesheet(theme):
+    plt.style.use('seaborn-poster')
+
     # frequencies = list()
 
     # def __init__(self, samplingRate=100) -> None:
@@ -51,6 +56,19 @@ class signal():
 
         self.signalType = signalType
         
+        self.setNSamples(duration, nSamples)
+        print(f"Signal duration set to {self.duration}, resulting in {self.nSamples} samples")
+        print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
+
+        # Create time vector
+        self.t = np.arange(0,self.duration,self.samplingInterval)
+        
+        # Create the signal
+        self.y = np.zeros(self.nSamples)
+
+        self.lockSampling=False
+
+    def setNSamples(self, duration=2, nSamples=80):
         # Either use the duration or the number of samples depending on what's longer
         t_max = max(duration, nSamples*self.samplingInterval)
 
@@ -60,16 +78,9 @@ class signal():
 
         # Update the number of samples and the duration based on the previous modifications
         self.nSamples = 2**nSamples_log2_min
-        self.duration = self.nSamples*self.samplingRate
-        t_max = self.nSamples*self.samplingInterval
+        self.duration = self.nSamples*self.samplingInterval
 
-        print(f"Signal duration set to {t_max}")
-
-        # Create time vector
-        self.t = np.arange(0,t_max,self.samplingInterval)
-        
-        # Create the signal
-        self.y = np.zeros(self.nSamples)
+        return self.duration
 
     def addFrequency(self, frequency, phase=0):
         if frequency > self.samplingRate/2:
@@ -77,8 +88,35 @@ class signal():
             
         self.frequencies.append(frequency)
         self.phases.append(phase)
+
+    def externalSample(self, y, t):
+        self.y = y
+        self.t = t
+        self.setNSamples(0,t.size)
+        self.lockSampling=True
+
+    def split(self, nParts):
+        self.sample()
+
+        if self.nSamples%nParts != 0:
+            raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
+
+        y_split = np.array_split(self.y, nParts)
+        t_split = np.array_split(self.t, nParts)
         
+        y_split_array = list()
+
+        for i in range(0,nParts):
+            y = deepcopy(self)
+            y.externalSample(y_split[i], t_split[i])
+            y_split_array.append(y)
+
+        return y_split_array
+
     def sample(self):
+        if self.lockSampling:
+            return self.y
+
         self.y = np.zeros(self.nSamples)
         if self.signalType == 'sin':
             for frequency, phase in zip(self.frequencies, self.phases):
@@ -126,8 +164,8 @@ class transform():
     def __init__(self, transformation, **kwargs):
         self.transformation = transformation(**kwargs)
 
-    def forward(self, y):
-        y_hat = self.transformation.transform(y)
+    def forward(self, y, *kwargs):
+        y_hat = self.transformation.transform(y, *kwargs)
 
         n = np.arange(len(y_hat))
         T = len(y_hat)/y.samplingRate
@@ -148,7 +186,7 @@ class transform():
             plt.subplot(*subplot,frameon=False)
         else:
             plt.figure(figsize = (10, 6))
-            
+
         plt.stem(f, abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
         plt.xlabel('Freq [Hz]')
         plt.ylabel('Amplitude (abs)')

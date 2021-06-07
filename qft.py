@@ -5,13 +5,9 @@ from numpy import array, pi
 
 from math import log2
 
-import matplotlib.pyplot as plt
-
 from qiskit import *
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT as qiskit_qft
-
-plt.style.use('seaborn-poster')
 
 def isPow2(x):
     return (x!=0) and (x & (x-1)) == 0
