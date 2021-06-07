@@ -28,9 +28,8 @@ class stqft_framework():
         Returns:
             signal: transformeed signal
         """
-        y_split_list = y_signal.split(nSplits)
+        y_split_list = y_signal.split(nParts)
 
-        print("Processing STQFT")
         y_hat = np.array([])
         for y_split in y_split_list:
             y_hat_split = self.qftInst.transform(y_split, suppressPrint=True)
