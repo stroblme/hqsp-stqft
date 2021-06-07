@@ -30,9 +30,9 @@ class stqft_framework():
         """
         y_split_list = y_signal.split(nParts)
 
-        y_hat = np.zeros((nParts,self.qftInst.estimateSize(y_split_list[0])))
+        y_hat = np.zeros((self.qftInst.estimateSize(y_split_list[0]),nParts))
         for i in range(0, nParts):
-            y_hat[i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
+            y_hat[:,i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
 
             # qft.show(y_hat, f, subplot=[2,2,4])
             # y_hat = np.append(y_hat, y_hat_split, axis=0)

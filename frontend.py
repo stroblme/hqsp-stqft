@@ -178,15 +178,15 @@ class transform():
             return y_hat, f
 
     def show(self, y_hat, f, t=None, isOneSided=False, subplot=None, path=None):
-        if not isOneSided and t is None:
-            n = len(y_hat)//2
+        if not isOneSided:
+            n = y_hat.shape[0]//2
             # get the one side frequency
             f = f[:n]
 
-            t = t[:n] if t is not None else None
+            # t = t[:y_hat.shape[1]//2] if t is not None else None
 
             # normalize the amplitude
-            y_hat =y_hat[:n]/n
+            y_hat =y_hat[:n]/n if t is None else y_hat[:n,:]/n
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
