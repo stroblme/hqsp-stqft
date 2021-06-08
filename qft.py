@@ -219,12 +219,17 @@ class qft_framework():
         Returns:
         circuit: QuantumCircuit - a quantum circuit initialized to the state given by amplitudes
         """
-        n_samples = len(samples)
+        n_samples = samples.size
         assert isPow2(n_samples)
 
         n_qubits = int((log2(n_samples)/log2(2)))
         if not self.suppressPrint:
-            print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")        
+            print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
+
+        if samples.max() == 0.0:
+            y_hat = np.zeros(2**n_qubits)
+            return y_hat
+
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
 
