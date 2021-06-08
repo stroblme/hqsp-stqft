@@ -25,13 +25,13 @@ y.show(subplot=[1,3,1])
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t, subplot=[1,3,2], scale='mel')
+stft.show(y_hat, f, t, subplot=[1,3,2], scale='mel', fmax=4000)
 
 
 print("Processing STQFT")
 stqft = transform(stqft_framework)
 y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t, subplot=[1,3,3], scale='mel')
+stqft.show(y_hat, f, t, subplot=[1,3,3], scale='mel', fmax=4000)
 
 
 print("Showing all figures")

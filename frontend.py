@@ -82,8 +82,9 @@ class signal():
 
         samplingRate = librosa.get_samplerate(path)
         if samplingRate < self.samplingRate:
-            print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will enforce provided sampling rate.')
-        
+            print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will upsample.')
+        elif samplingRate > self.samplingRate:
+            print(f'Warning: provided sampling rate ({self.samplingRate}) is lower than the one of the audio ({samplingRate}). Will downsample.')
         duration = librosa.get_duration(filename=path)
         if duration < self.duration:
             if zeroPadding:
@@ -99,6 +100,7 @@ class signal():
                 self.setNSamples(duration=duration, nSamples=0)
 
         self.y = librosa.load(path, sr=self.samplingRate, duration=self.duration)
+
 
         # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
         # all_wave.append(np.expand_dims(mel_feat, axis=2))
@@ -235,17 +237,22 @@ class transform():
         else:
             return y_hat, f
 
-    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, subplot=None, path=None):
+    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=False, fmax=None, subplot=None, path=None):
+
         n = y_hat.shape[0]//2
         # get the one side frequency
         f = f[:n] if autopower else f
-
-        # t = t[:y_hat.shape[1]//2] if t is not None else None
 
         # normalize the amplitude
         y_hat = np.abs(y_hat * np.conj(y_hat))
         if autopower:
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
+
+        if fmax != None:
+            f_idx = int(np.where(f>4000)[0][0])
+            f = f[:f_idx]
+            y_hat = y_hat[:f_idx,:]
+
 
         if normalize:
             y_hat = y_hat*(1/y_hat.max())
