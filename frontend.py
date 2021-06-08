@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from math import log, ceil, floor
 from copy import deepcopy
 
+import librosa
+
 def enableInteractive():
     global plt
     plt.ion()
@@ -38,7 +40,7 @@ class signal():
     frequencies = list()
     phases = list()
 
-    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin') -> None:
+    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
         """Signal Init
 
         Args:
@@ -49,22 +51,50 @@ class signal():
         """
         # Set the class attributes
         self.amplification = amplification
-        self.samplingRate = samplingRate
-        self.samplingInterval = 1/self.samplingRate
+        self.setSamplingRate(samplingRate)
 
         self.signalType = signalType
         
+        # Set the number of samples based on duration and target num of samples such that it matches 2**n
         self.setNSamples(duration, nSamples)
+
         print(f"Signal duration set to {self.duration}, resulting in {self.nSamples} samples")
         print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
 
-        # Create time vector
-        self.t = np.arange(0,self.duration,self.samplingInterval)
-        
-        # Create the signal
-        self.y = np.zeros(self.nSamples)
+        if signalType=='file':
+            assert path!=''
+            self.readFile(path)
 
-        self.lockSampling=False
+        else:
+            # Create time vector
+            self.t = np.arange(0,self.duration,self.samplingInterval)
+            
+            # Create the signal
+            self.y = np.zeros(self.nSamples)
+
+            self.lockSampling=False
+
+
+    def readFile(self, path):
+        duration = librosa.get_duration(path)
+        if duration < self.duration:
+            print(f'Need to adjust duration, as provided audio is not long enough')
+            self.setNSamples(duration, 0)
+
+        samplingRat = librosa.get_samplerate(path)
+
+        y, _ = librosa.load(path, sr=self.samplingRate, duration=self.duration)
+
+        if y.size < self.nSamples:
+            print(f"Adjusting sampling rate from {self.samplingRate} to {len(y)}")
+
+        # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
+        # all_wave.append(np.expand_dims(mel_feat, axis=2))
+        # all_label.append(label)
+
+    def setSamplingRate(self, samplingRate):
+        self.samplingRate = samplingRate
+        self.samplingInterval = 1/self.samplingRate
 
     def setNSamples(self, duration=2, nSamples=80):
         # Either use the duration or the number of samples depending on what's longer
