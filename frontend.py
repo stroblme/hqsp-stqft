@@ -104,12 +104,8 @@ class signal():
             raise NotImplementedError("Invalid window type")
 
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
-        padEndSize = nSamplesWindow
         nParts = np.int32(np.ceil(len(self.y) / np.float32(nSamplesWindow)))
         
-        innerPad = np.zeros(nSamplesWindow)
-
-        # proc = np.concatenate((self.y, np.zeros(padEndSize)))
         proc = self.y
         result = np.empty((nParts, nSamplesWindow), dtype=np.float32)
 
@@ -125,11 +121,9 @@ class signal():
             currentHop = hopSize * i                        # figure out the current segment offset
             segment = proc[currentHop:currentHop+nSamplesWindow]  # get the current segment
             windowed = segment * window                       # multiply by the half cosine function
-            # padded = np.append(windowed, innerPad)           # add 0s to double the length of the data
-            padded = windowed
             
             y = deepcopy(self)
-            y.externalSample(padded, self.t[currentHop:currentHop+nSamplesWindow])
+            y.externalSample(windowed, self.t[currentHop:currentHop+nSamplesWindow])
             y_split_array.append(y)
 
         return y_split_array
@@ -200,17 +194,16 @@ class transform():
         else:
             return y_hat, f
 
-    def show(self, y_hat, f, t=None, isOneSided=False, scaleToLog=True, normalize=True, subplot=None, path=None):
-        if not isOneSided:
-            n = y_hat.shape[0]//2
-            # get the one side frequency
-            f = f[:n]
+    def show(self, y_hat, f, t=None, scaleToLog=False, autopower=True, normalize=True, subplot=None, path=None):
+        n = y_hat.shape[0]//2
+        # get the one side frequency
+        f = f[:n] if autopower else f
 
-            # t = t[:y_hat.shape[1]//2] if t is not None else None
+        # t = t[:y_hat.shape[1]//2] if t is not None else None
 
-            # normalize the amplitude
-            y_hat =y_hat[:n]/n if t is None else y_hat[:n,:]/n
-            y_hat = np.abs(y_hat * np.conj(y_hat))
+        # normalize the amplitude
+        y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) if autopower else y_hat
+        y_hat = np.abs(y_hat * np.conj(y_hat))
 
         y_hat = 20*np.log10(y_hat) if scaleToLog else y_hat
         y_hat = y_hat/y_hat.max() if normalize else y_hat
