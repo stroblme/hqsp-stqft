@@ -8,19 +8,15 @@ from frontend import signal, transform, primeTime, enableInteractive, setStylesh
 enableInteractive()
 setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
+speechSignal = '../dataset/zero/0c40e715_nohash_1.wav'
+
 windowLength = 2**7
 overlapFactor=0.5
 windowType='hanning'
 
 print("Initializing Signal")
 
-y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**12, signalType='chirp')
-
-y.addFrequency(500)
-y.addFrequency(2000, y.duration)
-
-y.addFrequency(1000)
-y.addFrequency(3000, y.duration)
+y = signal(samplingRate=16000, signalType='file', path='../dataset/zero/0c40e715_nohash_1.wav')
 
 y.show(subplot=[1,3,1])
 

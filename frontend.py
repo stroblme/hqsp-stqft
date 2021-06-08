@@ -63,31 +63,34 @@ class signal():
 
         if signalType=='file':
             assert path!=''
-            self.readFile(path)
+            self.loadFile(path)
 
+            self.lockSampling = True
         else:
-            # Create time vector
-            self.t = np.arange(0,self.duration,self.samplingInterval)
-            
             # Create the signal
-            self.y = np.zeros(self.nSamples)
+            self.createEmptySignal(self.nSamples)
 
-            self.lockSampling=False
+            self.lockSampling = False
+
+        self.t = np.arange(0,self.duration,self.samplingInterval)
+
+    def createEmptySignal(self, nSamples):
+        self.y = np.zeros(nSamples)
 
 
-    def readFile(self, path):
+    def loadFile(self, path):
         duration = librosa.get_duration(path)
         if duration < self.duration:
-            print(f'Need to adjust duration, as provided audio is not long enough')
+            print(f'Need to adjust provided duration ({self.duration}), as audio is not long enough ({duration})')
             self.setNSamples(duration, 0)
 
-        samplingRat = librosa.get_samplerate(path)
-
+        samplingRate = librosa.get_samplerate(path)
+        if samplingRate < self.samplingRate:
+            print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will enforce provided sampling rate.')
+        
         y, _ = librosa.load(path, sr=self.samplingRate, duration=self.duration)
 
-        if y.size < self.nSamples:
-            print(f"Adjusting sampling rate from {self.samplingRate} to {len(y)}")
-
+        self.y = y
         # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
         # all_wave.append(np.expand_dims(mel_feat, axis=2))
         # all_label.append(label)
