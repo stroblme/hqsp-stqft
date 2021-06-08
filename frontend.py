@@ -104,7 +104,7 @@ class signal():
             raise NotImplementedError("Invalid window type")
 
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
-        nParts = np.int32(np.ceil(len(self.y) / np.float32(nSamplesWindow)))
+        nParts = np.int32(np.ceil(len(self.y) / np.float32(hopSize)))
         
         # if self.nSamples%nParts != 0:
         #     raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
@@ -114,7 +114,7 @@ class signal():
         
         y_split_array = list()
 
-        for i in range(0,nParts):
+        for i in range(0,nParts-1):
             currentHop = hopSize * i                        # figure out the current segment offset
             segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
             windowed = segment * window                       # multiply by the half cosine function
