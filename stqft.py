@@ -22,7 +22,6 @@ class stqft_framework():
 
         y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         nParts = len(y_split_list)
-        print(f"Signal divided into {nParts} parts")
 
         y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts),dtype=np.complex64)    # note: this cast is unnecessary, as we actually don't get complex values
         for i in range(0, nParts):
