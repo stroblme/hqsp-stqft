@@ -96,17 +96,14 @@ class signal():
     def split(self, nSamplesWindow, overlapFactor=0, windowType=None):
         self.sample()
 
-        if windowType == None:
-            window = 1.
-        elif windowType == 'hanning':
+        if windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hanning window")
         elif windowType == 'hamming':
             window = np.hamming(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
-
         else:
-            raise NotImplementedError("Invalid window type")
+            window = 1.
 
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
         nParts = np.int32(np.ceil(len(self.y) / np.float32(hopSize)))
