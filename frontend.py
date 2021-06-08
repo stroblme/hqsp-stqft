@@ -100,6 +100,8 @@ class signal():
             window = 1.
         elif windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
+        elif windowType == 'hamming':
+            window = np.hamming(nSamplesWindow)
         else:
             raise NotImplementedError("Invalid window type")
 
