@@ -100,10 +100,10 @@ class signal():
             window = 1.
         elif windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
-            print("Suggest an overlap factor of 0.5 in combination with hanning window") if overlapFactor!=0.5 else pass
+            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hanning window")
         elif windowType == 'hamming':
             window = np.hamming(nSamplesWindow)
-            print("Suggest an overlap factor of 0.5 in combination with hamming window") if overlapFactor!=0.5 else pass
+            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
 
         else:
             raise NotImplementedError("Invalid window type")
@@ -111,15 +111,9 @@ class signal():
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
         nParts = np.int32(np.ceil(len(self.y) / np.float32(hopSize)))
         
-        # if self.nSamples%nParts != 0:
-        #     raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
-
-        # y_split = np.array_split(self.y, nParts)
-        # t_split = np.array_split(self.t, nParts)
-        
         y_split_array = list()
 
-        for i in range(0,nParts-1):
+        for i in range(0,nParts-1): # -1 because e.g with an overlap of 0.5 we will get 2*N - 1 segments
             currentHop = hopSize * i                        # figure out the current segment offset
             segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
             windowed = segment * window                       # multiply by the half cosine function
@@ -204,11 +198,14 @@ class transform():
         # t = t[:y_hat.shape[1]//2] if t is not None else None
 
         # normalize the amplitude
-        y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) if autopower else y_hat
         y_hat = np.abs(y_hat * np.conj(y_hat))
+        if autopower:
+            y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
 
-        y_hat = 20*np.log10(y_hat) if scaleToLog else y_hat
-        y_hat = y_hat/y_hat.max() if normalize else y_hat
+        if normalize:
+            y_hat = y_hat*(1/y_hat.max())
+        if scaleToLog:
+            y_hat = 20*np.log10(y_hat)
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
