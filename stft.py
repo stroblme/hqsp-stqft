@@ -23,7 +23,6 @@ class stft_framework():
         y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         # y_split_list = y_signal.split(nSamplesWindow)
         nParts = len(y_split_list)
-        print(f"Signal divided into {nParts} parts with a length of {y_split_list[0].nSamples} each")
 
         y_hat = np.empty((self.fftInst.estimateSize(y_split_list[0]),nParts), dtype=np.complex64)
         print(f"Transformation output will be of shape {y_hat.shape}")

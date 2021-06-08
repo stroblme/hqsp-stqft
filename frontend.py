@@ -58,8 +58,6 @@ class signal():
         # Set the number of samples based on duration and target num of samples such that it matches 2**n
         self.setNSamples(duration, nSamples)
 
-        print(f"Signal duration set to {self.duration}, resulting in {self.nSamples} samples")
-        print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
 
         if signalType=='file':
             assert path!=''
@@ -72,25 +70,36 @@ class signal():
 
             self.lockSampling = False
 
+        print(f"Signal duration set to {self.duration}, resulting in {self.nSamples} samples")
+        print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
         self.t = np.arange(0,self.duration,self.samplingInterval)
 
     def createEmptySignal(self, nSamples):
         self.y = np.zeros(nSamples)
 
 
-    def loadFile(self, path):
-        duration = librosa.get_duration(path)
-        if duration < self.duration:
-            print(f'Need to adjust provided duration ({self.duration}), as audio is not long enough ({duration})')
-            self.setNSamples(duration, 0)
+    def loadFile(self, path, zeroPadding=True):
 
         samplingRate = librosa.get_samplerate(path)
         if samplingRate < self.samplingRate:
             print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will enforce provided sampling rate.')
         
-        y, _ = librosa.load(path, sr=self.samplingRate, duration=self.duration)
+        duration = librosa.get_duration(filename=path)
+        if duration < self.duration:
+            if zeroPadding:
+                print(f'Audio is not long enough ({duration}). Will use zero-padding to fill up distance to {self.duration}')
 
-        self.y = y
+                self.createEmptySignal(self.nSamples)
+
+                y_p, _ = librosa.load(path, sr=self.samplingRate)
+
+                self.y[0:y_p.size] = y_p
+                return
+            else:
+                self.setNSamples(duration=duration, nSamples=0)
+
+        self.y = librosa.load(path, sr=self.samplingRate, duration=self.duration)
+
         # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
         # all_wave.append(np.expand_dims(mel_feat, axis=2))
         # all_label.append(label)
@@ -141,7 +150,7 @@ class signal():
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
         nParts = np.int32(np.ceil(len(self.y) / np.float32(hopSize)))
         
-        y_split_array = list()
+        y_split_list = list()
 
         for i in range(0,nParts-1): # -1 because e.g with an overlap of 0.5 we will get 2*N - 1 segments
             currentHop = hopSize * i                        # figure out the current segment offset
@@ -150,9 +159,12 @@ class signal():
             
             y = deepcopy(self)
             y.externalSample(windowed, self.t[currentHop:currentHop+nSamplesWindow])
-            y_split_array.append(y)
+            y_split_list.append(y)
 
-        return y_split_array
+        print(f"Signal divided into {nParts-1} parts with a window length of {nSamplesWindow} each")
+
+
+        return y_split_list
 
     def sample(self):
         if self.lockSampling:
@@ -180,12 +192,15 @@ class signal():
         return self.y
     
     def show(self, subplot=None, path=None, ignorePhaseShift=False):
-        self.sample()
 
-        minF = min(self.frequencies)
-        maxP = max(self.phases) if not ignorePhaseShift else 0
-        maxT = (1/minF + maxP)*2
-        minSamples = int(maxT*self.samplingRate)
+        if self.signalType=='file':
+            minSamples = self.y.size-1 # Use all samples
+        else:
+            self.sample()   # Only sample if not file, as data is assumed to be loaded
+            minF = min(self.frequencies)
+            maxP = max(self.phases) if not ignorePhaseShift else 0
+            maxT = (1/minF + maxP)*2
+            minSamples = int(maxT*self.samplingRate)
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
