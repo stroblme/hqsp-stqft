@@ -32,22 +32,9 @@ class stqft_framework():
         nParts = len(y_split_list)
         print(f"Signal divided into {nParts} parts")
 
-        y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts),dtype=np.complex64)
+        y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts),dtype=np.complex64)    # note: this cast is unnecessary, as we actually don't get complex values
         for i in range(0, nParts):
             y_hat[:,i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
 
-            # qft.show(y_hat, f, subplot=[2,2,4])
-            # y_hat = np.append(y_hat, y_hat_split, axis=0)
-
-        # print(f"Stretching signal with scalar {self.scaler}")
-        # y_preprocessed = self.preprocessSignal(y, self.scaler)
-
-        # x_processed = x_processed[2:4]
-        # print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
-        # circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-
-        # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
-        # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
         return y_hat
 
