@@ -10,13 +10,13 @@ setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 speechSignal = '../dataset/zero/0c40e715_nohash_1.wav'
 
-windowLength = 2**7
+windowLength = 2**10
 overlapFactor=0.5
 windowType='hanning'
 
 print("Initializing Signal")
 
-y = signal(samplingRate=16000, signalType='file', path='../dataset/zero/0c40e715_nohash_1.wav')
+y = signal(samplingRate=16000, signalType='file', path=speechSignal)
 
 y.show(subplot=[1,3,1])
 
@@ -25,13 +25,13 @@ y.show(subplot=[1,3,1])
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t, subplot=[1,3,2], scale='mel')
+stft.show(y_hat, f, t, subplot=[1,3,2], scale='log')
 
 
 print("Processing STQFT")
 stqft = transform(stqft_framework)
 y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t, subplot=[1,3,3], scale='mel')
+stqft.show(y_hat, f, t, subplot=[1,3,3], scale='log')
 
 
 print("Showing all figures")
