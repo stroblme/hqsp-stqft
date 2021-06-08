@@ -190,7 +190,7 @@ class transform():
         else:
             return y_hat, f
 
-    def show(self, y_hat, f, t=None, scaleToLog=False, autopower=True, normalize=True, subplot=None, path=None):
+    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, subplot=None, path=None):
         n = y_hat.shape[0]//2
         # get the one side frequency
         f = f[:n] if autopower else f
@@ -204,8 +204,11 @@ class transform():
 
         if normalize:
             y_hat = y_hat*(1/y_hat.max())
-        if scaleToLog:
+
+        if scale == 'log':
             y_hat = 20*np.log10(y_hat)
+        elif scale == 'mel':
+            y_hat = y_hat**2
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
