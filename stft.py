@@ -20,6 +20,7 @@ class stft_framework():
 
     def transform(self, y_signal, nSamplesWindow, show=-1):
         y_split_list = y_signal.split(nSamplesWindow, overlapFactor=0.5, windowType='hanning')
+        nParts = len(y_split_list)
 
         y_hat = np.zeros((self.fftInst.estimateSize(y_split_list[0]),nParts))
         for i in range(0, nParts):
