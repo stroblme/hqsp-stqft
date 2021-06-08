@@ -100,8 +100,11 @@ class signal():
             window = 1.
         elif windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
+            print("Suggest an overlap factor of 0.5 in combination with hanning window") if overlapFactor!=0.5 else pass
         elif windowType == 'hamming':
             window = np.hamming(nSamplesWindow)
+            print("Suggest an overlap factor of 0.5 in combination with hamming window") if overlapFactor!=0.5 else pass
+
         else:
             raise NotImplementedError("Invalid window type")
 
