@@ -32,7 +32,7 @@ class stqft_framework():
         nParts = len(y_split_list)
         print(f"Signal divided into {nParts} parts")
 
-        y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts))
+        y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts),dtype=np.complex64)
         for i in range(0, nParts):
             y_hat[:,i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
 
