@@ -18,11 +18,13 @@ class stft_framework():
     def __init__(self):
         self.fftInst = fft_framework()
 
-    def transform(self, y_signal, nSamplesWindow, show=-1):
-        y_split_list = y_signal.split(nSamplesWindow, overlapFactor=0.5, windowType='hanning')
+    def transform(self, y_signal, nSamplesWindow):
+        # y_split_list = y_signal.split(nSamplesWindow, overlapFactor=0.5, windowType='hanning')
+        y_split_list = y_signal.split(nSamplesWindow)
         nParts = len(y_split_list)
+        print(f"Signal divided into {nParts} parts")
 
-        y_hat = np.zeros((self.fftInst.estimateSize(y_split_list[0]),nParts))
+        y_hat = np.empty((self.fftInst.estimateSize(y_split_list[0]),nParts), dtype=np.complex64)
         for i in range(0, nParts):
             y_hat[:, i] = self.fftInst.transform(y_split_list[i])
             # spectrum = np.fft.fft(padded) / fft_size          # take the Fourier Transform and scale by the number of samples
@@ -31,6 +33,5 @@ class stft_framework():
         
         # result = 20*np.log10(result)          # scale to db
         # result = np.clip(result, -40, 200)    # clip values
-
 
         return y_hat

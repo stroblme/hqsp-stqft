@@ -200,7 +200,7 @@ class transform():
         else:
             return y_hat, f
 
-    def show(self, y_hat, f, t=None, isOneSided=False, subplot=None, path=None):
+    def show(self, y_hat, f, t=None, isOneSided=False, scaleToLog=False, subplot=None, path=None):
         if not isOneSided:
             n = y_hat.shape[0]//2
             # get the one side frequency
@@ -210,6 +210,9 @@ class transform():
 
             # normalize the amplitude
             y_hat =y_hat[:n]/n if t is None else y_hat[:n,:]/n
+            y_hat = np.abs(y_hat * np.conj(y_hat))
+
+        y_hat = 20*np.log10(y_hat) if scaleToLog else y_hat
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -221,7 +224,7 @@ class transform():
             plt.xlabel('Freq [Hz]')
             plt.ylabel('Amplitude (abs)')
         else:
-            plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis')
+            plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis', shading='auto')
             plt.xlabel('Time [s]')
             plt.ylabel('Freq [Hz]')
                 
