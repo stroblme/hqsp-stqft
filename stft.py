@@ -18,13 +18,15 @@ class stft_framework():
     def __init__(self):
         self.fftInst = fft_framework()
 
-    def transform(self, y_signal, nSamplesWindow):
-        # y_split_list = y_signal.split(nSamplesWindow, overlapFactor=0.5, windowType='hanning')
-        y_split_list = y_signal.split(nSamplesWindow)
+    def transform(self, y_signal, nSamplesWindow, overlapFactor=0, windowType=None):
+        
+        y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
+        # y_split_list = y_signal.split(nSamplesWindow)
         nParts = len(y_split_list)
-        print(f"Signal divided into {nParts} parts")
+        print(f"Signal divided into {nParts} parts with a length of {y_split_list[0].nSamples} each")
 
         y_hat = np.empty((self.fftInst.estimateSize(y_split_list[0]),nParts), dtype=np.complex64)
+        print(f"Transformation output will be of shape {y_hat.shape}")
         for i in range(0, nParts):
             y_hat[:, i] = self.fftInst.transform(y_split_list[i])
             # spectrum = np.fft.fft(padded) / fft_size          # take the Fourier Transform and scale by the number of samples

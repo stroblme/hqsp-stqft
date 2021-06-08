@@ -18,17 +18,9 @@ class stqft_framework():
     def __init__(self, numOfShots=1024):
         self.qftInst = qft_framework(numOfShots=numOfShots)
 
+    def transform(self, y_signal, nSamplesWindow, overlapFactor=0, windowType=None):
 
-    def transform(self, y_signal, nSamplesWindow):
-        """Apply QFT on a given Signal
-
-        Args:
-            y (signal): signal to be transformed
-
-        Returns:
-            signal: transformeed signal
-        """
-        y_split_list = y_signal.split(nSamplesWindow)
+        y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         nParts = len(y_split_list)
         print(f"Signal divided into {nParts} parts")
 
@@ -37,4 +29,3 @@ class stqft_framework():
             y_hat[:,i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
 
         return y_hat
-

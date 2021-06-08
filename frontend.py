@@ -106,9 +106,6 @@ class signal():
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
         nParts = np.int32(np.ceil(len(self.y) / np.float32(nSamplesWindow)))
         
-        proc = self.y
-        result = np.empty((nParts, nSamplesWindow), dtype=np.float32)
-
         # if self.nSamples%nParts != 0:
         #     raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
 
@@ -119,7 +116,7 @@ class signal():
 
         for i in range(0,nParts):
             currentHop = hopSize * i                        # figure out the current segment offset
-            segment = proc[currentHop:currentHop+nSamplesWindow]  # get the current segment
+            segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
             windowed = segment * window                       # multiply by the half cosine function
             
             y = deepcopy(self)
@@ -179,8 +176,8 @@ class transform():
     def __init__(self, transformation, **kwargs):
         self.transformation = transformation(**kwargs)
 
-    def forward(self, y, *kwargs):
-        y_hat = self.transformation.transform(y, *kwargs)
+    def forward(self, y, **kwargs):
+        y_hat = self.transformation.transform(y, **kwargs)
 
         n = np.arange(y_hat.shape[0])
         F = y_hat.shape[0]/y.samplingRate
