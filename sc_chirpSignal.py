@@ -1,6 +1,7 @@
 from qft import qft_framework
 from dft import dft_framework
 from fft import fft_framework
+from stft import stft_framework
 from stqft import stqft_framework
 from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
 
@@ -16,15 +17,15 @@ y.addFrequency(1050, 0.008)
 
 y.show(subplot=[1,3,1])
 
-print("Processing FFT")
-fft = transform(fft_framework)
-y_hat, f = fft.forward(y)
-fft.show(y_hat, f, subplot=[1,3,2])
+print("Processing STFT")
+stft = transform(stft_framework)
+y_hat, f = stft.forward(y, 2**6)
+stft.show(y_hat, f, subplot=[1,3,2])
 
 
 print("Processing STQFT")
 stqft = transform(stqft_framework)
-y_hat, f, t = stqft.forward(y, 2**4)
+y_hat, f, t = stqft.forward(y, 2**6)
 stqft.show(y_hat, f, t, subplot=[1,3,3])
 
 

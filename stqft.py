@@ -19,7 +19,7 @@ class stqft_framework():
         self.qftInst = qft_framework(numOfShots=numOfShots)
 
 
-    def transform(self, y_signal, nParts, show=-1):
+    def transform(self, y_signal, nSamplesWindow, show=-1):
         """Apply QFT on a given Signal
 
         Args:
@@ -28,7 +28,7 @@ class stqft_framework():
         Returns:
             signal: transformeed signal
         """
-        y_split_list = y_signal.split(nParts)
+        y_split_list = y_signal.split(nSamplesWindow)
 
         y_hat = np.zeros((self.qftInst.estimateSize(y_split_list[0]),nParts))
         for i in range(0, nParts):

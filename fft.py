@@ -33,3 +33,10 @@ class fft_framework():
                                     y_hat_even+factor[int(N/2):]*y_hat_odd])
 
         return y_hat
+
+    def estimateSize(self, y_signal):
+        assert isPow2(y_signal.nSamples)
+
+        n_bins = int((log2(y_signal.nSamples)/log2(2)))
+
+        return 2**n_bins

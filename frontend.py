@@ -93,20 +93,43 @@ class signal():
         self.setNSamples(0,t.size)
         self.lockSampling=True
 
-    def split(self, nParts):
+    def split(self, nSamplesWindow, overlapFactor=0, windowType=None):
         self.sample()
 
-        if self.nSamples%nParts != 0:
-            raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
+        if windowType == None:
+            window = 1.
+        elif windowType == 'hanning':
+            window = np.hanning(nSamplesWindow)
+        else:
+            raise NotImplementedError("Invalid window type")
 
-        y_split = np.array_split(self.y, nParts)
-        t_split = np.array_split(self.t, nParts)
+        hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
+        padEndSize = nSamplesWindow
+        nParts = np.int32(np.ceil(len(self.y) / np.float32(nSamplesWindow)))
+        
+        innerPad = np.zeros(nSamplesWindow)
+
+        # proc = np.concatenate((self.y, np.zeros(padEndSize)))
+        proc = self.y
+        result = np.empty((nParts, nSamplesWindow), dtype=np.float32)
+
+        # if self.nSamples%nParts != 0:
+        #     raise RuntimeError(f"Signal with length {self.nSamples} cannot be splitted in {nParts} parts")
+
+        # y_split = np.array_split(self.y, nParts)
+        # t_split = np.array_split(self.t, nParts)
         
         y_split_array = list()
 
         for i in range(0,nParts):
+            currentHop = hopSize * i                        # figure out the current segment offset
+            segment = proc[currentHop:currentHop+nSamplesWindow]  # get the current segment
+            windowed = segment * window                       # multiply by the half cosine function
+            # padded = np.append(windowed, innerPad)           # add 0s to double the length of the data
+            padded = windowed
+            
             y = deepcopy(self)
-            y.externalSample(y_split[i], t_split[i])
+            y.externalSample(padded, self.t[currentHop:currentHop+nSamplesWindow])
             y_split_array.append(y)
 
         return y_split_array
