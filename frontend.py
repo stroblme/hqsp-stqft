@@ -253,7 +253,7 @@ class transform():
         if scale == 'log':
             y_hat = 20*np.log10(y_hat)
         elif scale == 'mel':
-            y_hat = y_hat**2
+            y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -268,6 +268,7 @@ class transform():
             plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis', shading='auto')
             plt.xlabel('Time [s]')
             plt.ylabel('Freq [Hz]')
+            # plt.colorbar(format='%+2.0f')
                 
         plt.title(type(self.transformation).__name__)
 
