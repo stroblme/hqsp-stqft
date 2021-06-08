@@ -9,8 +9,7 @@ from qiskit import *
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT as qiskit_qft
 
-def isPow2(x):
-    return (x!=0) and (x & (x-1)) == 0
+from utils import isPow2
 
 
 def get_bit_string(n, n_qubits):

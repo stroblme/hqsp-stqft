@@ -3,6 +3,8 @@ from IPython import get_ipython
 import numpy as np
 from numpy import pi
 
+from utils import isPow2
+
 class fft_framework():
     def transform(self, y_signal):
         """

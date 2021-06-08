@@ -29,6 +29,7 @@ class stqft_framework():
             signal: transformeed signal
         """
         y_split_list = y_signal.split(nSamplesWindow)
+        nParts = len(y_split_list)
 
         y_hat = np.zeros((self.qftInst.estimateSize(y_split_list[0]),nParts))
         for i in range(0, nParts):
