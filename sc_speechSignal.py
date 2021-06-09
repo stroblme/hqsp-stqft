@@ -5,7 +5,7 @@ from stft import stft_framework
 from stqft import stqft_framework
 from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
 
-from tests import test_melspectogram
+from tests import *
 
 enableInteractive()
 setStylesheet('dark_background') #seaborn-poster, seaborn-deep
@@ -27,15 +27,16 @@ y.show(subplot=[1,3,1])
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t, subplot=[1,3,2], scale='mel', fmax=2000)
+stft.show(y_hat, t, f, subplot=[1,3,2], scale='mel', fmax=2000)
 
 
 print("Processing STQFT")
 stqft = transform(stqft_framework)
 y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t, subplot=[1,3,3], scale='mel', fmax=2000)
+stqft.show(y_hat, t, f, subplot=[1,3,3], scale='mel', fmax=2000)
 
 print("Running reference")
+test_plot(y_hat, y.samplingRate)
 test_melspectogram(y)
 
 print("Showing all figures")

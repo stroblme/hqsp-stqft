@@ -20,7 +20,7 @@ def test_mel(y_hat, sr):
     
     return y_hat_mel
 
-def test_to_db(y_hat, sr):
+def test_to_db(y_hat):
     y_hat_dB = librosa.power_to_db(y_hat, ref=np.max)
 
     return y_hat_dB
@@ -40,12 +40,12 @@ def test_melspectogram(y_signal):
         y_hat_mel_db
     """
 
-    y_hat_mel_db = test_to_db(*test_mel(*test_stft(y_signal)))
-    test_plot(y_hat_mel_db)
+    y_hat_mel_db = test_to_db(test_mel(*test_stft(y_signal)))
+    test_plot(y_hat_mel_db, y_signal.samplingRate)
 
     return y_hat_mel_db
 
-def test_plot(y_hat):
+def test_plot(y_hat, sr):
     fig, ax = plt.subplots()
     img = librosa.display.specshow(y_hat, x_axis='time',
 
