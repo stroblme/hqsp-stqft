@@ -37,15 +37,17 @@ def test_melspectogram(y_signal):
         y_signal
 
     Returns:
-        y_hat
-        y_hat_mel
         y_hat_mel_db
     """
-    fig, ax = plt.subplots()
 
     y_hat_mel_db = test_to_db(*test_mel(*test_stft(y_signal)))
+    test_plot(y_hat_mel_db)
 
-    img = librosa.display.specshow(y_hat_mel_dB, x_axis='time',
+    return y_hat_mel_db
+
+def test_plot(y_hat):
+    fig, ax = plt.subplots()
+    img = librosa.display.specshow(y_hat, x_axis='time',
 
                             y_axis='mel', sr=sr,
 
@@ -53,5 +55,3 @@ def test_melspectogram(y_signal):
 
     fig.colorbar(img, ax=ax, format='%+2.0f dB')
     ax.set(title='Mel-frequency spectrogram')
-
-    return y_hat, y_hat_mel, y_hat_mel_dB
