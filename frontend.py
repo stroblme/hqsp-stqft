@@ -220,6 +220,9 @@ class transform():
         else:
             return y_hat, f
 
+    def swapaxes(self, y_hat):
+        return np.swapaxes(y_hat, 0, 1)
+
     def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=False, fmax=None, subplot=None, path=None):
 
         n = y_hat.shape[0]//2
@@ -232,6 +235,8 @@ class transform():
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
 
         if fmax != None:
+            if fmax > f.max():
+                raise RuntimeError("f_max must be lower than the actual max frequency")
             f_idx = int(np.where(f>fmax)[0][0])
             f = f[:f_idx]
             y_hat = y_hat[:f_idx,:]
