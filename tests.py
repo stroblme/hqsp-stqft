@@ -3,6 +3,27 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 
+def test_stft(y_signal):
+    fig, ax = plt.subplots()
+
+    y = y_signal.y
+    sr = y_signal.samplingRate
+
+    # Copied from https://librosa.org/doc/latest/generated/librosa.feature.melspectrogram.html
+
+    y_hat = np.abs(librosa.stft(y))**2
+    
+    return y_hat, sr
+
+def test_mel(y_hat, sr):
+    y_hat_mel = librosa.feature.melspectrogram(S=y_hat, sr=sr)
+    
+    return y_hat_mel
+
+def test_to_db(y_hat, sr):
+    y_hat_dB = librosa.power_to_db(y_hat, ref=np.max)
+
+    return y_hat_dB
 
 def test_melspectogram(y_signal):
     """Generates a melspectrogram using librosa
@@ -22,14 +43,8 @@ def test_melspectogram(y_signal):
     """
     fig, ax = plt.subplots()
 
-    y = y_signal.y
-    sr = y_signal.samplingRate
+    y_hat_mel_db = test_to_db(*test_mel(*test_stft(y_signal)))
 
-    # Copied from https://librosa.org/doc/latest/generated/librosa.feature.melspectrogram.html
-
-    y_hat = np.abs(librosa.stft(y))**2
-    y_hat_mel = librosa.feature.melspectrogram(S=y_hat, sr=sr)
-    y_hat_mel_dB = librosa.power_to_db(y_hat_mel, ref=np.max)
     img = librosa.display.specshow(y_hat_mel_dB, x_axis='time',
 
                             y_axis='mel', sr=sr,
