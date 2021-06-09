@@ -67,6 +67,7 @@ class signal():
             print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will upsample.')
         elif samplingRate > self.samplingRate:
             print(f'Warning: provided sampling rate ({self.samplingRate}) is lower than the one of the audio ({samplingRate}). Will downsample.')
+        
         duration = librosa.get_duration(filename=path)
         if duration < self.duration:
             if zeroPadding:
