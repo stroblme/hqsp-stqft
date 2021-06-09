@@ -249,7 +249,7 @@ class transform():
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
 
         if fmax != None:
-            f_idx = int(np.where(f>4000)[0][0])
+            f_idx = int(np.where(f>fmax)[0][0])
             f = f[:f_idx]
             y_hat = y_hat[:f_idx,:]
 
