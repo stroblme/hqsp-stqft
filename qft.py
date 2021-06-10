@@ -40,7 +40,6 @@ def get_fft_from_counts(counts, n_qubits):
 class qft_framework():
     def __init__(self, numOfShots=1024):
         self.numOfShots = numOfShots
-        pass
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
