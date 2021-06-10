@@ -253,6 +253,7 @@ class transform():
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
+            plt.subplots_adjust(wspace=0.58)
         else:
             plt.figure(figsize = (10, 6))
 
