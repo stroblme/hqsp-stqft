@@ -33,7 +33,7 @@ stft.show(y_hat, f, t, subplot=[1,3,2])
 
 
 print("Processing STQFT")
-stqft = transform(stqft_framework)
+stqft = transform(stqft_framework, suppressPrint=True)
 y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 stqft.show(y_hat, f, t, subplot=[1,3,3])
 

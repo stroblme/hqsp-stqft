@@ -38,7 +38,9 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    def __init__(self, numOfShots=1024):
+    def __init__(self, numOfShots=1024, show=-1, suppressPrint=False):
+        self.suppressPrint = suppressPrint
+        self.show = show
         self.numOfShots = numOfShots
 
     def estimateSize(self, y_signal):
@@ -48,7 +50,7 @@ class qft_framework():
 
         return 2**n_qubits
 
-    def transform(self, y_signal, show=-1, suppressPrint=False):
+    def transform(self, y_signal):
         """Apply QFT on a given Signal
 
         Args:
@@ -57,7 +59,6 @@ class qft_framework():
         Returns:
             signal: transformeed signal
         """
-        self.suppressPrint = suppressPrint
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
