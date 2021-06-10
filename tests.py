@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def test_stft(y_signal):
-    fig, ax = plt.subplots()
-
     y = y_signal.y
     sr = y_signal.samplingRate
 
