@@ -52,7 +52,7 @@ class signal():
 
             self.lockSampling = False
 
-        print(f"Signal duration set to {self.duration}, resulting in {self.nSamples} samples")
+        print(f"Signal duration set to {self.duration}s, resulting in {self.nSamples} samples")
         print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
         self.t = np.arange(0,self.duration,self.samplingInterval)
 
