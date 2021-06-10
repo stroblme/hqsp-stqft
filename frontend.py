@@ -236,10 +236,11 @@ class transform():
 
         if fmax != None:
             if fmax > f.max():
-                raise RuntimeError("f_max must be lower than the actual max frequency")
-            f_idx = int(np.where(f>fmax)[0][0])
-            f = f[:f_idx]
-            y_hat = y_hat[:f_idx,:]
+                print(f"f_max {fmax} is not lower than the actual max frequency {f.max()}")
+            else:
+                f_idx = int(np.where(f>fmax)[0][0])
+                f = f[:f_idx]
+                y_hat = y_hat[:f_idx,:]    
 
 
         if normalize:
