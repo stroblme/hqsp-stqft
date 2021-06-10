@@ -223,7 +223,7 @@ class transform():
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=False, fmax=None, subplot=None, path=None):
+    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None, subplot=None, path=None):
 
         n = y_hat.shape[0]//2
         # get the one side frequency
@@ -246,16 +246,18 @@ class transform():
         if normalize:
             y_hat = y_hat*(1/y_hat.max())
 
-        if scale == 'log':
-            y_hat = 20*np.log10(y_hat)
-        elif scale == 'mel':
-            y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
-
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
             plt.subplots_adjust(wspace=0.58)
         else:
             plt.figure(figsize = (10, 6))
+
+        if scale == 'log':
+            y_hat = 20*np.log10(y_hat)
+            plt.yscale('log')
+        elif scale == 'mel':
+            y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
+            plt.yscale('log')
 
         if t is None:
             plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
