@@ -254,10 +254,10 @@ class transform():
 
         if scale == 'log':
             y_hat = 20*np.log10(y_hat)
-            plt.yscale('log')
+            # plt.yscale('log',base=2)
         elif scale == 'mel':
             y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
-            plt.yscale('log')
+            # plt.yscale('log',base=2)
 
         if t is None:
             plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")

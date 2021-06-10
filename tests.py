@@ -1,17 +1,17 @@
-import librosa
-import librosa.display
-import matplotlib.pyplot as plt
+from scipy import signal as scipySignal
+from scipy.fft import fftshift
+import matplotlib.pyplot as plt 
 import numpy as np
 
-def test_stft(y_signal):
-    y = y_signal.y
-    sr = y_signal.samplingRate
-
-    # Copied from https://librosa.org/doc/latest/generated/librosa.feature.melspectrogram.html
-
-    y_hat = np.abs(librosa.stft(y))**2
+def test_stft(y_signal, windo):
+    f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate)
     
-    return y_hat, sr
+    return y_hat, f, t
+
+def test_show(y_hat, f, t):
+    plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis', shading='auto')
+    plt.xlabel('Time [s]')
+    plt.ylabel('Freq [Hz]')
 
 def test_mel(y_hat, sr):
     y_hat_mel = librosa.feature.melspectrogram(S=y_hat, sr=sr)
@@ -23,7 +23,7 @@ def test_to_db(y_hat):
 
     return y_hat_dB
 
-def test_melspectogram(y_signal):
+def test_melspectrogram(y_signal):
     """Generates a melspectrogram using librosa
 
     Returns the calculated intermediate step (spectrum, spectrum in mel-scale and spectrum in mel-scale as db).
@@ -47,7 +47,7 @@ def test_plot(y_hat, sr):
     fig, ax = plt.subplots()
     img = librosa.display.specshow(y_hat, x_axis='time',
 
-                            y_axis='mel', sr=sr,
+                            y_axis='linear', sr=sr,
 
                             fmax=sr/2, ax=ax)
 
