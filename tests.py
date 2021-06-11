@@ -1,13 +1,27 @@
 from scipy import signal as scipySignal
 from scipy.fft import fftshift
+import librosa
+import librosa.display
 import matplotlib.pyplot as plt 
 import numpy as np
 
-def test_stft(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
-    # f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate, window=windowType, nperseg=nSamplesWindow)
-    f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate)
+def test_stft_scipy(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
+    f, t, y_hat = scipySignal.stft( y_signal.sample(), y_signal.samplingRate, 
+                                    window=windowType, 
+                                    nperseg=nSamplesWindow, 
+                                    noverlap=overlapFactor*nSamplesWindow,
+                                    return_onesided=False)
+    # f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate)
     
     return y_hat, f, t
+
+def test_stft_librosa(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
+    y_hat = librosa.stft(   y_signal.sample(), 
+                            n_fft=nSamplesWindow, 
+                            hop_length=int(overlapFactor*nSamplesWindow),
+                            window=windowType)
+
+    return y_hat
 
 def test_show(y_hat, f, t):
     plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis', shading='auto')

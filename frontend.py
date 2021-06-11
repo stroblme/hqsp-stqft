@@ -224,14 +224,13 @@ class transform():
         return np.swapaxes(y_hat, 0, 1)
 
     def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None, subplot=None, path=None):
-
-        n = y_hat.shape[0]//2
-        # get the one side frequency
-        f = f[:n] if autopower else f
-
-        # normalize the amplitude
+        # abs the amplitude
         y_hat = np.abs(y_hat * np.conj(y_hat))
+
+        # get the one side frequency
         if autopower:
+            n = y_hat.shape[0]//2
+            f = f[:n]
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
 
         if fmax != None:
