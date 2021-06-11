@@ -19,22 +19,22 @@ windowType='hann'
 print("Initializing Signal")
 
 y = signal(samplingRate=16000, signalType='file', path=speechSignal)
-y.show(subplot=[1,3,1])
+y.show(subplot=[1,4,1])
 
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t=t, subplot=[1,3,2], scale='mel', fmax=4000)
+stft.show(y_hat, f, t=t, subplot=[1,4,2], scale='mel', fmax=4000)
 
 
 print("Running reference")
 y_hat, f, t = test_stft_scipy(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t=t, subplot=[1,3,3], scale='mel', fmax=4000)
+stft.show(y_hat, f, t=t, subplot=[1,4,3], scale='mel', fmax=4000)
 
 print("Processing STQFT")
-stqft = transform(stqft_framework)
+stqft = transform(stqft_framework, suppressPrint=True)
 y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t=t, subplot=[1,3,3], scale='mel', fmax=8000)
+stqft.show(y_hat, f, t=t, subplot=[1,4,4], scale='mel', fmax=4000)
 
 
 print("Showing all figures")
