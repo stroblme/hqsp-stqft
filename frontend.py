@@ -123,10 +123,10 @@ class signal():
     def split(self, nSamplesWindow, overlapFactor=0, windowType=None):
         self.sample()
 
-        if windowType == 'hanning':
+        if windowType == 'hann':
             window = np.hanning(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hanning window")
-        elif windowType == 'hamming':
+        elif windowType == 'hamm':
             window = np.hamming(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
         else:
@@ -235,7 +235,7 @@ class transform():
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
 
         if fmax != None:
-            if fmax > f.max():
+            if fmax >= f.max():
                 print(f"f_max {fmax} is not lower than the actual max frequency {f.max()}")
             else:
                 f_idx = int(np.where(f>fmax)[0][0])
@@ -264,7 +264,7 @@ class transform():
             plt.xlabel('Freq [Hz]')
             plt.ylabel('Amplitude (abs)')
         else:
-            plt.pcolormesh(t, f, np.abs(y_hat), cmap='cividis', shading='auto')
+            plt.pcolormesh(t, f, y_hat, cmap='cividis', shading='gouraud')
             plt.xlabel('Time [s]')
             plt.ylabel('Freq [Hz]')
             # plt.colorbar(format='%+2.0f')

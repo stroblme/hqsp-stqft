@@ -10,7 +10,7 @@ setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 windowLength = 2**7
 overlapFactor=0.5
-windowType='hanning'
+windowType='hann'
 
 print("Initializing Signal")
 

@@ -3,7 +3,8 @@ from scipy.fft import fftshift
 import matplotlib.pyplot as plt 
 import numpy as np
 
-def test_stft(y_signal, windo):
+def test_stft(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
+    # f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate, window=windowType, nperseg=nSamplesWindow)
     f, t, y_hat = scipySignal.stft(y_signal.sample(), y_signal.samplingRate)
     
     return y_hat, f, t
