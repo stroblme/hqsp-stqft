@@ -19,8 +19,7 @@ def setStylesheet(theme):
     plt.style.use(theme)
 
 class signal():
-    frequencies = list()
-    phases = list()
+    
 
     def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
         """Signal Init
@@ -34,6 +33,8 @@ class signal():
         # Set the class attributes
         self.amplification = amplification
         self.setSamplingRate(samplingRate)
+        self.frequencies = list()
+        self.phases = list()
 
         self.signalType = signalType
         
