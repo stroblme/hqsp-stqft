@@ -274,6 +274,64 @@ class transform():
         if path is not None:
             plt.savefig(path)
 
+class grader():
+    # def __init__(self):
+
+    def correlate(self, a, b):
+        y_hat_diff = scipySignal.correlate2d(a, b, mode='same')
+
+        return y_hat_diff
+        
+    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None, subplot=None, path=None):
+        # abs the amplitude
+        y_hat = np.abs(y_hat * np.conj(y_hat))
+
+        # get the one side frequency
+        if autopower:
+            n = y_hat.shape[0]//2
+            f = f[:n]
+            y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
+
+        if fmax != None:
+            if fmax >= f.max():
+                print(f"f_max {fmax} is not lower than the actual max frequency {f.max()}")
+            else:
+                f_idx = int(np.where(f>fmax)[0][0])
+                f = f[:f_idx]
+                y_hat = y_hat[:f_idx,:]    
+
+        if scale == 'log':
+            y_hat = 20*np.log10(y_hat)
+            # plt.yscale('log',base=2)
+        elif scale == 'mel':
+            y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
+            # plt.yscale('log',base=2)
+
+        if normalize:
+            y_hat = y_hat*(1/y_hat.max())
+
+        if subplot is not None:
+            plt.subplot(*subplot,frameon=False)
+            plt.subplots_adjust(wspace=0.58)
+        else:
+            plt.figure(figsize = (10, 6))
+
+
+        if t is None:
+            plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
+            plt.xlabel('Freq [Hz]')
+            plt.ylabel('Amplitude (abs)')
+        else:
+            plt.pcolormesh(t, f, y_hat, cmap='cividis', shading='gouraud')
+            plt.xlabel('Time [s]')
+            plt.ylabel('Freq [Hz]')
+            # plt.colorbar(format='%+2.0f')
+                
+        plt.title('Grader')
+
+        if path is not None:
+            plt.savefig(path)
+
 def primeTime():
     plt.show()
     disableInteractive()
