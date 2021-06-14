@@ -20,12 +20,3 @@ class stqft_framework():
 
     def transform(self, y_signal, **kwargs):
         return self.stt_inst.stt_transform(y_signal, **kwargs)
-
-        # y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
-        # nParts = len(y_split_list)
-
-        # y_hat = np.empty((self.qftInst.estimateSize(y_split_list[0]),nParts),dtype=np.complex64)    # note: this cast is unnecessary, as we actually don't get complex values
-        # for i in range(0, nParts):
-        #     y_hat[:,i] = self.qftInst.transform(y_split_list[i], suppressPrint=True)
-
-        # return y_hat
