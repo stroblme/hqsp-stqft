@@ -3,7 +3,7 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
+from frontend import signal, transform, primeTime, enableInteractive, setStylesheet, grader
 
 from tests import *
 
@@ -23,18 +23,20 @@ y.show(subplot=[1,4,1])
 
 print("Processing STFT")
 stft = transform(stft_framework)
-y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t=t, subplot=[1,4,2], scale='mel', fmax=4000)
+y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t, scale='mel', fmax=4000)
+stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2])
 
-
-print("Running reference")
-y_hat, f, t = test_stft_scipy(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t=t, subplot=[1,4,3], scale='mel', fmax=4000)
 
 print("Processing STQFT")
 stqft = transform(stqft_framework, suppressPrint=True)
-y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t=t, subplot=[1,4,4], scale='mel', fmax=4000)
+y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_stqft_p, f_p, t_p = stft.postProcess(y_hat_stqft, f ,t, scale='mel', fmax=4000)
+stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3])
+
+grader_inst = grader()
+y_hat_diff = grader_inst.correlate2d(y_hat_stft_p, y_hat_stqft_p)
+grader_inst.show(y_hat_diff, f_p, t=t_p, subplot=[1,4,4])
 
 
 print("Showing all figures")

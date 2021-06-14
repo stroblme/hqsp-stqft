@@ -4,6 +4,7 @@ from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
 from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
+from tests import *
 
 enableInteractive()
 setStylesheet('dark_background') #seaborn-poster, seaborn-deep
@@ -28,14 +29,21 @@ y.show(subplot=[1,3,1])
 
 print("Processing STFT")
 stft = transform(stft_framework)
-y_hat, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stft.show(y_hat, f, t, subplot=[1,3,2])
+y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
+stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,1])
+
+print("Running reference")
+y_hat_stft, f, t = test_stft_scipy(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
+stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2])
 
 
 print("Processing STQFT")
 stqft = transform(stqft_framework, suppressPrint=True)
-y_hat, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-stqft.show(y_hat, f, t, subplot=[1,3,3])
+y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_sqft_p, f_p, t_p = stft.postProcess(y_hat_stqft, f ,t)
+stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,3,3])
 
 
 print("Showing all figures")
