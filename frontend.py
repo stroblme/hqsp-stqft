@@ -7,6 +7,10 @@ from copy import deepcopy
 
 import librosa
 
+COLORMAP = 'plasma'
+SHADING='nearest'
+
+
 def enableInteractive():
     global plt
     plt.ion()
@@ -17,6 +21,8 @@ def disableInteractive():
 
 def setStylesheet(theme):
     plt.style.use(theme)
+
+
 
 class signal():
     
@@ -267,7 +273,7 @@ class transform():
             plt.xlabel('Freq [Hz]')
             plt.ylabel('Amplitude (abs)')
         else:
-            plt.pcolormesh(t, f, y_hat, cmap='cividis', shading='gouraud')
+            plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
             plt.xlabel('Time [s]')
             plt.ylabel('Freq [Hz]')
             # plt.colorbar(format='%+2.0f')
@@ -299,7 +305,7 @@ class grader():
             plt.xlabel('Freq [Hz]')
             plt.ylabel('Amplitude (abs)')
         else:
-            plt.pcolormesh(t, f, y_hat, cmap='cividis', shading='gouraud')
+            plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
             plt.xlabel('Time [s]')
             plt.ylabel('Freq [Hz]')
             # plt.colorbar(format='%+2.0f')
