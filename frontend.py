@@ -7,9 +7,11 @@ from copy import deepcopy
 
 import librosa
 
+from qbstyles import mpl_style
+
 COLORMAP = 'plasma'
 SHADING='nearest'
-
+DARK=True
 
 def enableInteractive():
     global plt
@@ -19,8 +21,9 @@ def disableInteractive():
     global plt
     plt.ioff()
 
-def setStylesheet(theme):
-    plt.style.use(theme)
+mpl_style(dark=DARK, minor_ticks=False)
+def setTheme(dark=False):
+    mpl_style(dark=dark)
 
 
 
@@ -195,7 +198,7 @@ class signal():
             minSamples = int(maxT*self.samplingRate)
 
         if subplot is not None:
-            plt.subplot(*subplot,frameon=False)
+            plt.subplot(*subplot, frameon=False)
         else:
             plt.figure(figsize = (10, 6))
 
@@ -229,10 +232,11 @@ class transform():
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
         # abs the amplitude
-        y_hat = np.abs(y_hat * np.conj(y_hat))
+        # y_hat = np.abs(y_hat * np.conj(y_hat))
 
         # get the one side frequency
         if autopower:
+            y_hat = np.abs(y_hat)
             n = y_hat.shape[0]//2
             f = f[:n]
             y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 

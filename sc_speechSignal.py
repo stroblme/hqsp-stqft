@@ -3,12 +3,11 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import signal, transform, primeTime, enableInteractive, setStylesheet, grader
+from frontend import signal, transform, primeTime, enableInteractive, grader
 
 from tests import *
 
 enableInteractive()
-setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 speechSignal = '../dataset/zero/0c40e715_nohash_1.wav'
 

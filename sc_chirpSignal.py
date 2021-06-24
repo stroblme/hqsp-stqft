@@ -3,11 +3,10 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import signal, transform, primeTime, enableInteractive, setStylesheet
+from frontend import signal, transform, primeTime, enableInteractive
 from tests import *
 
 enableInteractive()
-setStylesheet('dark_background') #seaborn-poster, seaborn-deep
 
 windowLength = 2**7
 overlapFactor=0.5
@@ -42,7 +41,7 @@ stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2])
 print("Processing STQFT")
 stqft = transform(stqft_framework, suppressPrint=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-y_hat_sqft_p, f_p, t_p = stft.postProcess(y_hat_stqft, f ,t)
+y_hat_sqft_p, f_p, t_p = stft.postProcess(y_hat_stqft, f ,t, scale='mel')
 stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,3,3])
 
 
