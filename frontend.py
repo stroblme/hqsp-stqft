@@ -21,9 +21,8 @@ def disableInteractive():
     global plt
     plt.ioff()
 
-mpl_style(dark=DARK, minor_ticks=False)
 def setTheme(dark=False):
-    mpl_style(dark=dark)
+    DARK = dark
 
 
 
@@ -187,6 +186,7 @@ class signal():
         return self.y
     
     def show(self, subplot=None, path=None, ignorePhaseShift=False):
+        mpl_style(dark=DARK, minor_ticks=False)
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
@@ -260,12 +260,16 @@ class transform():
             y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
             # plt.yscale('log',base=2)
 
-        return y_hat, f, t
+        if t is None:
+            return y_hat, f
+        else:
+            return y_hat, f, t
 
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None, subplot=None, path=None):
+    def show(self, y_hat, f, t=None, subplot=None, path=None):
+        mpl_style(dark=DARK, minor_ticks=False)
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)

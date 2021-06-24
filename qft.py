@@ -38,12 +38,13 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    MINROTATION = 0.2 #in [0, pi/2)
+    # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, suppressPrint=False):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
+        self.minRotation = minRotation
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
@@ -98,10 +99,10 @@ class qft_framework():
 
         for qubit in range(n):
             rot = pi/2**(n-qubit)
-            if rot < self.MINROTATION:
+            if rot < self.minRotation:
                 rotGateSaveCounter += 1
                 if not self.suppressPrint:
-                    print(f"Warning rotations lower than {self.MINROTATION}: is {rot}. Ignoring")
+                    print(f"Warning rotations lower than {self.minRotation}: is {rot}. Ignoring")
             else:
                 circuit.cp(rot, qubit, n)
 
