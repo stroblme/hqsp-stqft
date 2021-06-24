@@ -279,7 +279,7 @@ class qft_framework():
 
         if self.draw:
             self.draw=False
-            name = time.mktime(datetime.datetime.now().timetuple())[:-2]
+            name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
             qc.draw(output='mpl', filename=f'./export/{name}.png')
         return y_hat
 
