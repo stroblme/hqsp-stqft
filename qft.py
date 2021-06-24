@@ -38,6 +38,8 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
+    MINROTATION = 0.9 #in [0, pi/2)
+
     def __init__(self, numOfShots=2048, show=-1, suppressPrint=False):
         self.suppressPrint = suppressPrint
         self.show = show
@@ -73,6 +75,7 @@ class qft_framework():
         # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         y_hat = self.processQFT_schmidt(y)
         # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
+
         return y_hat
 
     def showCircuit(self, y):
@@ -89,13 +92,23 @@ class qft_framework():
         if n == 0:
             return circuit
         n -= 1
-        circuit.h(n)
-        for qubit in range(n):
-            circuit.cp(pi/2**(n-qubit), qubit, n)
+        circuit.h(n) # apply hadamard
+        
+        rotGateSaveCounter = 0
 
+        for qubit in range(n):
+            rot = pi/2**(n-qubit)
+            if rot < self.MINROTATION:
+                rotGateSaveCounter += 1
+                if not self.suppressPrint:
+                    print(f"Warning rotations lower than {self.MINROTATION}: is {rot}. Ignoring")
+            else:
+                circuit.cp(rot, qubit, n)
 
         # At the end of our function, we call the same function again on
         # the next qubits (we reduced n by one earlier in the function)
+        if n != 0 and rotGateSaveCounter != 0 and not self.suppressPrint:
+            print(f"Saved {rotGateSaveCounter} rotation gates which is {int(100*rotGateSaveCounter/n)}% of {n} qubits")
         self.qft_rotations(circuit, n)
 
     def swap_registers(self, circuit, n):
