@@ -1,3 +1,4 @@
+from matplotlib.pyplot import draw
 from qft import qft_framework
 from dft import dft_framework
 from fft import fft_framework
@@ -42,7 +43,7 @@ y.addFrequency(3000, y.duration)
 y.show(subplot=[2,2,3])
 
 print("Processing STQFT")
-stqft = transform(stqft_framework, minRotation=0.5, suppressPrint=False)
+stqft = transform(stqft_framework, minRotation=0.2, suppressPrint=False, draw=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
 stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[2,2,4])

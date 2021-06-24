@@ -1,4 +1,7 @@
+import time
 from IPython import get_ipython
+
+import datetime
 
 import numpy as np
 from numpy import array, pi
@@ -40,11 +43,12 @@ def get_fft_from_counts(counts, n_qubits):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, draw=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
+        self.draw = draw
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
@@ -53,7 +57,7 @@ class qft_framework():
 
         return 2**n_qubits
 
-    def transform(self, y_signal):
+    def transform(self, y_signal, draw=False):
         """Apply QFT on a given Signal
 
         Args:
@@ -273,7 +277,10 @@ class qft_framework():
         # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
 
-
+        if self.draw:
+            self.draw=False
+            name = time.mktime(datetime.datetime.now().timetuple())[:-2]
+            qc.draw(output='mpl', filename=f'./export/{name}.png')
         return y_hat
 
     def processQFT_geometric(self, y, circuit_size, show=-1):
