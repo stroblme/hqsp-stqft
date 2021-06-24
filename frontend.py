@@ -86,12 +86,12 @@ class signal():
 
                 y_p, _ = librosa.load(path, sr=self.samplingRate)
 
-                self.y[0:y_p.size] = y_p
+                self.y[0:y_p.size] = y_p * self.amplification
                 return
             else:
                 self.setNSamples(duration=duration, nSamples=0)
 
-        self.y = librosa.load(path, sr=self.samplingRate, duration=self.duration)
+        self.y = librosa.load(path, sr=self.samplingRate, duration=self.duration) * self.amplification
 
 
         # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
