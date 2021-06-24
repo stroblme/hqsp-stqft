@@ -30,7 +30,7 @@ stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2])
 print("Processing STQFT")
 stqft = transform(stqft_framework, suppressPrint=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-y_hat_stqft_p, f_p, t_p = stft.postProcess(y_hat_stqft, f ,t, scale='mel', fmax=4000)
+y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel', fmax=4000)
 stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3])
 
 grader_inst = grader()
