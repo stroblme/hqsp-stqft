@@ -38,7 +38,7 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    MINROTATION = 0.9 #in [0, pi/2)
+    MINROTATION = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, suppressPrint=False):
         self.suppressPrint = suppressPrint

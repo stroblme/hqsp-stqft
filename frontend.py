@@ -2,7 +2,7 @@ import numpy as np
 from numpy import pi
 from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
-from math import log, ceil, floor
+from math import log, ceil, floor, sqrt
 from copy import deepcopy
 
 import librosa
@@ -251,6 +251,7 @@ class transform():
 
         if normalize:
             y_hat = y_hat*(1/y_hat.max())
+            # y_hat = y_hat*(1/sqrt(y_hat.shape[0]))
 
         if scale == 'log':
             y_hat = 20*np.log10(y_hat)
