@@ -38,7 +38,7 @@ def get_fft_from_counts(counts, n_qubits):
     return out
 
 class qft_framework():
-    def __init__(self, numOfShots=1024, show=-1, suppressPrint=False):
+    def __init__(self, numOfShots=2048, show=-1, suppressPrint=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
