@@ -69,17 +69,7 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
-        # print(f"Stretching signal with scalar {self.scaler}")
-        # y_preprocessed = self.preprocessSignal(y, self.scaler)
-
-        # x_processed = x_processed[2:4]
-        # print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
-        # circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-
-        # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         y_hat = self.processQFT(y)
-        # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
 
         return y_hat
 
@@ -95,17 +85,7 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y_hat = y_signal.sample()
 
-        # print(f"Stretching signal with scalar {self.scaler}")
-        # y_preprocessed = self.preprocessSignal(y, self.scaler)
-
-        # x_processed = x_processed[2:4]
-        # print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
-        # circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
-
-        # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
-        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
         y = self.processIQFT(y_hat)
-        # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
 
         return y
 
