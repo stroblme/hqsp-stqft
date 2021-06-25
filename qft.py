@@ -78,10 +78,36 @@ class qft_framework():
 
         # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
         # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
-        y_hat = self.processQFT_schmidt(y)
+        y_hat = self.processQFT(y)
         # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
 
         return y_hat
+
+    def transformInv(self, y_signal, draw=False):
+        """Apply QFT on a given Signal
+
+        Args:
+            y (signal): signal to be transformed
+
+        Returns:
+            signal: transformeed signal
+        """
+        self.samplingRate = y_signal.samplingRate
+        y_hat = y_signal.sample()
+
+        # print(f"Stretching signal with scalar {self.scaler}")
+        # y_preprocessed = self.preprocessSignal(y, self.scaler)
+
+        # x_processed = x_processed[2:4]
+        # print(f"Calculating required qubits for encoding a max value of {int(max(y_preprocessed))}")
+        # circuit_size = int(max(y_preprocessed)).bit_length() # this basically defines the "adc resolution"
+
+        # y_hat = self.processQFT_dumb(y_preprocessed, circuit_size, show)
+        # y_hat = self.processQFT_layerwise(y_preprocessed, circuit_size, show)
+        y = self.processIQFT(y_hat)
+        # y_hat = self.processQFT_geometric(y_preprocessed, circuit_size, show)
+
+        return y
 
     def showCircuit(self, y):
         """Display the circuit for a signal y
@@ -228,7 +254,7 @@ class qft_framework():
         return y_hat
 
 
-    def processQFT_schmidt(self, samples):
+    def processQFT(self, y):
 
         """
         Args:
@@ -237,14 +263,14 @@ class qft_framework():
         Returns:
         circuit: QuantumCircuit - a quantum circuit initialized to the state given by amplitudes
         """
-        n_samples = samples.size
+        n_samples = y.size
         assert isPow2(n_samples)
 
         n_qubits = int((log2(n_samples)/log2(2)))
         if not self.suppressPrint:
             print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
 
-        if samples.max() == 0.0:
+        if y.max() == 0.0:
             y_hat = np.zeros(2**n_qubits)
             return y_hat
 
@@ -252,13 +278,61 @@ class qft_framework():
         qc = QuantumCircuit(q)
 
         # Normalize ampl, which is required for squared sum of amps=1
-        ampls = samples / np.linalg.norm(samples)
+        ampls = y / np.linalg.norm(y)
 
         # for 2^n amplitudes, we have n qubits for initialization
         # this means that the binary representation happens exactly here
         qc.initialize(ampls, [q[i] for i in range(n_qubits)])
 
         qc = self.qft(qc, n_qubits)
+        qc.measure_all()
+
+        qasm_backend = Aer.get_backend('qasm_simulator')
+        # real_backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+        #                                        and not x.configuration().simulator
+        #                                        and x.status().operational==True))
+
+
+        #substitute with the desired backend
+        out = execute(qc, qasm_backend, shots=self.numOfShots).result()
+        counts = out.get_counts()
+        y_hat = np.array(get_fft_from_counts(counts, n_qubits))
+        # [:n_samples//2]
+        y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
+        # top_indices = np.argsort(-np.array(fft))
+        # freqs = top_indices*self.samplingRate/n_samples
+        # get top 5 detected frequencies
+
+        if self.draw:
+            self.draw=False
+            name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
+            qc.draw(output='mpl', filename=f'./export/{name}.png')
+        return y_hat
+
+    def processIQFT(self, y):
+        n_samples = y.size
+        assert isPow2(n_samples)
+
+        n_qubits = int((log2(n_samples)/log2(2)))
+        if not self.suppressPrint:
+            print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
+
+        if y.max() == 0.0:
+            y_hat = np.zeros(2**n_qubits)
+            return y_hat
+
+        q = QuantumRegister(n_qubits)
+        qc = QuantumCircuit(q)
+
+        # Normalize ampl, which is required for squared sum of amps=1
+        ampls = y / np.linalg.norm(y)
+
+        # for 2^n amplitudes, we have n qubits for initialization
+        # this means that the binary representation happens exactly here
+        qc.initialize(ampls, [q[i] for i in range(n_qubits)])
+
+        qc = self.qft(qc, n_qubits)
+        qc.inverse()
         qc.measure_all()
 
         qasm_backend = Aer.get_backend('qasm_simulator')

@@ -230,6 +230,11 @@ class transform():
         else:
             return y_hat, f
 
+    def backward(self, y_hat, **kwargs):
+        y = self.transformation.transformInv(y_hat, **kwargs)
+
+        
+
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
         # abs the amplitude
         # y_hat = np.abs(y_hat * np.conj(y_hat))
