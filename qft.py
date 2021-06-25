@@ -117,7 +117,7 @@ class qft_framework():
             if rot < self.minRotation:
                 rotGateSaveCounter += 1
                 if not self.suppressPrint:
-                    print(f"Warning rotations lower than {self.minRotation}: is {rot}. Ignoring")
+                    print(f"Rotations lower than {self.minRotation}: is {rot}")
             else:
                 circuit.cp(rot, qubit, n)
 
@@ -271,16 +271,28 @@ class qft_framework():
 
         qc = self.qft(qc, n_qubits)
         qc.measure_all()
+        
+        if self.draw:
+            self.draw=False
+            name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
+            qc.draw(output='mpl', filename=f'./export/{name}.png')
 
         if not self.simulation:
-            backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
-                                        and not x.configuration().simulator
-                                        and x.status().operational==True))
-            print("Running on current least busy device: ", backend)
-            qc = transpile(qc, backend, optimization_level=3)
+            backend = self.provider.get_backend('ibmq_quito')
+            # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+            #                             and not x.configuration().simulator
+            #                             and x.status().operational==True))
         else:
             backend = Aer.get_backend('qasm_simulator')
+        
+        if not self.suppressPrint:
+            print(f"Transpiling for {backend}")
+    
+        qc = transpile(qc, backend, optimization_level=1)
 
+        if not self.suppressPrint:
+            print("Executing job...")
+    
         #substitute with the desired backend
         out = execute(qc, backend, shots=self.numOfShots).result()
         counts = out.get_counts()
@@ -291,10 +303,7 @@ class qft_framework():
         # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
 
-        if self.draw:
-            self.draw=False
-            name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
-            qc.draw(output='mpl', filename=f'./export/{name}.png')
+        
         return y_hat
 
     def processIQFT(self, y):
