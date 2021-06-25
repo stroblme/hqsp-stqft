@@ -288,7 +288,7 @@ class qft_framework():
         if not self.suppressPrint:
             print(f"Transpiling for {backend}")
     
-        qc = transpile(qc, backend, optimization_level=1)
+        qc = transpile(qc, backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
 
         if not self.suppressPrint:
             print("Executing job...")
