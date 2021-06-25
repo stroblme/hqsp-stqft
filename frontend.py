@@ -233,7 +233,7 @@ class transform():
     def backward(self, y_hat, **kwargs):
         y = self.transformation.transformInv(y_hat, **kwargs)
 
-        
+
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
         # abs the amplitude
@@ -298,13 +298,21 @@ class transform():
             plt.savefig(path)
 
 class grader():
+    epsilon=1e-10
     # def __init__(self):
 
     def correlate2d(self, a, b):
         y_hat_diff = scipySignal.correlate2d(a, b, mode='same')
 
         return y_hat_diff
+
+    def calculateNoisePower(self, y, y_ref):
+        diff = y-y_ref
         
+        snr = np.divide(y_ref,np.add(np.abs(diff),self.epsilon))
+
+        return 10*np.log10(snr)
+
     def show(self, y_hat, f, t=None, subplot=None, path=None):
         
         if subplot is not None:
