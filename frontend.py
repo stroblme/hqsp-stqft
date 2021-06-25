@@ -298,7 +298,7 @@ class transform():
             plt.savefig(path)
 
 class grader():
-    epsilon=1e-10
+    epsilon=1e-3
     # def __init__(self):
 
     def correlate2d(self, a, b):
@@ -307,9 +307,9 @@ class grader():
         return y_hat_diff
 
     def calculateNoisePower(self, y, y_ref):
-        diff = y-y_ref
-        
-        snr = np.divide(y_ref,np.add(np.abs(diff),self.epsilon))
+        diff = np.abs(y-y_ref)
+
+        snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff))
 
         return 10*np.log10(snr)
 
