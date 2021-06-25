@@ -204,7 +204,7 @@ class signal():
 
         plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
         plt.ylabel('Amplitude')
-        plt.xlabel('Time (excerp) [s]')
+        plt.xlabel('Time (excerp) (s)')
         plt.title(type(self).__name__)
 
 
@@ -284,12 +284,12 @@ class transform():
 
         if t is None:
             plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-            plt.xlabel('Freq [Hz]')
+            plt.xlabel('Freq (Hz)')
             plt.ylabel('Amplitude (abs)')
         else:
             plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
-            plt.xlabel('Time [s]')
-            plt.ylabel('Freq [Hz]')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Freq (Hz)')
             # plt.colorbar(format='%+2.0f')
                 
         plt.title(type(self.transformation).__name__)
@@ -324,12 +324,12 @@ class grader():
 
         if t is None:
             plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-            plt.xlabel('Freq [Hz]')
+            plt.xlabel('Freq (Hz)')
             plt.ylabel('Amplitude (abs)')
         else:
             plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
-            plt.xlabel('Time [s]')
-            plt.ylabel('Freq [Hz]')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Freq (Hz)')
             # plt.colorbar(format='%+2.0f')
                 
         plt.title('Grader')
