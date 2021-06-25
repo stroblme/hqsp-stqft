@@ -55,6 +55,27 @@ class qft_framework():
             self.provider = IBMQ.load_account()
             self.provider = IBMQ.get_provider("ibm-q")
 
+            self.backend = self.provider.get_backend('ibmq_quito')
+            # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+            #                             and not x.configuration().simulator
+            #                             and x.status().operational==True))
+
+            props = self.backend.properties(datetime=datetime.datetime.now())
+        
+            nQubitsAvailable = len(props.qubits)
+            qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
+            qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
+            qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
+
+            print(f"Backend {self.backend} has {nQubitsAvailable} qubits available.")
+            print(f"ReadoutErrors are {qubitReadoutErrors}")
+            print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
+            print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+        else:
+            self.backend = Aer.get_backend('qasm_simulator')
+
+        
+
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
 
@@ -277,24 +298,18 @@ class qft_framework():
             name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
             qc.draw(output='mpl', filename=f'./export/{name}.png')
 
-        if not self.simulation:
-            backend = self.provider.get_backend('ibmq_quito')
-            # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
-            #                             and not x.configuration().simulator
-            #                             and x.status().operational==True))
-        else:
-            backend = Aer.get_backend('qasm_simulator')
         
+
         if not self.suppressPrint:
-            print(f"Transpiling for {backend}")
+            print(f"Transpiling for {self.backend}")
     
-        qc = transpile(qc, backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
+        qc = transpile(qc, self.backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
 
         if not self.suppressPrint:
             print("Executing job...")
     
         #substitute with the desired backend
-        out = execute(qc, backend, shots=self.numOfShots).result()
+        out = execute(qc, self.backend, shots=self.numOfShots).result()
         counts = out.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
