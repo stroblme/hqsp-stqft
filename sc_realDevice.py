@@ -4,7 +4,7 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import signal, transform, primeTime, enableInteractive
+from frontend import grader, signal, transform, primeTime, enableInteractive
 
 enableInteractive()
 
@@ -15,15 +15,25 @@ y = signal(samplingRate=1000, amplification=1, duration=0, nSamples=2**5)
 y.addFrequency(250) # you should choose a frequency matching a multiple of samplingRate/nSamples
 # y.addFrequency(2000)
 
-y.show(subplot=[2,2,1])
+y.show(subplot=[1,3,1])
 
-print("Processing QFT")
+print("Processing Simulated QFT")
 
-qft = transform(qft_framework, minRotation=0.5, suppressPrint=False, simulation=False)
+qft = transform(qft_framework, minRotation=0, suppressPrint=False, simulation=True)
 y_hat, f = qft.forward(y)
-y_hat_p, f_p = qft.postProcess(y_hat, f)
-qft.show(y_hat_p, f_p, subplot=[2,2,2])
+y_hat_sim, f_p = qft.postProcess(y_hat, f)
+qft.show(y_hat_sim, f_p, subplot=[1,3,2])
 
+print("Processing Real QFT")
+
+qft = transform(qft_framework, minRotation=0, suppressPrint=False, simulation=False)
+y_hat, f = qft.forward(y)
+y_hat_real, f_p = qft.postProcess(y_hat, f)
+qft.show(y_hat_real, f_p, subplot=[1,3,3])
+
+grader_inst = grader()
+snr = grader_inst.calculateNoisePower(y_hat_real, y_hat_sim)
+print(f"Calculated snr of {snr}db")
 # windowLength = 2**5 #only 5 qubits allowed
 # overlapFactor=0.5
 # windowType='hann'
