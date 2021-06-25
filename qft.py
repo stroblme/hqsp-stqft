@@ -11,6 +11,7 @@ from math import log2
 from qiskit import *
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT as qiskit_qft
+from qiskit.providers.ibmq import least_busy
 
 from utils import isPow2
 
@@ -43,12 +44,16 @@ def get_fft_from_counts(counts, n_qubits):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, draw=False):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
+        self.simulation = simulation
+        if not simulation:
+            self.provider = IBMQ.load_account()
+            self.provider = IBMQ.get_provider("ibm-q")
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
@@ -267,14 +272,17 @@ class qft_framework():
         qc = self.qft(qc, n_qubits)
         qc.measure_all()
 
-        qasm_backend = Aer.get_backend('qasm_simulator')
-        # real_backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
-        #                                        and not x.configuration().simulator
-        #                                        and x.status().operational==True))
-
+        if not self.simulation:
+            backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+                                        and not x.configuration().simulator
+                                        and x.status().operational==True))
+            print("Running on current least busy device: ", backend)
+            qc = transpile(qc, backend, optimization_level=3)
+        else:
+            backend = Aer.get_backend('qasm_simulator')
 
         #substitute with the desired backend
-        out = execute(qc, qasm_backend, shots=self.numOfShots).result()
+        out = execute(qc, backend, shots=self.numOfShots).result()
         counts = out.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
