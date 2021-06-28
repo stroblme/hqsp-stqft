@@ -44,18 +44,20 @@ def get_fft_from_counts(counts, n_qubits):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False, backend="simu"):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
-        self.simulation = simulation
-        if not simulation:
+
+        if backend == "simu":
+            self.simulation = True
+        if not self.simulation:
             self.provider = IBMQ.load_account()
             self.provider = IBMQ.get_provider("ibm-q")
 
-            self.backend = self.provider.get_backend('ibmq_quito')
+            self.backend = self.provider.get_backend(backend)
             # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
             #                             and not x.configuration().simulator
             #                             and x.status().operational==True))
