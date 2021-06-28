@@ -24,7 +24,10 @@ def disableInteractive():
 def setTheme(dark=False):
     DARK = dark
 
+    mpl_style(dark=DARK, minor_ticks=False)
 
+mpl_style(dark=DARK, minor_ticks=False)
+# plt.style.use('./styles/.mplstyle')
 
 class signal():
     
@@ -185,8 +188,7 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, path=None, ignorePhaseShift=False):
-        mpl_style(dark=DARK, minor_ticks=False)
+    def show(self, subplot=None, path=None, ignorePhaseShift=False, xlabel="Time (excerp) (s)", ylabel="Amplitude"):
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
@@ -202,10 +204,11 @@ class signal():
         else:
             plt.figure(figsize = (10, 6))
 
-        plt.plot(self.t[:minSamples], self.y[:minSamples], 'r')
-        plt.ylabel('Amplitude')
-        plt.xlabel('Time (excerp) (s)')
+        plt.plot(self.t[:minSamples], self.y[:minSamples])
+        plt.ylabel(ylabel)
+        plt.xlabel(xlabel)
         plt.title(type(self).__name__)
+        plt.tight_layout()
 
 
         if path is not None:
@@ -273,8 +276,7 @@ class transform():
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, subplot=None, path=None):
-        mpl_style(dark=DARK, minor_ticks=False)
+    def show(self, y_hat, f, t=None, subplot=None, title="", path=None, xlabel='', ylabel=''):
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -283,23 +285,42 @@ class transform():
             plt.figure(figsize = (10, 6))
 
         if t is None:
-            plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-            plt.xlabel('Freq (Hz)')
-            plt.ylabel('Amplitude (abs)')
+            plt.stem(f, np.abs(y_hat))
+            if xlabel != "":
+                plt.xlabel(xlabel)
+            else:
+                plt.xlabel('Freq (Hz)')
+            if ylabel != "":
+                plt.ylabel(ylabel)
+            else:
+                plt.ylabel('Amplitude (abs)')
         else:
             plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
-            plt.xlabel('Time (s)')
-            plt.ylabel('Freq (Hz)')
+            if xlabel != "":
+                plt.xlabel(xlabel)
+            else:
+                plt.xlabel('Time (s)')
+            if ylabel != "":
+                plt.ylabel(ylabel)
+            else:
+                plt.ylabel('Freq (Hz)')
             # plt.colorbar(format='%+2.0f')
                 
-        plt.title(type(self.transformation).__name__)
+        if title!="":
+            plt.title(title)
+        else:
+            plt.title(type(self.transformation).__name__)
 
+        plt.tight_layout()
         if path is not None:
             plt.savefig(path)
+        
 
 class grader():
-    epsilon=1e-3
-    # def __init__(self):
+    epsilon=1e-10
+    def __init__(self):
+        self.yValues = np.array([])
+        self.xValues = np.array([])
 
     def correlate2d(self, a, b):
         y_hat_diff = scipySignal.correlate2d(a, b, mode='same')
@@ -309,11 +330,15 @@ class grader():
     def calculateNoisePower(self, y, y_ref):
         diff = np.abs(y-y_ref)
 
-        snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff))
+        snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff)+self.epsilon)
 
         return 10*np.log10(snr)
 
-    def show(self, y_hat, f, t=None, subplot=None, path=None):
+    def log(self, ylabel, xlabel):
+        self.yValues = np.append(self.yValues, [ylabel])
+        self.xValues = np.append(self.xValues, [xlabel])    
+
+    def show(self, subplot=None, path=None):
         
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -321,17 +346,10 @@ class grader():
         else:
             plt.figure(figsize = (10, 6))
 
-
-        if t is None:
-            plt.stem(f, np.abs(y_hat), 'b', markerfmt=" ", basefmt="-b")
-            plt.xlabel('Freq (Hz)')
-            plt.ylabel('Amplitude (abs)')
-        else:
-            plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
-            plt.xlabel('Time (s)')
-            plt.ylabel('Freq (Hz)')
-            # plt.colorbar(format='%+2.0f')
-                
+        plt.plot(self.xValues, self.yValues, 'o--')
+        plt.xlabel('Tick')
+        plt.ylabel('SNR')
+        plt.tight_layout()
         plt.title('Grader')
 
         if path is not None:
