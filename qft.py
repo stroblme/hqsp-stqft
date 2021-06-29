@@ -51,8 +51,8 @@ class qft_framework():
         self.minRotation = minRotation
         self.draw = draw
 
-        if backend == "simu":
-            self.simulation = True
+        self.simulation = True if backend == "simu" else False
+        
         if not self.simulation:
             self.provider = IBMQ.load_account()
             self.provider = IBMQ.get_provider("ibm-q")
