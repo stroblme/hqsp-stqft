@@ -24,18 +24,18 @@ print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t, scale='mel', fmax=4000)
-stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2])
+stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2])
 
 
 print("Processing STQFT")
-stqft = transform(stqft_framework, suppressPrint=True)
+stqft = transform(stqft_framework, suppressPrint=True, minRotation=0.2)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel', fmax=4000)
-stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3])
+stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,3,3])
 
-grader_inst = grader()
-y_hat_diff = grader_inst.correlate2d(y_hat_stft_p, y_hat_stqft_p)
-grader_inst.show(y_hat_diff, f_p, t=t_p, subplot=[1,4,4])
+# grader_inst = grader()
+# y_hat_diff = grader_inst.correlate2d(y_hat_stft_p, y_hat_stqft_p)
+# grader_inst.show(y_hat_diff, f_p, t=t_p, subplot=[1,4,4])
 
 
 print("Showing all figures")
