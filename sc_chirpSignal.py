@@ -30,12 +30,12 @@ print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,1])
-
-print("Running reference")
-y_hat_stft, f, t = test_stft_scipy(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
 stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2])
+
+# print("Running reference")
+# y_hat_stft, f, t = test_stft_scipy(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+# y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
+# stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2])
 
 
 print("Processing STQFT")
