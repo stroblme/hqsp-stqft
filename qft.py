@@ -9,6 +9,7 @@ from numpy import array, pi
 from math import log2
 
 from qiskit import *
+from qiskit.providers.aer.backends.aer_simulator import AerSimulator
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT as qiskit_qft
 from qiskit.providers.ibmq import least_busy
@@ -44,20 +45,20 @@ def get_fft_from_counts(counts, n_qubits):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False, backend="simu"):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False, backendName=None):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
 
-        self.simulation = True if backend == "simu" else False
+        self.simulation = simulation
         
-        if not self.simulation:
+        if backendName != None:
             self.provider = IBMQ.load_account()
             self.provider = IBMQ.get_provider("ibm-q")
 
-            self.backend = self.provider.get_backend(backend)
+            self.backend = self.provider.get_backend(backendName)
             # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
             #                             and not x.configuration().simulator
             #                             and x.status().operational==True))
@@ -73,7 +74,13 @@ class qft_framework():
             print(f"ReadoutErrors are {qubitReadoutErrors}")
             print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
             print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+
+            if self.simulation:
+                self.backend = AerSimulator.from_backend(self.backend)
         else:
+            if not self.simulation:
+                print("Setting simulation to 'True', as no backend was specified")
+                self.simulation = True
             self.backend = Aer.get_backend('qasm_simulator')
 
         

@@ -35,7 +35,7 @@ pt = 0
 grader_inst = grader()
 import random
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, backend="simu")
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False)
     y_hat, f = qft.forward(y)
     y_hat_real, f_p = qft.postProcess(y_hat, f)
     ylabel = "Amplitude" if pt == 0 else " "
@@ -55,7 +55,7 @@ pt = 0
 grader_inst = grader()
 import random
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, backend="ibmq_quito")
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName="ibmq_quito")
     y_hat, f = qft.forward(y)
     y_hat_real, f_p = qft.postProcess(y_hat, f)
     ylabel = "Amplitude" if pt == 0 else " "
