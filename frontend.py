@@ -30,8 +30,6 @@ mpl_style(dark=DARK, minor_ticks=False)
 # plt.style.use('./styles/.mplstyle')
 
 class signal():
-    
-
     def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
         """Signal Init
 
@@ -73,7 +71,12 @@ class signal():
 
 
     def loadFile(self, path, zeroPadding=True):
+        """Loads an audio sample from file
 
+        Args:
+            path ([type]): [description]
+            zeroPadding (bool, optional): [description]. Defaults to True.
+        """
         samplingRate = librosa.get_samplerate(path)
         if samplingRate < self.samplingRate:
             print(f'Warning: provided sampling rate ({self.samplingRate}) is higher than the one of the audio ({samplingRate}). Will upsample.')
@@ -102,6 +105,11 @@ class signal():
         # all_label.append(label)
 
     def setSamplingRate(self, samplingRate):
+        """Sets the sampling rate for the current signal instance
+
+        Args:
+            samplingRate ([type]): [description]
+        """
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
 
@@ -204,7 +212,7 @@ class signal():
         else:
             plt.figure(figsize = (10, 6))
 
-        plt.plot(self.t[:minSamples], self.y[:minSamples])
+        plt.plot(self.t[:minSamples], self.y[:minSamples], '.-')
         plt.ylabel(ylabel)
         plt.xlabel(xlabel)
         plt.title(type(self).__name__)
@@ -239,9 +247,6 @@ class transform():
 
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
-        # abs the amplitude
-        # y_hat = np.abs(y_hat * np.conj(y_hat))
-
         # get the one side frequency
         if autopower:
             y_hat = np.abs(y_hat)
