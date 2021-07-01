@@ -33,7 +33,7 @@ print("Processing Real QFT")
 mrot = 0
 pt = 0
 grader_inst = grader()
-import random
+
 while mrot <= PI/2:
     qft = transform(qft_framework, minRotation=mrot, suppressPrint=False)
     y_hat, f = qft.forward(y)
