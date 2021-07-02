@@ -425,7 +425,8 @@ class export():
         pltInstance.savefig(path)
 
     def safeDetails(self):
-
+        path = self.getBasePath() + ".p"
+        pickle.dump(self.details, open(path, "wb"))
 
     def doExport(self):
         self.createTopicOnDemand()
