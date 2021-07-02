@@ -6,6 +6,7 @@ from math import log, ceil, floor, sqrt
 from copy import deepcopy
 import os
 import pickle
+import git
 
 import librosa
 
@@ -284,7 +285,7 @@ class transform():
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, subplot=None, title="", safe=None, xlabel='', ylabel=''):
+    def show(self, y_hat, f, t=None, subplot=None, title="", xlabel='', ylabel=''):
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -320,8 +321,8 @@ class transform():
             plt.title(type(self.transformation).__name__)
 
         plt.tight_layout()
-        if safe is not None:
-            exportData(safe["topic"], safe["name"], safe["details"])
+        
+        return plt
 
 class grader():
     epsilon=1e-10
@@ -377,10 +378,12 @@ class export():
     QCNAME = "qcname"
     QCNOISE = "qcnoise"
     QCCIRCUIT = "qccircuit"
+    SIGNAL = "SIGNAL"
     SIGNALPARAM = "signalparam"
     TRANSFORMPARAM = "transformparam"
     PLOTINST = "plotinst"
     PLOTPARAM = "plotparam"
+    GITHASH = "githash"
 
 
     def __init__(self, topic=None, identifier=None) -> None:
@@ -400,6 +403,11 @@ class export():
         for key, value in kwargs.items():
             self.details[dkey][key] = value
 
+    def guttenberg(self, fhandle, **params):
+        self.setParam(self, dkey=type(fhandle).__name__, kwargs=params)
+
+        return fhandle(**params)
+
     def getBasePath(self):
         path = self.DATADIRECTORY + self.details[self.TOPIC] + "/" + self.details[self.IDENTIFIER]
 
@@ -418,18 +426,24 @@ class export():
         except Exception as e:
             print(e)
 
+    def getGitCommitId(self):
+        repo = git.Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha
+        self.details[self.GITHASH] = sha
+
     def safePlot(self):
         pltInstance = self.details[self.PLOTINST]
 
         path = self.getBasePath() + ".png"
-        pltInstance.savefig(path)
+        # pltInstance.savefig(path)
 
     def safeDetails(self):
         path = self.getBasePath() + ".p"
-        pickle.dump(self.details, open(path, "wb"))
+        # pickle.dump(self.details, open(path, "wb"))
 
     def doExport(self):
         self.createTopicOnDemand()
+        self.getGitCommitId()
 
         self.safePlot()
         self.safeDetails()
