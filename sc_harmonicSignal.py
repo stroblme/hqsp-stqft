@@ -22,7 +22,7 @@ print("Processing DFT")
 try:
     dft = transform(dft_framework)
     y_hat, f = dft.forward(y)
-    dft.show(y_hat, f)
+    dft.show(y_hat, f, )
 except Exception as e:
     print(e)
 

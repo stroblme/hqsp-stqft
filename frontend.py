@@ -4,6 +4,8 @@ from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
 from math import log, ceil, floor, sqrt
 from copy import deepcopy
+import os
+import pickle
 
 import librosa
 
@@ -12,6 +14,7 @@ from qbstyles import mpl_style
 COLORMAP = 'plasma'
 SHADING='nearest'
 DARK=True
+
 
 def enableInteractive():
     global plt
@@ -281,7 +284,7 @@ class transform():
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, subplot=None, title="", path=None, xlabel='', ylabel=''):
+    def show(self, y_hat, f, t=None, subplot=None, title="", safe=None, xlabel='', ylabel=''):
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -317,9 +320,8 @@ class transform():
             plt.title(type(self.transformation).__name__)
 
         plt.tight_layout()
-        if path is not None:
-            plt.savefig(path)
-        
+        if safe is not None:
+            exportData(safe["topic"], safe["name"], safe["details"])
 
 class grader():
     epsilon=1e-10
@@ -365,3 +367,69 @@ def primeTime():
     disableInteractive()
     input("Press any key to close all figures\n")
     plt.close('all')
+
+class export():
+    DATADIRECTORY = './data'
+
+    TOPIC = "topic"
+    DESCRIPTION = "description"
+    IDENTIFIER = "identifier"
+    QCNAME = "qcname"
+    QCNOISE = "qcnoise"
+    QCCIRCUIT = "qccircuit"
+    SIGNALPARAM = "signalparam"
+    TRANSFORMPARAM = "transformparam"
+    PLOTINST = "plotinst"
+    PLOTPARAM = "plotparam"
+
+
+    def __init__(self, topic=None, identifier=None) -> None:
+        if topic is not None:
+            self.setData(self.TOPIC, identifier)
+        if identifier is not None:
+            self.setData(self.IDENTIFIER, identifier)
+
+        self.details = dict()
+
+    def setData(self, dkey, data):
+        self.details[dkey] = data
+
+    def setParam(self, dkey, **kwargs):
+        self.details[dkey] = dict()
+
+        for key, value in kwargs.items():
+            self.details[dkey][key] = value
+
+    def getBasePath(self):
+        path = self.DATADIRECTORY + self.details[self.TOPIC] + "/" + self.details[self.IDENTIFIER]
+
+    def createTopicOnDemand(self):
+        content = os.listdir(self.DATADIRECTORY)
+
+        topic = self.details[self.TOPIC]
+
+        for c in content:
+            if c == topic:
+                print(f"Topic {topic} already exists.")
+                return
+
+        try:
+            os.mkdir(self.DATADIRECTORY+"/"+c)
+        except Exception as e:
+            print(e)
+
+    def safePlot(self):
+        pltInstance = self.details[self.PLOTINST]
+
+        path = self.getBasePath() + ".png"
+        pltInstance.savefig(path)
+
+    def safeDetails(self):
+
+
+    def doExport(self):
+        self.createTopicOnDemand()
+
+        if 
+
+
