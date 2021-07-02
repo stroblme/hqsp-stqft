@@ -404,7 +404,7 @@ class export():
         for key, value in kwargs.items():
             self.details[dkey][key] = value
 
-    def guttenberg(self, fhandle, **params):
+    def nsa(self, fhandle, **params):
         self.setParam(self, dkey=type(fhandle).__name__, kwargs=params)
 
         return fhandle(**params)
@@ -420,11 +420,12 @@ class export():
 
         for c in content:
             if c == topic:
-                print(f"Topic {topic} already exists.")
+                print(f"Topic {topic} already exists in {self.DATADIRECTORY}")
                 return
 
         try:
             os.mkdir(self.DATADIRECTORY+"/"+topic)
+            plot(f"Folder {topic} created in {self.DATADIRECTORY}")
         except Exception as e:
             print(e)
 
