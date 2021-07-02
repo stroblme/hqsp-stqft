@@ -431,6 +431,8 @@ class export():
     def doExport(self):
         self.createTopicOnDemand()
 
-        if 
+        self.safePlot()
+        self.safeDetails()
+
 
 
