@@ -1,3 +1,4 @@
+from math import exp
 from matplotlib.pyplot import draw, text
 from numpy.random import random
 from qiskit.providers import backend
@@ -6,19 +7,27 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import grader, signal, transform, primeTime, enableInteractive
+from frontend import grader, signal, transform, primeTime, enableInteractive, export
 from utils import PI
 
 enableInteractive()
+TOPIC = "harmonic_realDevice"
 
 print("Initializing Harmonic Signal")
 
+y_export = export(topic=TOPIC, identifier="pure_signal")
 y = signal(samplingRate=1000, amplification=1, duration=0, nSamples=2**4)
 
 y.addFrequency(250) # you should choose a frequency matching a multiple of samplingRate/nSamples
 y.addFrequency(125) # you should choose a frequency matching a multiple of samplingRate/nSamples
 
-y.show(subplot=[2,9,1])
+y_export.setData(export.SIGNAL, y)
+
+plt = y.show(subplot=[2,9,1])
+
+y_export.setData(export.PLOTINST, plt)
+
+y_export.doExport()
 
 print("Processing FFT")
 
