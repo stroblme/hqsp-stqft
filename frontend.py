@@ -200,7 +200,7 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, path=None, ignorePhaseShift=False, xlabel="Time (excerp) (s)", ylabel="Amplitude"):
+    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (excerp) (s)", ylabel="Amplitude"):
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
@@ -223,8 +223,7 @@ class signal():
         plt.tight_layout()
 
 
-        if path is not None:
-            plt.savefig(path)
+        return plt
 
 class transform():
     def __init__(self, transformation, **kwargs):
@@ -387,12 +386,13 @@ class export():
 
 
     def __init__(self, topic=None, identifier=None) -> None:
+        self.details = dict()
+
         if topic is not None:
-            self.setData(self.TOPIC, identifier)
+            self.setData(self.TOPIC, topic)
         if identifier is not None:
             self.setData(self.IDENTIFIER, identifier)
 
-        self.details = dict()
 
     def setData(self, dkey, data):
         self.details[dkey] = data
@@ -409,7 +409,8 @@ class export():
         return fhandle(**params)
 
     def getBasePath(self):
-        path = self.DATADIRECTORY + self.details[self.TOPIC] + "/" + self.details[self.IDENTIFIER]
+        path = self.DATADIRECTORY + "/" + self.details[self.TOPIC] + "/" + self.details[self.IDENTIFIER]
+        return path
 
     def createTopicOnDemand(self):
         content = os.listdir(self.DATADIRECTORY)
@@ -422,7 +423,7 @@ class export():
                 return
 
         try:
-            os.mkdir(self.DATADIRECTORY+"/"+c)
+            os.mkdir(self.DATADIRECTORY+"/"+topic)
         except Exception as e:
             print(e)
 
@@ -435,11 +436,14 @@ class export():
         pltInstance = self.details[self.PLOTINST]
 
         path = self.getBasePath() + ".png"
-        # pltInstance.savefig(path)
+        pltInstance.savefig(path)
 
     def safeDetails(self):
         path = self.getBasePath() + ".p"
-        # pickle.dump(self.details, open(path, "wb"))
+        tmpDetails = self.details
+        tmpDetails.pop(self.PLOTINST)   #can't export module
+
+        pickle.dump(tmpDetails, open(path, "wb"))
 
     def doExport(self):
         self.createTopicOnDemand()
