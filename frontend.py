@@ -202,6 +202,8 @@ class signal():
     
     def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (excerp) (s)", ylabel="Amplitude"):
 
+        fighandle = plt.figure()
+
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
         else:
@@ -223,7 +225,7 @@ class signal():
         plt.tight_layout()
 
 
-        return plt
+        return fighandle
 
 class transform():
     def __init__(self, transformation, **kwargs):
@@ -285,6 +287,7 @@ class transform():
         return np.swapaxes(y_hat, 0, 1)
 
     def show(self, y_hat, f, t=None, subplot=None, title="", xlabel='', ylabel=''):
+        fighandle = plt.figure()
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -321,7 +324,7 @@ class transform():
 
         plt.tight_layout()
         
-        return plt
+        return fighandle
 
 class grader():
     epsilon=1e-10
@@ -379,7 +382,7 @@ class export():
     SIGNAL = "SIGNAL"
     SIGNALPARAM = "signalparam"
     TRANSFORMPARAM = "transformparam"
-    PLOTINST = "plotinst"
+    PLOTHANDLE = "plothandle"
     PLOTPARAM = "plotparam"
     GRADERX = "graderx"
     GRADERY = "gradery"
@@ -445,17 +448,15 @@ class export():
         self.details[self.GITHASH] = sha
 
     def safePlot(self):
-        pltInstance = self.details[self.PLOTINST]
+        pltInstance = self.details[self.PLOTHANDLE]
 
         path = self.getBasePath() + ".png"
         pltInstance.savefig(path)
 
     def safeDetails(self):
         path = self.getBasePath() + ".p"
-        tmpDetails = self.details
-        tmpDetails.pop(self.PLOTINST)   #can't export module
 
-        pickle.dump(tmpDetails, open(path, "wb"))
+        pickle.dump(self.details, open(path, "wb"))
 
     def doExport(self):
         self.createTopicOnDemand()
