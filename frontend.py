@@ -427,6 +427,16 @@ class export():
         except Exception as e:
             print(e)
 
+    @staticmethod
+    def checkWorkingTree():
+        repo = git.Repo(path=export.DATADIRECTORY)
+
+        hcommit = repo.head.commit
+        d = hcommit.diff(None)
+        if len(d) > 0:
+            input(f"Working Tree in {export.DATADIRECTORY} is dirty. You might want to commit first")
+
+
     def getGitCommitId(self):
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha

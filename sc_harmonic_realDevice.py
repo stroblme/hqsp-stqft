@@ -12,6 +12,7 @@ from utils import PI
 
 enableInteractive()
 TOPIC = "harmonic_realDevice"
+export.checkWorkingTree()
 
 print("Initializing Harmonic Signal")
 
@@ -22,6 +23,8 @@ y.addFrequency(250) # you should choose a frequency matching a multiple of sampl
 y.addFrequency(125) # you should choose a frequency matching a multiple of samplingRate/nSamples
 
 y_export.setData(export.SIGNAL, y)
+
+y_export.setData(export.DESCRIPTION, "Harmonic Signal with 125 and 250 Hz at 1kHz over 2^4 samples")
 
 plt = y.show(subplot=[2,9,1])
 
