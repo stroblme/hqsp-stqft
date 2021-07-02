@@ -345,7 +345,7 @@ class grader():
         self.yValues = np.append(self.yValues, [ylabel])
         self.xValues = np.append(self.xValues, [xlabel])    
 
-    def show(self, subplot=None, path=None):
+    def show(self, subplot=None):
         
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -359,8 +359,7 @@ class grader():
         plt.tight_layout()
         plt.title('Grader')
 
-        if path is not None:
-            plt.savefig(path)
+        return plt
 
 def primeTime():
     plt.show()
@@ -382,6 +381,8 @@ class export():
     TRANSFORMPARAM = "transformparam"
     PLOTINST = "plotinst"
     PLOTPARAM = "plotparam"
+    GRADERX = "graderx"
+    GRADERY = "gradery"
     GITHASH = "githash"
 
 
