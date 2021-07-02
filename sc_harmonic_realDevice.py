@@ -26,7 +26,7 @@ plt = y.show(subplot=[2,9,1])
 exp = export(topic=TOPIC, identifier="signal")
 exp.setData(export.SIGNAL, y)
 exp.setData(export.DESCRIPTION, "Harmonic Signal, 125 and 250 Hz at 1kHz, 2^4 samples")
-exp.setData(export.PLOTINST, plt)
+exp.setData(export.PLOTHANDLE, plt)
 exp.doExport()
 
 print("Processing FFT")
@@ -39,7 +39,7 @@ plt = fft.show(y_hat_ideal, f_p, subplot=[2,9,10], title="FFT (ref)")
 exp = export(topic=TOPIC, identifier="fft")
 exp.setData(export.SIGNAL, y_hat_ideal)
 exp.setData(export.DESCRIPTION, "FFT, default param, post processed")
-exp.setData(export.PLOTINST, plt)
+exp.setData(export.PLOTHANDLE, plt)
 exp.doExport()
 
 print("Processing Simulated QFT")
@@ -61,10 +61,10 @@ while mrot <= PI/2:
     pt += 1
     mrot = PI/2**(5-pt)
 
-    exp = export(topic=TOPIC, identifier="qft_sim_mr:{mrot:.2f}")
+    exp = export(topic=TOPIC, identifier=f"qft_sim_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real)
     exp.setData(export.DESCRIPTION, f"QFT, simulated, mrot={mrot}, post processed")
-    exp.setData(export.PLOTINST, plt)
+    exp.setData(export.PLOTHANDLE, plt)
     exp.doExport()
 
 plt = grader_inst.show(subplot=[2,9,9])
@@ -73,7 +73,7 @@ exp = export(topic=TOPIC, identifier="grader_qft_sim")
 exp.setData(export.GRADERX, grader_inst.xValues)
 exp.setData(export.GRADERY, grader_inst.yValues)
 exp.setData(export.DESCRIPTION, "Grader, qft_sim")
-exp.setData(export.PLOTINST, plt)
+exp.setData(export.PLOTHANDLE, plt)
 exp.doExport()
 
 print("Processing Real QFT")
@@ -95,10 +95,10 @@ while mrot <= PI/2:
     pt += 1
     mrot = PI/2**(5-pt)
 
-    exp = export(topic=TOPIC, identifier=f"qft_sim_mr:{mrot:.2f}")
+    exp = export(topic=TOPIC, identifier=f"qft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real)
     exp.setData(export.DESCRIPTION, f"QFT, simulated, ibmq_quito noise, mrot={mrot}, post processed")
-    exp.setData(export.PLOTINST, plt)
+    exp.setData(export.PLOTHANDLE, plt)
     exp.doExport()
 
 plt = grader_inst.show(subplot=[2,9,18])
@@ -107,7 +107,7 @@ exp = export(topic=TOPIC, identifier="grader_qft_real")
 exp.setData(export.GRADERX, grader_inst.xValues)
 exp.setData(export.GRADERY, grader_inst.yValues)
 exp.setData(export.DESCRIPTION, "Grader, qft_real")
-exp.setData(export.PLOTINST, plt)
+exp.setData(export.PLOTHANDLE, plt)
 exp.doExport()
 
 # grader_inst = grader()
