@@ -200,7 +200,7 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (excerp) (s)", ylabel="Amplitude"):
+    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (s)", ylabel="Amplitude"):
 
         fighandle = plt.figure()
 
