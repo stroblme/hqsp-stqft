@@ -7,6 +7,7 @@ from copy import deepcopy
 import os
 import pickle
 import git
+from matplotlib.gridspec import GridSpec
 
 import librosa
 
@@ -452,6 +453,10 @@ class export():
         pltInstance = self.details[self.PLOTHANDLE]
 
         path = self.getBasePath() + ".png"
+
+        gs = GridSpec(1,1,figure=pltInstance)[0]
+        pltInstance.axes[0].set_subplotspec(gs)
+
         pltInstance.savefig(path)
 
     def safeDetails(self):
