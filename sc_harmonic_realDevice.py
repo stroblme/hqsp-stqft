@@ -87,7 +87,7 @@ while mrot <= PI/2:
     y_hat, f = qft.forward(y)
     y_hat_real, f_p = qft.postProcess(y_hat, f)
     ylabel = "Amplitude" if pt == 0 else " "
-    qft.show(y_hat_real, f_p, subplot=[2,9,pt+12], title=f"QFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
+    plt = qft.show(y_hat_real, f_p, subplot=[2,9,pt+12], title=f"QFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
     snr = grader_inst.calculateNoisePower(y_hat_real, y_hat_ideal)
     print(f"Calculated an snr of {snr} db")
     grader_inst.log(snr, mrot)
