@@ -349,6 +349,7 @@ class grader():
         self.xValues = np.append(self.xValues, [xlabel])    
 
     def show(self, subplot=None):
+        fighandle = plt.figure()
         
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -362,7 +363,7 @@ class grader():
         plt.tight_layout()
         plt.title('Grader')
 
-        return plt
+        return fighandle
 
 def primeTime():
     plt.show()
