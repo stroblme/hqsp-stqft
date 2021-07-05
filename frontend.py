@@ -439,7 +439,7 @@ class export():
         hcommit = repo.head.commit
         d = hcommit.diff(None)
         if len(d) > 0:
-            input(f"Working Tree in {export.DATADIRECTORY} is dirty. You might want to commit first")
+            input(f"Working Tree in {export.DATADIRECTORY} is dirty. You might want to commit first. Press any key to continue regardless")
 
 
     def getGitCommitId(self):
@@ -456,7 +456,7 @@ class export():
     def safeDetails(self):
         path = self.getBasePath() + ".p"
 
-        pickle.dump(self.details, open(path, "wb"))
+        pickle.dump(self.details, open(path, "wb"), protocol=pickle.HIGHEST_PROTOCOL)
 
     def doExport(self):
         self.createTopicOnDemand()
