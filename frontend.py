@@ -203,7 +203,7 @@ class signal():
     
     def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (s)", ylabel="Amplitude"):
 
-        fighandle = plt.figure()
+        # fighandle = plt.figure()
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
@@ -224,7 +224,7 @@ class signal():
         plt.xlabel(xlabel)
         plt.title(type(self).__name__)
         plt.tight_layout()
-
+        fighandle = plt.gcf()
 
         return fighandle
 
@@ -288,7 +288,7 @@ class transform():
         return np.swapaxes(y_hat, 0, 1)
 
     def show(self, y_hat, f, t=None, subplot=None, title="", xlabel='', ylabel=''):
-        fighandle = plt.figure()
+        # fighandle = plt.figure()
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -324,7 +324,8 @@ class transform():
             plt.title(type(self.transformation).__name__)
 
         plt.tight_layout()
-        
+        fighandle = plt.gcf()
+
         return fighandle
 
 class grader():
@@ -350,7 +351,7 @@ class grader():
         self.xValues = np.append(self.xValues, [xlabel])    
 
     def show(self, subplot=None):
-        fighandle = plt.figure()
+        # fighandle = plt.figure()
         
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -363,6 +364,7 @@ class grader():
         plt.ylabel('SNR')
         plt.tight_layout()
         plt.title('Grader')
+        fighandle = plt.gcf()
 
         return fighandle
 
@@ -468,7 +470,7 @@ class export():
         self.createTopicOnDemand()
         self.getGitCommitId()
 
-        self.safePlot()
+        # self.safePlot()
         self.safeDetails()
 
 
