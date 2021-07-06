@@ -94,7 +94,7 @@ class frontend():
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
         else:
-            plt.pcolormesh(x2Data, x1Data, yData, cmap=COLORMAP, shading=SHADING)
+            plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING)
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
                 
