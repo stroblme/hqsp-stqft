@@ -450,21 +450,6 @@ class grader(frontend):
         self.xValues = np.append(self.xValues, [xlabel])    
 
     def show(self, subplot=None):
-        # fighandle = plt.figure()
-        
-        # if subplot is not None:
-        #     plt.subplot(*subplot,frameon=False)
-        #     plt.subplots_adjust(wspace=0.58)
-        # else:
-        #     plt.figure(figsize = (10, 6))
-
-        # plt.plot(self.xValues, self.yValues, 'o--')
-        # plt.xlabel('Tick')
-        # plt.ylabel('SNR')
-        # plt.tight_layout()
-        # plt.title('Grader')
-        # fighandle = plt.gca()
-
         yData = self.yValues
         x1Data = self.xValues
         title = 'Grader'
@@ -473,10 +458,6 @@ class grader(frontend):
         x2Data = None
 
         return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot, plotType='plot')
-
-
-        return fighandle
-
 
 
 class export():
