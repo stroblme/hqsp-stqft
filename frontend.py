@@ -432,7 +432,7 @@ class export():
 
         try:
             os.mkdir(self.DATADIRECTORY+"/"+topic)
-            plot(f"Folder {topic} created in {self.DATADIRECTORY}")
+            print(f"Folder {topic} created in {self.DATADIRECTORY}")
         except Exception as e:
             print(e)
 
