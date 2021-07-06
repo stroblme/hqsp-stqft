@@ -13,30 +13,69 @@ import librosa
 
 from qbstyles import mpl_style
 
-COLORMAP = 'plasma'
-SHADING='nearest'
-DARK=True
-
-
-def enableInteractive():
-    global plt
-    plt.ion()
-
-def disableInteractive():
-    global plt
-    plt.ioff()
-
-def setTheme(dark=False):
-    DARK = dark
-
-    mpl_style(dark=DARK, minor_ticks=False)
-
-mpl_style(dark=DARK, minor_ticks=False)
-# plt.style.use('./styles/.mplstyle')
 
 class frontend():
-    def __init__(self) -> None:
-        pass
+    COLORMAP = 'plasma'
+    SHADING='nearest'
+    DARK=True
+    clickEventHandled = True
+
+    @staticmethod
+    def enableInteractive():
+        global plt
+        plt.ion()
+
+    @staticmethod
+    def disableInteractive():
+        global plt
+        plt.ioff()
+
+    @staticmethod
+    def setTheme(dark=True):
+        frontend.DARK = dark
+
+        mpl_style(dark=frontend.DARK, minor_ticks=False)
+
+    @staticmethod
+    def primeTime():
+        plt.show()
+        frontend.disableInteractive()
+        input("Press any key to close all figures\n")
+        plt.close('all')
+
+    @staticmethod
+    def on_click(event):
+        """Enlarge or restore the selected axis."""
+
+        if not frontend.clickEventHandled:
+            return
+
+        ax = event.inaxes
+        if ax is not None:
+            # Occurs when a region not in an axis is clicked...
+            if int(event.button) is 1:
+                # On left click, zoom the selected axes
+                ax._orig_position = ax.get_position()
+                ax.set_position([0.1, 0.1, 0.85, 0.85])
+                for axis in event.canvas.figure.axes:
+                    # Hide all the other axes...
+                    if axis is not ax:
+                        axis.set_visible(False)
+                event.canvas.draw()
+
+            elif int(event.button) is 3:
+                # On right click, restore the axes
+                try:
+                    ax.set_position(ax._orig_position)
+                    for axis in event.canvas.figure.axes:
+                        axis.set_visible(True)
+                except AttributeError:
+                    # If we haven't zoomed, ignore...
+                    pass
+
+                event.canvas.draw()
+
+        frontend.clickEventHandled = True
 
     def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None):
         # fighandle = plt.figure()
@@ -428,11 +467,7 @@ class grader(frontend):
 
         return fighandle
 
-def primeTime():
-    plt.show()
-    disableInteractive()
-    input("Press any key to close all figures\n")
-    plt.close('all')
+
 
 class export():
     DATADIRECTORY = './data'
@@ -533,5 +568,8 @@ class export():
         # self.safePlot()
         self.safeDetails()
 
+# ----------------------------------------------------------
+# On-Import region
+# ----------------------------------------------------------
 
-
+frontend.setTheme()
