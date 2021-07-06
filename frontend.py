@@ -38,8 +38,7 @@ class frontend():
 
     @staticmethod
     def primeTime():
-        fig = plt.gcf()
-        fig.canvas.mpl_connect('button_press_event', frontend.on_click)
+        
 
         plt.show()
         frontend.disableInteractive()
@@ -89,6 +88,11 @@ class frontend():
         else:
             plt.figure(figsize = (10, 6))
 
+        fig = plt.gcf()
+        fig.set_size_inches(16,9)
+        fig.canvas.mpl_connect('button_press_event', frontend.on_click)
+        plt.tight_layout()
+
         if x2Data is None:
             plt.stem(x1Data, yData)
             plt.xlabel(xlabel)
@@ -100,7 +104,6 @@ class frontend():
                 
         plt.title(title)
 
-        plt.tight_layout()
         return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
 class signal(frontend):
