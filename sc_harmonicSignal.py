@@ -1,9 +1,9 @@
 from qft import qft_framework
 from dft import dft_framework
 from fft import fft_framework
-from frontend import signal, transform, primeTime, enableInteractive
+from frontend import frontend, signal, transform, primeTime, enableInteractive
 
-enableInteractive()
+frontend.enableInteractive()
 
 print("Initializing Signal")
 

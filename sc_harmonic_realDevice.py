@@ -7,10 +7,10 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import grader, signal, transform, primeTime, enableInteractive, export
+from frontend import frontend, grader, signal, transform, primeTime, enableInteractive, export
 from utils import PI
 
-enableInteractive()
+frontend.enableInteractive()
 TOPIC = "harmonic_realDevice"
 export.checkWorkingTree()
 

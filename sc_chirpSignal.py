@@ -3,10 +3,10 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import signal, transform, primeTime, enableInteractive
+from frontend import frontend, signal, transform, primeTime, enableInteractive
 from tests import *
 
-enableInteractive()
+frontend.enableInteractive()
 
 windowLength = 2**7
 overlapFactor=0.5
