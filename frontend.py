@@ -99,6 +99,7 @@ class frontend():
                 ax.set_yscale('log')
                 plt.autoscale(False)
                 plt.ylim(0.1,1)
+                plt.xlim(min(x1Data), max(x1Data))
 
             if plotType == 'stem':
                 plt.stem(x1Data, yData)
