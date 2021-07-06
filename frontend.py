@@ -378,7 +378,7 @@ class transform(frontend):
 
         return fighandle
 
-class grader():
+class grader(frontend):
     epsilon=1e-10
     def __init__(self):
         self.yValues = np.array([])
@@ -403,18 +403,28 @@ class grader():
     def show(self, subplot=None):
         # fighandle = plt.figure()
         
-        if subplot is not None:
-            plt.subplot(*subplot,frameon=False)
-            plt.subplots_adjust(wspace=0.58)
-        else:
-            plt.figure(figsize = (10, 6))
+        # if subplot is not None:
+        #     plt.subplot(*subplot,frameon=False)
+        #     plt.subplots_adjust(wspace=0.58)
+        # else:
+        #     plt.figure(figsize = (10, 6))
 
-        plt.plot(self.xValues, self.yValues, 'o--')
-        plt.xlabel('Tick')
-        plt.ylabel('SNR')
-        plt.tight_layout()
-        plt.title('Grader')
-        fighandle = plt.gca()
+        # plt.plot(self.xValues, self.yValues, 'o--')
+        # plt.xlabel('Tick')
+        # plt.ylabel('SNR')
+        # plt.tight_layout()
+        # plt.title('Grader')
+        # fighandle = plt.gca()
+
+        yData = self.yValues
+        x1Data = self.xValues
+        title = 'Grader'
+        xlabel = 'Tick'
+        ylabel = 'SNR'
+        x2Data = None
+
+        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot)
+
 
         return fighandle
 
@@ -501,15 +511,15 @@ class export():
         sha = repo.head.object.hexsha
         self.details[self.GITHASH] = sha
 
-    def safePlot(self):
-        pltInstance = self.details[self.PLOTHANDLE]
+    # def safePlot(self):
+    #     pltInstance = self.details[self.PLOTHANDLE]
 
-        path = self.getBasePath() + ".png"
+    #     path = self.getBasePath() + ".png"
 
-        gs = GridSpec(1,1,figure=pltInstance)[0]
-        pltInstance.axes[0].set_subplotspec(gs)
+    #     gs = GridSpec(1,1,figure=pltInstance)[0]
+    #     pltInstance.axes[0].set_subplotspec(gs)
 
-        pltInstance.savefig(path)
+    #     pltInstance.savefig(path)
 
     def safeDetails(self):
         path = self.getBasePath() + ".p"
