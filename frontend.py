@@ -224,7 +224,7 @@ class signal():
         plt.xlabel(xlabel)
         plt.title(type(self).__name__)
         plt.tight_layout()
-        fighandle = plt.gcf()
+        fighandle = plt.gca()
 
         return fighandle
 
@@ -324,7 +324,7 @@ class transform():
             plt.title(type(self.transformation).__name__)
 
         plt.tight_layout()
-        fighandle = plt.gcf()
+        fighandle = plt.gca()
 
         return fighandle
 
@@ -364,7 +364,7 @@ class grader():
         plt.ylabel('SNR')
         plt.tight_layout()
         plt.title('Grader')
-        fighandle = plt.gcf()
+        fighandle = plt.gca()
 
         return fighandle
 
