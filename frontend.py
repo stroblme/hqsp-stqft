@@ -79,7 +79,7 @@ class frontend():
 
         frontend.clickEventHandled = True
 
-    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None, plotType='stem'):
+    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None, plotType='stem', log=False):
         # fighandle = plt.figure()
 
         if subplot is not None:
@@ -94,10 +94,17 @@ class frontend():
         plt.tight_layout()
 
         if x2Data is None:
+            if log:
+                ax = plt.gca()
+                ax.set_yscale('log')
+                plt.autoscale(False)
+                plt.ylim(0.1,1)
+
             if plotType == 'stem':
                 plt.stem(x1Data, yData)
             else:
                 plt.plot(x1Data, yData, 'o--')
+
 
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
@@ -439,10 +446,12 @@ class grader(frontend):
         return y_hat_diff
 
     def calculateNoisePower(self, y, y_ref):
-        diff = np.abs(y-y_ref)
+        diff = np.abs(np.power(y,2)-np.power(y_ref,2))
 
-        snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff)+self.epsilon)
+        # snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff)+self.epsilon)
+        snr = 1-(1/np.sum(np.power(y_ref,2)) * np.sum(diff))
 
+        return snr
         return 10*np.log10(snr)
 
     def log(self, ylabel, xlabel):
@@ -457,7 +466,7 @@ class grader(frontend):
         ylabel = 'SNR'
         x2Data = None
 
-        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot, plotType='plot')
+        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot, plotType='plot', log=True)
 
 
 class export():
