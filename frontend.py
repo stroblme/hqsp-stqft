@@ -79,7 +79,7 @@ class frontend():
 
         frontend.clickEventHandled = True
 
-    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None):
+    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None, plotType='stem'):
         # fighandle = plt.figure()
 
         if subplot is not None:
@@ -94,7 +94,11 @@ class frontend():
         plt.tight_layout()
 
         if x2Data is None:
-            plt.stem(x1Data, yData)
+            if plotType == 'stem':
+                plt.stem(x1Data, yData)
+            else:
+                plt.plot(x1Data, yData, 'o--')
+
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
         else:
@@ -468,7 +472,7 @@ class grader(frontend):
         ylabel = 'SNR'
         x2Data = None
 
-        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot)
+        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot, plotType='plot')
 
 
         return fighandle
