@@ -38,6 +38,9 @@ class frontend():
 
     @staticmethod
     def primeTime():
+        fig = plt.gcf()
+        fig.canvas.mpl_connect('button_press_event', frontend.on_click)
+
         plt.show()
         frontend.disableInteractive()
         input("Press any key to close all figures\n")
