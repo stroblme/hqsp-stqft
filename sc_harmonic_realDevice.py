@@ -7,7 +7,7 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import frontend, grader, signal, transform, primeTime, enableInteractive, export
+from frontend import frontend, grader, signal, transform, export
 from utils import PI
 
 frontend.enableInteractive()
@@ -140,4 +140,4 @@ exp.doExport()
 
 
 print("Showing all figures")
-primeTime() # Show all with blocking
+frontend.primeTime() # Show all with blocking

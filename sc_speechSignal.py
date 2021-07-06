@@ -3,7 +3,7 @@ from dft import dft_framework
 from fft import fft_framework
 from stft import stft_framework
 from stqft import stqft_framework
-from frontend import frontend, signal, transform, primeTime, enableInteractive, grader
+from frontend import frontend, signal, transform
 
 from tests import *
 
@@ -39,4 +39,4 @@ stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,3,3])
 
 
 print("Showing all figures")
-primeTime() # Show all with blocking
+frontend.primeTime() # Show all with blocking

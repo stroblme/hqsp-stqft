@@ -1,7 +1,7 @@
 from qft import qft_framework
 from dft import dft_framework
 from fft import fft_framework
-from frontend import frontend, signal, transform, primeTime, enableInteractive
+from frontend import frontend, signal, transform
 
 frontend.enableInteractive()
 
@@ -40,4 +40,4 @@ qft.show(y_hat, f)
 
 
 print("Showing all figures")
-primeTime() # Show all with blocking
+frontend.primeTime() # Show all with blocking
