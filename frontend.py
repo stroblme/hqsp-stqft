@@ -34,7 +34,34 @@ def setTheme(dark=False):
 mpl_style(dark=DARK, minor_ticks=False)
 # plt.style.use('./styles/.mplstyle')
 
-class signal():
+class frontend():
+    def __init__(self) -> None:
+        pass
+
+    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None):
+        # fighandle = plt.figure()
+
+        if subplot is not None:
+            plt.subplot(*subplot,frameon=False)
+            plt.subplots_adjust(wspace=0.58)
+        else:
+            plt.figure(figsize = (10, 6))
+
+        if x2Data is None:
+            plt.stem(x1Data, yData)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
+        else:
+            plt.pcolormesh(x2Data, x1Data, yData, cmap=COLORMAP, shading=SHADING)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
+                
+        plt.title(title)
+
+        plt.tight_layout()
+        return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
+
+class signal(frontend):
     def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
         """Signal Init
 
@@ -201,9 +228,7 @@ class signal():
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (s)", ylabel="Amplitude"):
-
-        # fighandle = plt.figure()
+    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (s)", ylabel="Amplitude", title=""):
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
@@ -213,22 +238,32 @@ class signal():
             maxP = max(self.phases) if not ignorePhaseShift else 0
             maxT = (1/minF + maxP)*2
             minSamples = int(maxT*self.samplingRate)
+        xData = self.t[:minSamples]
+        yData = self.y[:minSamples]
+
+        if title!="":
+            plt.title(title)
+        else:
+            plt.title(type(self).__name__)
+
+        return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot)
 
         if subplot is not None:
             plt.subplot(*subplot, frameon=False)
         else:
             plt.figure(figsize = (10, 6))
 
-        plt.plot(self.t[:minSamples], self.y[:minSamples], '.-')
+
+
+        plt.plot(xdata, ydata, '.-')
         plt.ylabel(ylabel)
         plt.xlabel(xlabel)
         plt.title(type(self).__name__)
         plt.tight_layout()
-        fighandle = plt.gca()
 
-        return fighandle
+        return {'xdata':xdata, 'ydata':ydata, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
-class transform():
+class transform(frontend):
     def __init__(self, transformation, **kwargs):
         self.transformation = transformation(**kwargs)
 
@@ -287,8 +322,28 @@ class transform():
     def swapaxes(self, y_hat):
         return np.swapaxes(y_hat, 0, 1)
 
-    def show(self, y_hat, f, t=None, subplot=None, title="", xlabel='', ylabel=''):
+    def show(self, yData, x1Data, x2Data=None, subplot=None, title="", xlabel='', ylabel=''):
         # fighandle = plt.figure()
+
+
+        if x2Data is None:
+            yData = np.abs(yData)
+            if xlabel == "":
+                plt.xlabel('Freq (Hz)')
+            if ylabel == "":
+                plt.ylabel('Amplitude (abs)')
+        else:
+            if xlabel == "":
+                plt.xlabel('Time (s)')
+            if ylabel == "":
+                plt.ylabel('Freq (Hz)')
+                
+        if title!="":
+            plt.title(title)
+        else:
+            plt.title(type(self.transformation).__name__)
+            
+        return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot)
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -296,8 +351,8 @@ class transform():
         else:
             plt.figure(figsize = (10, 6))
 
-        if t is None:
-            plt.stem(f, np.abs(y_hat))
+        if x2Data is None:
+            plt.stem(x1Data, np.abs(yData))
             if xlabel != "":
                 plt.xlabel(xlabel)
             else:
@@ -307,7 +362,7 @@ class transform():
             else:
                 plt.ylabel('Amplitude (abs)')
         else:
-            plt.pcolormesh(t, f, y_hat, cmap=COLORMAP, shading=SHADING)
+            plt.pcolormesh(x2Data, x1Data, yData, cmap=COLORMAP, shading=SHADING)
             if xlabel != "":
                 plt.xlabel(xlabel)
             else:
@@ -317,11 +372,6 @@ class transform():
             else:
                 plt.ylabel('Freq (Hz)')
             # plt.colorbar(format='%+2.0f')
-                
-        if title!="":
-            plt.title(title)
-        else:
-            plt.title(type(self.transformation).__name__)
 
         plt.tight_layout()
         fighandle = plt.gca()
