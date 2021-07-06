@@ -446,7 +446,7 @@ class export():
     SIGNAL = "SIGNAL"
     SIGNALPARAM = "signalparam"
     TRANSFORMPARAM = "transformparam"
-    PLOTHANDLE = "plothandle"
+    PLOTDATA = "plotdata"
     PLOTPARAM = "plotparam"
     GRADERX = "graderx"
     GRADERY = "gradery"
@@ -512,7 +512,7 @@ class export():
         self.details[self.GITHASH] = sha
 
     # def safePlot(self):
-    #     pltInstance = self.details[self.PLOTHANDLE]
+    #     pltInstance = self.details[self.PLOTDATA]
 
     #     path = self.getBasePath() + ".png"
 
