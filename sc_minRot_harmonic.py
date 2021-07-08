@@ -105,33 +105,6 @@ exp.setData(export.DESCRIPTION, "Grader, qft_real")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
-# grader_inst = grader()
-# snr = grader_inst.calculateNoisePower(y_hat_real, y_hat_sim)
-# print(f"Calculated an snr of {snr} db")
-# windowLength = 2**5 #only 5 qubits allowed
-# overlapFactor=0.5
-# windowType='hann'
-
-# print("Initializing Chirp")
-
-# del(y)
-
-# y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**12, signalType='chirp')
-
-# y.addFrequency(500)
-# y.addFrequency(2000, y.duration)
-
-# y.addFrequency(1000)
-# y.addFrequency(3000, y.duration)
-
-# y.show(subplot=[2,2,3])
-
-# print("Processing STQFT")
-# stqft = transform(stqft_framework, minRotation=0.2, suppressPrint=False, simulation=False)
-# y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
-# stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[2,2,4])
-
 
 
 print("Showing all figures")
