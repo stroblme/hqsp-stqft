@@ -116,7 +116,7 @@ class frontend():
                 
         plt.title(title)
 
-        return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
+        return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'plotType':plotType, 'log':log, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
 class signal(frontend):
     def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
