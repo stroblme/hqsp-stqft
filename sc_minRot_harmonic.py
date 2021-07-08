@@ -11,7 +11,7 @@ from frontend import frontend, grader, signal, transform, export
 from utils import PI
 
 frontend.enableInteractive()
-TOPIC = "harmonic_realDevice"
+TOPIC = "minRot_harmonic"
 export.checkWorkingTree()
 
 print("Initializing Harmonic Signal")
@@ -54,6 +54,7 @@ while mrot <= PI/2:
     y_hat_real, f_p = qft.postProcess(y_hat, f)
     ylabel = "Amplitude" if pt == 0 else " "
     plotData = qft.show(y_hat_real, f_p, subplot=[2,9,pt+3], title=f"QFT_sim, mr:{mrot:.2f}", xlabel=" ", ylabel=ylabel)
+    
     snr = grader_inst.calculateNoisePower(y_hat_real, y_hat_ideal)
     print(f"Calculated an snr of {snr} db")
     grader_inst.log(snr, mrot)
