@@ -28,14 +28,14 @@ exp.doExport()
 
 print("Processing QFT")
 
-qft = transform(qft_framework, minRotation=0.2, suppressPrint=False)
+qft = transform(qft_framework, minRotation=PI/2**(nQubits-bandwidth), suppressPrint=False)
 y_hat, f = qft.forward(y)
 y_hat_p, f_p = qft.postProcess(y_hat, f)
 plotData = qft.show(y_hat_p, f_p, subplot=[2,2,2])
 
-exp = export(topic=TOPIC, identifier="fft")
-exp.setData(export.SIGNAL, y_hat_ideal)
-exp.setData(export.DESCRIPTION, "FFT, default param, post processed")
+exp = export(topic=TOPIC, identifier="qft")
+exp.setData(export.SIGNAL, y_hat_p)
+exp.setData(export.DESCRIPTION, f"QFT, bandwith of {bandwidth}, post processed")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
