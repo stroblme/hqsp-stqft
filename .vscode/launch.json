@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "STQFT: Harmonic",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_harmonicSignal.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Chirp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_chirpSignal.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Speech",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_speechSignal.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Noise Reduction",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_noiseReduction.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Harmonic Real Device",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_harmonic_realDevice.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Chirp Real Device",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_chirp_realDevice.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}
