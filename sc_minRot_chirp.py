@@ -23,7 +23,7 @@ y.addFrequency(2000, y.duration)
 y.addFrequency(1000)
 y.addFrequency(3000, y.duration)
 
-plotData = y.show(subplot=[2,9,1])
+plotData = y.show(subplot=[2,nQubits+2,1])
 
 exp = export(topic=TOPIC, identifier="signal")
 # exp.setData(export.SIGNAL, y)
@@ -36,7 +36,7 @@ print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,9,10])
+plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,nQubits+2,nQubits+3])
 
 exp = export(topic=TOPIC, identifier="stft")
 exp.setData(export.SIGNAL, y_hat_stft)
@@ -55,7 +55,7 @@ while mrot <= PI/2:
     y_hat_sim, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
     y_hat_sim_p, f_p, t_p = stqft.postProcess(y_hat_sim, f ,t, scale='mel')
     ylabel = "Amplitude" if pt == 0 else " "
-    plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,9,pt+3], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
+    plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,nQubits+2,2+pt], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
 
     snr = grader_inst.calculateNoisePower(y_hat_sim_p, y_hat_stft_p)
     print(f"Calculated an snr of {snr} db")
@@ -70,7 +70,7 @@ while mrot <= PI/2:
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 
-plotData = grader_inst.show(subplot=[2,9,9])
+plotData = grader_inst.show(subplot=[2,nQubits+2,9])
 
 exp = export(topic=TOPIC, identifier="grader_stqft_sim")
 exp.setData(export.GRADERX, grader_inst.xValues)
@@ -90,7 +90,7 @@ while mrot <= PI/2:
     y_hat_real, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
     y_hat_real_p, f_p, t_p = stqft.postProcess(y_hat_real, f ,t, scale='mel')
     ylabel = "Amplitude" if pt == 0 else " "
-    plotData = stqft.show(y_hat_real_p, f_p, t_p, subplot=[2,9,pt+12], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
+    plotData = stqft.show(y_hat_real_p, f_p, t_p, subplot=[2,nQubits+2,pt+nQubits+5+pt], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
 
     snr = grader_inst.calculateNoisePower(y_hat_real_p, y_hat_stft_p)
     print(f"Calculated an snr of {snr} db")
@@ -105,7 +105,7 @@ while mrot <= PI/2:
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 
-plotData = grader_inst.show(subplot=[2,9,18])
+plotData = grader_inst.show(subplot=[2,nQubits+2,18])
 
 exp = export(topic=TOPIC, identifier="grader_stqft_real")
 exp.setData(export.GRADERX, grader_inst.xValues)
