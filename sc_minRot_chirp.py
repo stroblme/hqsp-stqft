@@ -8,7 +8,8 @@ frontend.enableInteractive()
 TOPIC = "minRot_chirp"
 export.checkWorkingTree()
 
-windowLength = 2**7 #nqubits. using results from minRot_harmonic
+nQubits = 7
+windowLength = 2**nQubits #nqubits. using results from minRot_harmonic
 overlapFactor=0.5
 windowType='hann'
 
@@ -61,7 +62,7 @@ while mrot <= PI/2:
     grader_inst.log(snr, mrot)
     print(f"Minimum rotation is: {mrot}")
     pt += 1
-    mrot = PI/2**(5-pt)
+    mrot = PI/2**(nQubits-pt)
 
     exp = export(topic=TOPIC, identifier=f"stqft_sim_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_sim_p)
@@ -96,7 +97,7 @@ while mrot <= PI/2:
     grader_inst.log(snr, mrot)
     print(f"Minimum rotation is: {mrot}")
     pt += 1
-    mrot = PI/2**(5-pt)
+    mrot = PI/2**(nQubits-pt)
 
     exp = export(topic=TOPIC, identifier=f"stqft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
