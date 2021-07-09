@@ -10,9 +10,12 @@ from math import log2
 
 from qiskit import *
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
-from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT as qiskit_qft
-from qiskit.providers.ibmq import least_busy
+
+import inspect
+from qiskit.test import mock
+from qiskit.providers.exceptions import QiskitBackendNotFoundError
+
 
 from utils import isPow2
 
@@ -54,16 +57,34 @@ class qft_framework():
 
         self.simulation = simulation
         
+        isMock = False
+
         if backendName != None:
             self.provider = IBMQ.load_account()
             self.provider = IBMQ.get_provider("ibm-q")
 
-            self.backend = self.provider.get_backend(backendName)
+            try:
+                self.backend = self.provider.get_backend(backendName)
+            except QiskitBackendNotFoundError as e:
+                print(f"Backend {backendName} not found in {self.provider}.\nTrying mock backend..")
+                
+                try:
+                    tempBackendModule = getattr(mock, backendName.replace("ibmq_", ''))
+                    self.backend = inspect.getmembers(tempBackendModule)[0][1]()
+                    isMock = True
+                except QiskitBackendNotFoundError as e:
+                    print(f"Backend {backendName} also not found in mock devices. Check if the name is valid and has 'ibmq_' as prefix")
+                except IndexError:
+                    print(f"Sorry, but mock backend didn't returned the expected structure. Check {tempBackendModule}")
+
+            if not isMock:
+                props = self.backend.properties(datetime=datetime.datetime.now())
+            else:
+                props = self.backend.properties()
+
             # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
             #                             and not x.configuration().simulator
             #                             and x.status().operational==True))
-
-            props = self.backend.properties(datetime=datetime.datetime.now())
         
             nQubitsAvailable = len(props.qubits)
             qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
