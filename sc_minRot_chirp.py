@@ -36,7 +36,7 @@ print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2])
+plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,9,10])
 
 exp = export(topic=TOPIC, identifier="stft")
 exp.setData(export.SIGNAL, y_hat_stft)
@@ -45,7 +45,7 @@ exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing Simulated STQFT")
-exit
+
 mrot = 0
 pt = 0
 grader_inst = grader()
@@ -101,7 +101,7 @@ while mrot <= PI/2:
 
     exp = export(topic=TOPIC, identifier=f"stqft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
-    exp.setData(export.DESCRIPTION, f"STQFT, simulated, ibmq_quito noise, mrot={mrot}, post processed")
+    exp.setData(export.DESCRIPTION, f"STQFT, simulated, ibmq_melbourne noise, mrot={mrot}, post processed")
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 
