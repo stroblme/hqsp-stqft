@@ -1,9 +1,7 @@
 from matplotlib.pyplot import draw, text
 from numpy.random import random
 from qiskit.providers import backend
-from qft import qft_framework
-from dft import dft_framework
-from fft import fft_framework
+from qft import loadBackend
 from stft import stft_framework
 from stqft import stqft_framework
 from frontend import frontend, grader, signal, transform, export
@@ -40,11 +38,11 @@ y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
 stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
 
-# print("Processing real STQFT")
-# stqft = transform(stqft_framework, minRotation=0, suppressPrint=True, simulation=True, backendName="ibmq_casablanca")
-# y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
-# stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,4,4])
+print("Processing real STQFT")
+stqft = transform(stqft_framework, minRotation=0.2, suppressPrint=True, simulation=True, backendName="ibmq_casablanca")
+y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
+stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,4,4])
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking
