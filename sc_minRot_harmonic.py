@@ -6,7 +6,7 @@ from utils import PI
 
 frontend.enableInteractive()
 TOPIC = "minRot_harmonic"
-export.checkWorkingTree()
+# export.checkWorkingTree()
 
 nQubits = 4
 
@@ -80,8 +80,13 @@ mrot = 0
 pt = 0
 grader_inst = grader()
 
+backend = None
+
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName="ibmq_quito")
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName="ibmq_quito", reuseBackend=backend)
+    if backend is None:
+        backend = qft.transformation.getBackend()
+
     y_hat, f = qft.forward(y)
     y_hat_real_p, f_p = qft.postProcess(y_hat, f)
     ylabel = "Amplitude" if pt == 0 else " "

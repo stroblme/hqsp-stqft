@@ -45,10 +45,53 @@ def get_fft_from_counts(counts, n_qubits):
 
     return out
 
+def loadBackend(backendName, simulation=True):
+    provider = IBMQ.load_account()
+    provider = IBMQ.get_provider("ibm-q")
+
+    isMock = False
+    try:
+        backend = provider.get_backend(backendName)
+    except QiskitBackendNotFoundError as e:
+        print(f"Backend {backendName} not found in {provider}.\nTrying mock backend..")
+        
+        try:
+            tempBackendModule = getattr(mock, backendName.replace("ibmq_", ''))
+            backend = inspect.getmembers(tempBackendModule)[0][1]()
+            isMock = True
+        except QiskitBackendNotFoundError as e:
+            print(f"Backend {backendName} also not found in mock devices. Check if the name is valid and has 'ibmq_' as prefix")
+        except IndexError:
+            print(f"Sorry, but mock backend didn't returned the expected structure. Check {tempBackendModule}")
+
+    if not isMock:
+        props = backend.properties(datetime=datetime.datetime.now())
+    else:
+        props = backend.properties()
+
+    # backend = least_busy(  provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
+    #                             and not x.configuration().simulator
+    #                             and x.status().operational==True))
+
+    nQubitsAvailable = len(props.qubits)
+    qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
+    qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
+    qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
+
+    print(f"Backend {backend} has {nQubitsAvailable} qubits available.")
+    print(f"ReadoutErrors are {qubitReadoutErrors}")
+    print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
+    print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+
+    if simulation:
+        backend = AerSimulator.from_backend(backend)
+
+    return provider, backend
+
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, simulation=True, draw=False, backendName=None):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, draw=False, simulation=True, backendName=None, reuseBackend=None):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -57,54 +100,27 @@ class qft_framework():
 
         self.simulation = simulation
         
-        isMock = False
 
-        if backendName != None:
-            self.provider = IBMQ.load_account()
-            self.provider = IBMQ.get_provider("ibm-q")
-
-            try:
-                self.backend = self.provider.get_backend(backendName)
-            except QiskitBackendNotFoundError as e:
-                print(f"Backend {backendName} not found in {self.provider}.\nTrying mock backend..")
-                
-                try:
-                    tempBackendModule = getattr(mock, backendName.replace("ibmq_", ''))
-                    self.backend = inspect.getmembers(tempBackendModule)[0][1]()
-                    isMock = True
-                except QiskitBackendNotFoundError as e:
-                    print(f"Backend {backendName} also not found in mock devices. Check if the name is valid and has 'ibmq_' as prefix")
-                except IndexError:
-                    print(f"Sorry, but mock backend didn't returned the expected structure. Check {tempBackendModule}")
-
-            if not isMock:
-                props = self.backend.properties(datetime=datetime.datetime.now())
-            else:
-                props = self.backend.properties()
-
-            # backend = least_busy(  self.provider.backends(filters=lambda x: x.configuration().n_qubits >= 5
-            #                             and not x.configuration().simulator
-            #                             and x.status().operational==True))
-        
-            nQubitsAvailable = len(props.qubits)
-            qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
-            qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
-            qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
-
-            print(f"Backend {self.backend} has {nQubitsAvailable} qubits available.")
-            print(f"ReadoutErrors are {qubitReadoutErrors}")
-            print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
-            print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
-
+        if reuseBackend != None:
+            print(f"Reusing backend {reuseBackend}")
             if self.simulation:
-                self.backend = AerSimulator.from_backend(self.backend)
+                self.backend = AerSimulator.from_backend(reuseBackend)
+            else:
+                self.backend = reuseBackend
+        else:
+            self.setBackend(backendName, simulation)
+
+    def getBackend(self):
+        return self.backend
+
+    def setBackend(self, backendName=None, simulation=True):
+        if backendName != None:
+            self.provider, self.backend = loadBackend(backendName=backendName, simulation=simulation)
         else:
             if not self.simulation:
                 print("Setting simulation to 'True', as no backend was specified")
                 self.simulation = True
             self.backend = Aer.get_backend('qasm_simulator')
-
-        
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
