@@ -61,8 +61,6 @@ while mrot <= PI/2:
     print(f"Calculated an snr of {snr} db")
     grader_inst.log(snr, mrot)
     print(f"Minimum rotation is: {mrot}")
-    pt += 1
-    mrot = PI/2**(nQubits-pt)
 
     exp = export(topic=TOPIC, identifier=f"stqft_sim_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_sim_p)
@@ -70,7 +68,10 @@ while mrot <= PI/2:
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 
-plotData = grader_inst.show(subplot=[2,nQubits+2,9])
+    pt += 1
+    mrot = PI/2**(nQubits-pt)
+
+plotData = grader_inst.show(subplot=[2,nQubits+2,nQubits])
 
 exp = export(topic=TOPIC, identifier="grader_stqft_sim")
 exp.setData(export.GRADERX, grader_inst.xValues)
@@ -90,14 +91,12 @@ while mrot <= PI/2:
     y_hat_real, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
     y_hat_real_p, f_p, t_p = stqft.postProcess(y_hat_real, f ,t, scale='mel')
     ylabel = "Amplitude" if pt == 0 else " "
-    plotData = stqft.show(y_hat_real_p, f_p, t_p, subplot=[2,nQubits+2,pt+nQubits+5+pt], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
+    plotData = stqft.show(y_hat_real_p, f_p, t_p, subplot=[2,nQubits+2,pt+nQubits+5], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
 
     snr = grader_inst.calculateNoisePower(y_hat_real_p, y_hat_stft_p)
     print(f"Calculated an snr of {snr} db")
     grader_inst.log(snr, mrot)
     print(f"Minimum rotation is: {mrot}")
-    pt += 1
-    mrot = PI/2**(nQubits-pt)
 
     exp = export(topic=TOPIC, identifier=f"stqft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
@@ -105,7 +104,10 @@ while mrot <= PI/2:
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 
-plotData = grader_inst.show(subplot=[2,nQubits+2,18])
+    pt += 1
+    mrot = PI/2**(nQubits-pt)
+
+plotData = grader_inst.show(subplot=[2,nQubits+2,2*(nQubits+3)])
 
 exp = export(topic=TOPIC, identifier="grader_stqft_real")
 exp.setData(export.GRADERX, grader_inst.xValues)

@@ -12,7 +12,7 @@ from utils import PI
 
 frontend.enableInteractive()
 
-windowLength = 2**4
+windowLength = 2**6
 overlapFactor=0.5
 windowType='hann'
 
