@@ -92,6 +92,7 @@ class frontend():
         fig.set_size_inches(16,9)
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.tight_layout()
+        
 
         if x2Data is None:
             if log:
@@ -106,15 +107,12 @@ class frontend():
             else:
                 plt.plot(x1Data, yData, 'o--')
 
-
-            plt.xlabel(xlabel)
-            plt.ylabel(ylabel)
         else:
             plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING)
-            plt.xlabel(xlabel)
-            plt.ylabel(ylabel)
                 
         plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
 
         return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'plotType':plotType, 'log':log, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
@@ -298,10 +296,8 @@ class signal(frontend):
         xData = self.t[:minSamples]
         yData = self.y[:minSamples]
 
-        if title!="":
-            plt.title(title)
-        else:
-            plt.title(type(self).__name__)
+        if title=="":
+            title=type(self).__name__
 
         return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot)
 
@@ -395,10 +391,8 @@ class transform(frontend):
             if ylabel == "":
                 plt.ylabel('Freq (Hz)')
                 
-        if title!="":
-            plt.title(title)
-        else:
-            plt.title(type(self.transformation).__name__)
+        if title=="":
+            title = type(self.transformation).__name__
             
         return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot)
 
@@ -569,6 +563,7 @@ class export():
         # self.safePlot()
         self.safeDetails()
 
+        # del(self.details)
 # ----------------------------------------------------------
 # On-Import region
 # ----------------------------------------------------------
