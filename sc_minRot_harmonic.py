@@ -6,7 +6,7 @@ from utils import PI
 
 frontend.enableInteractive()
 TOPIC = "minRot_harmonic"
-# export.checkWorkingTree()
+export.checkWorkingTree()
 
 nQubits = 4
 
