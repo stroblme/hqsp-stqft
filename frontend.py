@@ -299,7 +299,7 @@ class signal(frontend):
         if title=="":
             title=type(self).__name__
 
-        return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot)
+        return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot, plotType="plot")
 
         if subplot is not None:
             plt.subplot(*subplot, frameon=False)
