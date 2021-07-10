@@ -10,6 +10,8 @@ from utils import PI
 
 frontend.enableInteractive()
 
+TOPIC = "chirp_realDevice"
+
 windowLength = 2**7
 overlapFactor=0.5
 windowType='hann'
@@ -24,25 +26,50 @@ y.addFrequency(2000, y.duration)
 y.addFrequency(1000)
 y.addFrequency(3000, y.duration)
 
-y.show(subplot=[1,4,1], title="signal")
+plotData = y.show(subplot=[1,4,1], title="signal")
+
+exp = export(topic=TOPIC, identifier="signal")
+# exp.setData(export.SIGNAL, y)
+exp.setData(export.DESCRIPTION, "Harmonic Signal, 125 and 250 Hz at 1kHz, 2^4 samples")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2], title="stft")
+plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2], title="stft")
+
+exp = export(topic=TOPIC, identifier="stft")
+exp.setData(export.SIGNAL, y_hat_stft)
+exp.setData(export.DESCRIPTION, "stft, chirp, window: 'hann', length=2**7")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
 print("Processing simulation STQFT")
 stqft = transform(stqft_framework, minRotation=0.2, suppressPrint=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
-stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
+plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
+
+exp = export(topic=TOPIC, identifier="stqft")
+exp.setData(export.SIGNAL, y_hat_stqft)
+exp.setData(export.DESCRIPTION, "stqft, chirp, window: 'hann', length=2**7")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
 print("Processing real STQFT")
 stqft = transform(stqft_framework, minRotation=0.2, suppressPrint=True, simulation=True, backendName="ibmq_casablanca")
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
-stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,4,4])
+plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,4,4], title="stqft_noise")
+
+exp = export(topic=TOPIC, identifier="stqft-noise")
+exp.setData(export.SIGNAL, y_hat_stqft)
+exp.setData(export.DESCRIPTION, "stqft, ibmq_casablanca, chirp, window: 'hann', length=2**7")
+exp.setData(export.PLOTDATA, plotData)
+exp.setData(export.BACKEND, stqft.transformation.getBackend())
+exp.doExport()
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking
