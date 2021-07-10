@@ -68,7 +68,7 @@ exp = export(topic=TOPIC, identifier="stqft-noise")
 exp.setData(export.SIGNAL, y_hat_stqft)
 exp.setData(export.DESCRIPTION, "stqft, ibmq_casablanca, chirp, window: 'hann', length=2**7")
 exp.setData(export.PLOTDATA, plotData)
-exp.setData(export.BACKEND, stqft.transformation.getBackend())
+exp.setData(export.BACKEND, stqft.transformation.stt_inst.transformationInst.getBackend())
 exp.doExport()
 
 print("Showing all figures")
