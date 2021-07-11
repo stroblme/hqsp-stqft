@@ -10,11 +10,7 @@ from qbstyles import mpl_style
 
 from frontend import frontend
 
-COLORMAP = 'plasma'
-SHADING='nearest'
-DARK=True
-
-mpl_style(dark=DARK, minor_ticks=False)
+frontend.setTheme(dark=True)
 
 cdir = "./data"
 ignoreList = ["venv", ".vscode"]
