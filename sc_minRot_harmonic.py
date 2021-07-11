@@ -82,7 +82,7 @@ pt = 0
 grader_inst = grader()
 
 device = "ibmq_quito"
-_, backend = loadBackend(simulation=False, backendName=device)
+_, backend = loadBackend(simulation=True, backendName=device)
 
 while mrot <= PI/2:
     qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, reuseBackend=backend)
