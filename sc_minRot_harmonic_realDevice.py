@@ -103,7 +103,7 @@ while mrot <= PI/2:
 
     exp = export(topic=TOPIC, identifier=f"qft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
-    exp.setData(export.DESCRIPTION, f"QFT, simulated, {device} noise, mrot={mrot}, post processed")
+    exp.setData(export.DESCRIPTION, f"QFT, real Device, {device} noise, mrot={mrot}, post processed")
     exp.setData(export.BACKEND, qft.transformation.getBackend())
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
