@@ -103,10 +103,7 @@ class qft_framework():
 
         if reuseBackend != None:
             print(f"Reusing backend {reuseBackend}")
-            if self.simulation:
-                self.backend = AerSimulator.from_backend(reuseBackend)
-            else:
-                self.backend = reuseBackend
+            self.backend = reuseBackend
         else:
             self.setBackend(backendName, simulation)
 
