@@ -37,6 +37,8 @@ else:
         except IndexError:
             continue
 
+    print(f"Showing {selection} ...")
+
 fileList = glob.glob(f"{cdir + selection}/*.p")
 pt = 0
 
