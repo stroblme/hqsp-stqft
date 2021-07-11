@@ -82,54 +82,6 @@ class matplotLibViewer(frontend):
 
         self.clickEventHandled = True
 
-    # def show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None, plotType='stem', log=False):
-    #     self._show( yData=yData, 
-    #                 x1Data=x1Data, 
-    #                 title=title, 
-    #                 xlabel=xlabel, 
-    #                 ylabel=ylabel, 
-    #                 x2Data=x2Data, 
-    #                 subplot=subplot, 
-    #                 plotType=plotType, 
-    #                 log=log)
-        # # fighandle = plt.figure()
-
-        # if subplot is not None:
-        #     plt.subplot(*subplot,frameon=False)
-        #     plt.subplots_adjust(wspace=0.58)
-        # else:
-        #     plt.figure(figsize = (10, 6))
-
-        # fig = plt.gcf()
-        # fig.set_size_inches(16,9)
-        # fig.canvas.mpl_connect('button_press_event', self.on_click)
-        # plt.tight_layout()
-
-        # if x2Data is None:
-        #     if log:
-        #         ax = plt.gca()
-        #         ax.set_yscale('log')
-        #         plt.autoscale(False)
-        #         plt.ylim(0.1,1)
-        #         plt.xlim(min(x1Data), max(x1Data))
-
-        #     if plotType == 'stem':
-        #         plt.stem(x1Data, yData)
-        #     else:
-        #         plt.plot(x1Data, yData, 'o--')
-
-
-        #     plt.xlabel(xlabel)
-        #     plt.ylabel(ylabel)
-        # else:
-        #     plt.pcolormesh(x2Data, x1Data, yData, cmap=COLORMAP, shading=SHADING)
-        #     plt.xlabel(xlabel)
-        #     plt.ylabel(ylabel)
-                
-        # plt.title(title)
-
-        return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'plotType':plotType, 'log':log, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
-
     def createPlots(self):
         for filePath in fileList:
             try:
@@ -163,10 +115,6 @@ class matplotLibViewer(frontend):
                     plotType=plotType, 
                     log=log)
 
-            # self.show(yData=yData,x1Data=x1Data,title=title,xlabel=xlabel,ylabel=ylabel,x2Data=x2Data,subplot=subplot,plotType=plotType,log=log)
-
-
-
         fig = plt.gcf()
         fig.canvas.mpl_connect('button_press_event', self.on_click)
         plt.show()
@@ -175,43 +123,3 @@ mplv = matplotLibViewer()
 
 mplv.createPlots()
 
-# exit
-
-# def rightKey(event):
-#     global pt
-
-#     tpt = pt + 1 if pt < len(fileList)-1 else pt
-#     setFigureFromFile(fileList[pt])
-#     pt = tpt
-
-
-# def leftKey(event):
-#     global pt
-
-#     tpt = pt - 1 if pt > 0 else pt
-#     setFigureFromFile(fileList[pt])
-#     pt = tpt
-
-
-# def resize(event):
-#     setFigureFromFile(fileList[pt])
-
-
-# def startup():
-    
-#     setFigureFromFile(fileList[pt])
-
-# # w2 = Scale(main, from_=0, to=200, orient=HORIZONTAL)
-# # w2.set(23)
-# # w2.pack()
-
-# main = Tk()
-# frame = Frame(main)
-# main.bind('<Left>', leftKey)
-# main.bind('<Right>', rightKey)
-# # main.bind("<Configure>", resize)
-
-
-# startup()
-
-# main.mainloop()
