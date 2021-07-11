@@ -1,15 +1,9 @@
 from tkinter import *
 from tkinter.ttk import *
 import pickle
-from git import exc
 import matplotlib
-from matplotlib.backend_bases import MouseEvent
 import matplotlib.pyplot as plt
-from numpy import mat
 matplotlib.use("TkAgg")
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.gridspec import GridSpec
 import glob
 import os
 from qbstyles import mpl_style
