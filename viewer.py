@@ -12,14 +12,14 @@ from frontend import frontend
 
 frontend.setTheme(dark=True)
 
-cdir = "./data"
+cdir = "./data/"
 ignoreList = ["venv", ".vscode"]
 
 content = os.listdir(cdir)
 folderList = list()
 
 for c in content:
-    if os.path.isdir(c):
+    if os.path.isdir(cdir+c):
         if c not in ignoreList:
             folderList.append(c)
 
