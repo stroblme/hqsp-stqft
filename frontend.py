@@ -47,7 +47,9 @@ class frontend():
 
     @staticmethod
     def on_click(event):
-        """Enlarge or restore the selected axis."""
+        '''
+        Taken from: https://stackoverflow.com/questions/9012081/matplotlib-grab-single-subplot-from-multiple-subplots
+        '''
 
         if not frontend.clickEventHandled:
             return
@@ -71,8 +73,9 @@ class frontend():
                     ax.set_position(ax._orig_position)
                     for axis in event.canvas.figure.axes:
                         axis.set_visible(True)
-                except AttributeError:
+                except AttributeError as e:
                     # If we haven't zoomed, ignore...
+                    print(e.with_traceback())
                     pass
 
                 event.canvas.draw()
