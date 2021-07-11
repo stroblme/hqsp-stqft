@@ -99,7 +99,7 @@ class frontend():
                 ax = plt.gca()
                 ax.set_yscale('log')
                 plt.autoscale(False)
-                plt.ylim(0.1,1)
+                plt.ylim(min(yData),1)
                 plt.xlim(min(x1Data), max(x1Data))
 
             if plotType == 'stem':
