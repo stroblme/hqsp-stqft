@@ -382,14 +382,14 @@ class transform(frontend):
         if x2Data is None:
             yData = np.abs(yData)
             if xlabel == "":
-                plt.xlabel('Freq (Hz)')
+                xlabel = 'Freq (Hz)'
             if ylabel == "":
-                plt.ylabel('Amplitude (abs)')
+                ylabel = 'Amplitude (abs)'
         else:
             if xlabel == "":
-                plt.xlabel('Time (s)')
+                xlabel ='Time (s)'
             if ylabel == "":
-                plt.ylabel('Freq (Hz)')
+                ylabel ='Freq (Hz)'
                 
         if title=="":
             title = type(self.transformation).__name__
