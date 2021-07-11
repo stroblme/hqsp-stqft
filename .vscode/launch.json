@@ -6,6 +6,13 @@
     "configurations": [
 
         {
+            "name": "Viewer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/viewer.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "STQFT: Harmonic",
             "type": "python",
             "request": "launch",
