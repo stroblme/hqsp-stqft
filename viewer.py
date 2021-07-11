@@ -46,42 +46,6 @@ pt = 0
 
 class matplotLibViewer(frontend):
 
-    clickEventHandled = True
-
-    def on_click(self, event):
-        """Enlarge or restore the selected axis."""
-        self.clickEventHandled
-
-        if not self.clickEventHandled:
-            return
-
-        ax = event.inaxes
-        if ax is not None:
-            # Occurs when a region not in an axis is clicked...
-            if int(event.button) is 1:
-                # On left click, zoom the selected axes
-                ax._orig_position = ax.get_position()
-                ax.set_position([0.1, 0.1, 0.85, 0.85])
-                for axis in event.canvas.figure.axes:
-                    # Hide all the other axes...
-                    if axis is not ax:
-                        axis.set_visible(False)
-                event.canvas.draw()
-
-            elif int(event.button) is 3:
-                # On right click, restore the axes
-                try:
-                    ax.set_position(ax._orig_position)
-                    for axis in event.canvas.figure.axes:
-                        axis.set_visible(True)
-                except AttributeError:
-                    # If we haven't zoomed, ignore...
-                    pass
-
-                event.canvas.draw()
-
-        self.clickEventHandled = True
-
     def createPlots(self):
         for filePath in fileList:
             try:
@@ -116,7 +80,7 @@ class matplotLibViewer(frontend):
                     log=log)
 
         fig = plt.gcf()
-        fig.canvas.mpl_connect('button_press_event', self.on_click)
+        fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.show()
 
 mplv = matplotLibViewer()
