@@ -85,7 +85,7 @@ device = "ibmq_quito"
 _, backend = loadBackend(simulation=True, backendName=device)
 
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName=device, reuseBackend=backend)
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, reuseBackend=backend)
 
     y_hat, f = qft.forward(y)
     y_hat_real_p, f_p = qft.postProcess(y_hat, f)
