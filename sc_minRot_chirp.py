@@ -85,9 +85,10 @@ print("Processing Real STQFT")
 mrot = 0
 pt = 0
 grader_inst = grader()
-import random
+device = "ibmq_melbourne"
+
 while mrot <= PI/2:
-    stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True, simulation=True, backendName="ibmq_melbourne")
+    stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True, simulation=True, backendName=device)
     y_hat_real, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
     y_hat_real_p, f_p, t_p = stqft.postProcess(y_hat_real, f ,t, scale='mel')
     ylabel = "Amplitude" if pt == 0 else " "
@@ -100,7 +101,7 @@ while mrot <= PI/2:
 
     exp = export(topic=TOPIC, identifier=f"stqft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
-    exp.setData(export.DESCRIPTION, f"STQFT, simulated, ibmq_melbourne noise, mrot={mrot}, post processed")
+    exp.setData(export.DESCRIPTION, f"STQFT, simulated, {device} noise, mrot={mrot}, post processed")
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
 

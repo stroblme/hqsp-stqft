@@ -81,10 +81,11 @@ mrot = 0
 pt = 0
 grader_inst = grader()
 
-_, backend = loadBackend(simulation=True, backendName="ibmq_quito")
+device = "ibmq_quito"
+_, backend = loadBackend(simulation=True, backendName=device)
 
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName="ibmq_quito", reuseBackend=backend)
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=True, backendName=device, reuseBackend=backend)
 
     y_hat, f = qft.forward(y)
     y_hat_real_p, f_p = qft.postProcess(y_hat, f)
@@ -99,7 +100,7 @@ while mrot <= PI/2:
 
     exp = export(topic=TOPIC, identifier=f"qft_real_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_real_p)
-    exp.setData(export.DESCRIPTION, f"QFT, simulated, ibmq_quito noise, mrot={mrot}, post processed")
+    exp.setData(export.DESCRIPTION, f"QFT, simulated, {device} noise, mrot={mrot}, post processed")
     exp.setData(export.BACKEND, qft.transformation.getBackend())
     exp.setData(export.PLOTDATA, plotData)
     exp.doExport()
