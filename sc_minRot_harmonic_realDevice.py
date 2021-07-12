@@ -59,7 +59,7 @@ while mrot <= PI/2:
     grader_inst.log(snr, mrot)
     print(f"Minimum rotation is: {mrot}")
 
-    exp = export(topic=TOPIC, identifier=f"qft_sim_mr_{mrot:.2f}")
+    exp = export(topic=TOPIC, identifier=f"qft_sim_n_mr_{mrot:.2f}")
     exp.setData(export.SIGNAL, y_hat_sim_p)
     exp.setData(export.DESCRIPTION, f"QFT, simulated, mrot={mrot}, post processed")
     exp.setData(export.BACKEND, qft.transformation.getBackend())
@@ -88,7 +88,7 @@ device = "ibmq_quito"
 _, backend = loadBackend(simulation=False, backendName=device)
 
 while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, reuseBackend=backend)
+    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, simulation=False, backendName=device)
 
     y_hat, f = qft.forward(y)
     y_hat_real_p, f_p = qft.postProcess(y_hat, f)
