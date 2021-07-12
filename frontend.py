@@ -447,7 +447,8 @@ class grader(frontend):
         diff = np.abs(np.power(y,2)-np.power(y_ref,2))
 
         # snr = np.divide(np.sum(np.abs(y_ref)),np.sum(diff)+self.epsilon)
-        snr = 1-(1/np.sum(np.power(y_ref,2)) * np.sum(diff))
+        # snr = 1-(1/np.sum(np.power(y_ref,2)) * np.sum(diff))
+        snr = 1-(1/len(y_ref) * np.sum(diff))
 
         return snr
         return 10*np.log10(snr)
