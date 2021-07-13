@@ -20,6 +20,9 @@ class fft_framework():
 
         return y_hat
 
+    def postProcess(self, y_hat, f):
+        return y_hat, f
+
     def fft_recurse(self, y):
         N = len(y)
         

@@ -22,3 +22,6 @@ class dft_framework():
         Y = np.dot(e, y)
         
         return Y
+
+    def postProcess(self, y_hat, f):
+        return y_hat, f

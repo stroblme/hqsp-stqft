@@ -158,6 +158,9 @@ class qft_framework():
 
         return y
 
+    def postProcess(self, y_hat, f):
+        return y_hat, f
+
     def showCircuit(self, y):
         """Display the circuit for a signal y
 

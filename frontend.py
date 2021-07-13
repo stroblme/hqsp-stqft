@@ -344,6 +344,8 @@ class transform(frontend):
 
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
+        y_hat, f, t = self.transformation.postProcess(y_hat, f, t)
+        
         # get the one side frequency
         if autopower:
             y_hat = np.abs(y_hat)

@@ -33,3 +33,9 @@ class stt_framework():
         # result = np.clip(result, -40, 200)    # clip values
 
         return y_hat
+
+    def postProcess(self, y_hat, f, t):
+        for t_idx in t:
+            y_hat[:,t_idx] = self.transformationInst.postProcess(y_hat[:,t_idx], f)
+
+        return y_hat, f, t
