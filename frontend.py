@@ -294,7 +294,7 @@ class signal(frontend):
             self.sample()   # Only sample if not file, as data is assumed to be loaded
             minF = min(self.frequencies)
             maxP = max(self.phases) if not ignorePhaseShift else 0
-            maxT = (1/minF + maxP)*2
+            maxT = (1/minF + maxP)*2 if minF != 0 else self.duration
             minSamples = int(maxT*self.samplingRate)
         xData = self.t[:minSamples]
         yData = self.y[:minSamples]
@@ -344,7 +344,11 @@ class transform(frontend):
 
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
-        y_hat, f, t = self.transformation.postProcess(y_hat, f, t)
+        if t == None:
+            y_hat, f = self.transformation.postProcess(y_hat, f)
+        
+        else:
+            y_hat, f, t = self.transformation.postProcess(y_hat, f, t)
         
         # get the one side frequency
         if autopower:
@@ -362,7 +366,7 @@ class transform(frontend):
                 y_hat = y_hat[:f_idx,:]    
 
         if normalize:
-            y_hat = y_hat*(1/y_hat.max())
+            y_hat = y_hat*(1/y_hat.max()) if y_hat.max() != 0 else y_hat
             # y_hat = y_hat*(1/sqrt(y_hat.shape[0]))
 
         if scale == 'log':
