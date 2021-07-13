@@ -21,7 +21,9 @@ class stft_framework():
     def transform(self, y_signal, **kwargs):
         return self.stt_inst.stt_transform(y_signal, **kwargs)
 
-
+    def postProcess(self, y_hat, f, t):
+        return self.stt_inst.postProcess(y_hat, f, t)
+        
         # y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         # # y_split_list = y_signal.split(nSamplesWindow)
         # nParts = len(y_split_list)
