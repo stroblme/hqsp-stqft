@@ -91,7 +91,7 @@ def loadBackend(backendName, simulation=True):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressPrint=False, draw=False, simulation=True, backendName=None, reuseBackend=None):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, fixZeroSignal=False, suppressPrint=False, draw=False, simulation=True, backendName=None, reuseBackend=None):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -99,7 +99,7 @@ class qft_framework():
         self.draw = draw
 
         self.simulation = simulation
-        
+        self.fixZeroSignal = fixZeroSignal        
 
         if reuseBackend != None:
             print(f"Reusing backend {reuseBackend}")
@@ -332,8 +332,12 @@ class qft_framework():
             print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
 
         if y.max() == 0.0:
-            y_hat = np.zeros(2**n_qubits)
-            return y_hat
+            if self.fixZeroSignal:
+                print(f"Warning: Signal's max value is zero and therefore amplitude initialization will fail. Setting signal to constant-one to continue")
+                y = np.ones(n_samples)
+            else:
+                y_hat = np.zeros(2**n_qubits)
+                return y_hat
 
         q = QuantumRegister(n_qubits)
         qc = QuantumCircuit(q)
