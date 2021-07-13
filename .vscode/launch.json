@@ -60,6 +60,13 @@
             "request": "launch",
             "program": "${workspaceRoot}/sc_chirp_realDevice.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Filter Evaluation",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/filterEvaluation.py",
+            "console": "integratedTerminal"
         }
     ]
 }
