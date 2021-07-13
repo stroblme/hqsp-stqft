@@ -8,6 +8,8 @@ frontend.enableInteractive()
 TOPIC = "filterEvaluation"
 export.checkWorkingTree()
 
+device = "ibmq_quito"
+
 nQubits = 4
 
 print("Initializing Harmonic Signal")
@@ -16,88 +18,69 @@ y = signal(samplingRate=1000, amplification=1, duration=0, nSamples=2**nQubits)
 
 y.addFrequency(0)
 
-plotData = y.show(subplot=[2,nQubits+3,1], title='signal')
+plotData = y.show(subplot=[1,5,1], title='signal')
 
 exp = export(topic=TOPIC, identifier="signal")
 # exp.setData(export.SIGNAL, y)
-exp.setData(export.DESCRIPTION, "Flat, zero-like signal, 2^4 samples")
+exp.setData(export.DESCRIPTION, f"Flat, zero-like signal, 2^{nQubits} samples")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing FFT")
 
 fft = transform(fft_framework)
+
 y_hat, f = fft.forward(y)
 y_hat_ideal_p, f_p = fft.postProcess(y_hat, f)
-plotData = fft.show(y_hat_ideal_p, f_p, subplot=[2,nQubits+3,nQubits+4], title="FFT (ref)")
+plotData = fft.show(y_hat_ideal_p, f_p, subplot=[1,5,2], title="FFT (ref)")
 
 exp = export(topic=TOPIC, identifier="fft")
 exp.setData(export.SIGNAL, y_hat_ideal_p)
-exp.setData(export.DESCRIPTION, "FFT, default param, post processed")
+exp.setData(export.DESCRIPTION, "FFT output")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing Simulated QFT")
 
-mrot = 0
-pt = 0
-grader_inst = grader()
+qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=True, backendName=device)
 
-while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False)
-    y_hat, f = qft.forward(y)
-    y_hat_sim_p, f_p = qft.postProcess(y_hat, f)
-    ylabel = "Amplitude" if pt == 0 else " "
-    plotData = qft.show(y_hat_sim_p, f_p, subplot=[2,nQubits+3,pt+2], title=f"QFT_sim, mr:{mrot:.2f}", xlabel=" ", ylabel=ylabel)
+y_hat, f = qft.forward(y)
+y_hat_sim_p, f_p = qft.postProcess(y_hat, f)
+plotData = qft.show(y_hat_sim_p, f_p, subplot=[1,5,3], title=f"qft_sim")
 
-    snr = grader_inst.calculateNoisePower(y_hat_sim_p, y_hat_ideal_p)
-    print(f"Calculated an snr of {snr} db")
-    grader_inst.log(snr, mrot)
-    print(f"Minimum rotation is: {mrot}")
+exp = export(topic=TOPIC, identifier="qft_sim")
+exp.setData(export.SIGNAL, y_hat_sim_p)
+exp.setData(export.DESCRIPTION, "QFT, simulated, zeroSignalFix")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
-    exp = export(topic=TOPIC, identifier=f"qft_sim_mr_{mrot:.2f}")
-    exp.setData(export.SIGNAL, y_hat_sim_p)
-    exp.setData(export.DESCRIPTION, f"QFT, simulated, mrot={mrot}, post processed")
-    exp.setData(export.BACKEND, qft.transformation.getBackend())
-    exp.setData(export.PLOTDATA, plotData)
-    exp.doExport()
+print("Processing simulated qft with noise")
 
-    pt += 1
-    mrot = PI/2**(nQubits+1-pt)
+qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=True, backendName=device)
 
-print("Processing Real QFT")
+y_hat, f = qft.forward(y)
+y_hat_sim_n_p, f_p = qft.postProcess(y_hat, f)
+plotData = qft.show(y_hat_sim_n_p, f_p, subplot=[1,5,4], title=f"qft_sim_n")
 
-mrot = 0
-pt = 0
-grader_inst = grader()
+exp = export(topic=TOPIC, identifier="qft_sim_n")
+exp.setData(export.SIGNAL, y_hat_sim_n_p)
+exp.setData(export.DESCRIPTION, f"QFT, simulated, noise from {device}, zeroSignalFix")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
-device = "ibmq_quito"
-_, backend = loadBackend(simulation=True, backendName=device)
+print("Processing real qft")
 
-while mrot <= PI/2:
-    qft = transform(qft_framework, minRotation=mrot, suppressPrint=False, reuseBackend=backend)
+qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=False, backendName=device)
 
-    y_hat, f = qft.forward(y)
-    y_hat_real_p, f_p = qft.postProcess(y_hat, f)
-    ylabel = "Amplitude" if pt == 0 else " "
-    # 2nd entry in 2nd row: 0+1+(nQubits+3)+1)
-    plotData = qft.show(y_hat_real_p, f_p, subplot=[2,nQubits+3,pt+nQubits+5], title=f"QFT_sim_n, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
-    
-    snr = grader_inst.calculateNoisePower(y_hat_real_p, y_hat_ideal_p)
-    print(f"Calculated an snr of {snr} db")
-    grader_inst.log(snr, mrot)
-    print(f"Minimum rotation is: {mrot}")
+y_hat, f = qft.forward(y)
+y_hat_real_p, f_p = qft.postProcess(y_hat, f)
+plotData = qft.show(y_hat_real_p, f_p, subplot=[1,5,5], title=f"qft_real")
 
-    exp = export(topic=TOPIC, identifier=f"qft_real_mr_{mrot:.2f}")
-    exp.setData(export.SIGNAL, y_hat_real_p)
-    exp.setData(export.DESCRIPTION, f"QFT, simulated, {device} noise, mrot={mrot}, post processed")
-    exp.setData(export.BACKEND, qft.transformation.getBackend())
-    exp.setData(export.PLOTDATA, plotData)
-    exp.doExport()
-
-    pt += 1
-    mrot = PI/2**(nQubits+1-pt)
-
+exp = export(topic=TOPIC, identifier="qft_real")
+exp.setData(export.SIGNAL, y_hat_real_p)
+exp.setData(export.DESCRIPTION, f"QFT, real Device {device}, zeroSignalFix")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking
