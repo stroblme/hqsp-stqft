@@ -159,6 +159,15 @@ class qft_framework():
         return y
 
     def postProcess(self, y_hat, f):
+        y_hat, f = self.qubitNoiseFilter(y_hat=y_hat, f=f)
+
+
+        return y_hat, f
+
+    def qubitNoiseFilter(self, y_hat, f):
+
+        # y_hat = y_hat*efilter
+
         return y_hat, f
 
     def showCircuit(self, y):
