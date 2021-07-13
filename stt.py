@@ -6,6 +6,7 @@ from numpy import array, pi
 from math import log2
 
 import matplotlib.pyplot as plt
+from numpy.core.fromnumeric import size
 
 from qiskit import *
 from qiskit.visualization import plot_histogram
@@ -35,7 +36,7 @@ class stt_framework():
         return y_hat
 
     def postProcess(self, y_hat, f, t):
-        for t_idx in t:
-            y_hat[:,t_idx] = self.transformationInst.postProcess(y_hat[:,t_idx], f)
+        for t_idx in range(0, y_hat.shape[1]):
+            y_hat[:,t_idx], f= self.transformationInst.postProcess(y_hat[:,t_idx], f)
 
         return y_hat, f, t
