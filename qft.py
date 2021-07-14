@@ -402,8 +402,10 @@ class qft_framework():
             print("Executing job...")
     
         #substitute with the desired backend
-        out = execute(qc, self.backend, shots=self.numOfShots).result()
-        counts = out.get_counts()
+        job = execute(qc, self.backend, shots=self.numOfShots).result()
+        job_monitor(job) #run a blocking monitor thread
+
+        counts = job.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
         y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
