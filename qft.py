@@ -1,4 +1,5 @@
 import time
+from tkinter.constants import NO
 from IPython import get_ipython
 
 import datetime
@@ -15,6 +16,8 @@ from qiskit.circuit.library import QFT as qiskit_qft
 import inspect
 from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
+from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
+
 
 from qiskit.tools.monitor import job_monitor
 
@@ -165,44 +168,44 @@ class qft_framework():
 
         return y_hat, f
 
-    def qubitNoiseFilter(self, y_hat, f):
+    def initMeasurementFitter(self, nQubits, nShots=1024):
+        """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
-        from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
+        Args:
+            nQubits ([type]): [description]
+            nShots (int, optional): [description]. Defaults to 1024.
+        """
+        if self.backend is None:
+            print("Need a backend first")
+            self.measFitter = None
+            return
 
-        qr = QuantumRegister(2)
-        meas_calibs, state_labels = complete_meas_cal(qr=qr, circlabel='mcal')
-        backend = self.provider.get_backend('ibmq_16_melbourne')
-        job = execute(meas_calibs, backend=backend, shots=1000)
-        job_monitor(job, interval = 3)
+        measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
+
+        job = execute(measCalibrations, backend=self.backend, shots=nShots)
+        job_monitor(job, interval=5)
         cal_results = job.result()
 
-        meas_fitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
-        print(meas_fitter.cal_matrix)
+        self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
+        print(self.measFitter.cal_matrix)
 
-        # --- Execution of the noisy quantum circuit
+    def qubitNoiseFilter(self, jobResult):
+        """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
-        qc = QuantumCircuit(nBits, nBits)
-        qc.x(1)
+        Args:
+            jobResult ([type]): [description]
 
-        qc.measure(qc.qregs[0], qc.cregs[0])
-        job = execute(qc, self.provider.get_backend('ibmq_16_melbourne'), shots = shots)
-        #job = execute(qc, BasicAer.get_backend('qasm_simulator'), shots = shots)
-        job_monitor(job, interval = 3)
-        result = job.result()
-        print(result.get_counts())
-
-        # --- Error correction
-
+        Returns:
+            [type]: [description]
+        """
         # Get the filter object
-        meas_filter = meas_fitter.filter
+        meas_filter = self.meas_fitter.filter
 
         # Results with mitigation
-        mitigated_results = meas_filter.apply(result)
-        mitigated_counts = mitigated_results.get_counts(0)
+        mitigatedResult = meas_filter.apply(jobResult)
+        mitigatedCounts = mitigatedResult.get_counts(0)
 
-        print(mitigated_counts)
-
-        return y_hat, f
+        return mitigatedCounts
 
     def showCircuit(self, y):
         """Display the circuit for a signal y
@@ -403,7 +406,7 @@ class qft_framework():
     
         #substitute with the desired backend
         job = execute(qc, self.backend, shots=self.numOfShots).result()
-        job_monitor(job) #run a blocking monitor thread
+        job_monitor(job, interval=5) #run a blocking monitor thread
 
         counts = job.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
