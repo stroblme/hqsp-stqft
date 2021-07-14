@@ -16,6 +16,7 @@ import inspect
 from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 
+from qiskit.tools.monitor import job_monitor
 
 from utils import isPow2
 
@@ -166,7 +167,40 @@ class qft_framework():
 
     def qubitNoiseFilter(self, y_hat, f):
 
-        # y_hat = y_hat*efilter
+        from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
+
+        qr = QuantumRegister(2)
+        meas_calibs, state_labels = complete_meas_cal(qr=qr, circlabel='mcal')
+        backend = self.provider.get_backend('ibmq_16_melbourne')
+        job = execute(meas_calibs, backend=backend, shots=1000)
+        job_monitor(job, interval = 3)
+        cal_results = job.result()
+
+        meas_fitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
+        print(meas_fitter.cal_matrix)
+
+        # --- Execution of the noisy quantum circuit
+
+        qc = QuantumCircuit(nBits, nBits)
+        qc.x(1)
+
+        qc.measure(qc.qregs[0], qc.cregs[0])
+        job = execute(qc, self.provider.get_backend('ibmq_16_melbourne'), shots = shots)
+        #job = execute(qc, BasicAer.get_backend('qasm_simulator'), shots = shots)
+        job_monitor(job, interval = 3)
+        result = job.result()
+        print(result.get_counts())
+
+        # --- Error correction
+
+        # Get the filter object
+        meas_filter = meas_fitter.filter
+
+        # Results with mitigation
+        mitigated_results = meas_filter.apply(result)
+        mitigated_counts = mitigated_results.get_counts(0)
+
+        print(mitigated_counts)
 
         return y_hat, f
 
