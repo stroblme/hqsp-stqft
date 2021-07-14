@@ -72,6 +72,8 @@ print("Processing real qft")
 
 qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=False, backendName=device)
 
+qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
+
 y_hat, f = qft.forward(y)
 y_hat_real_p, f_p = qft.postProcess(y_hat, f)
 plotData = qft.show(y_hat_real_p, f_p, subplot=[1,5,5], title=f"qft_real")

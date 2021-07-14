@@ -95,7 +95,8 @@ def loadBackend(backendName, simulation=True):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, fixZeroSignal=False, suppressPrint=False, draw=False, simulation=True, backendName=None, reuseBackend=None):
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, fixZeroSignal=False, suppressPrint=False, draw=False,
+    simulation=True, backendName=None, reuseBackend=None):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -110,6 +111,9 @@ class qft_framework():
             self.backend = reuseBackend
         else:
             self.setBackend(backendName, simulation)
+
+        self.mitigateResults = False
+        self.measFitter = None
 
     def getBackend(self):
         return self.backend
@@ -168,7 +172,7 @@ class qft_framework():
 
         return y_hat, f
 
-    def initMeasurementFitter(self, nQubits, nShots=1024):
+    def setupMeasurementFitter(self, nQubits, nShots=1024):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -189,6 +193,8 @@ class qft_framework():
         self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
         print(self.measFitter.cal_matrix)
 
+        self.mitigateResults = True
+
     def qubitNoiseFilter(self, jobResult):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
@@ -198,14 +204,18 @@ class qft_framework():
         Returns:
             [type]: [description]
         """
+        if self.measFitter == None:
+            print("Need to initialize measurement fitter first")
+            return jobResult
+
         # Get the filter object
-        meas_filter = self.meas_fitter.filter
+        measFilter = self.measFitter.filter
 
         # Results with mitigation
-        mitigatedResult = meas_filter.apply(jobResult)
-        mitigatedCounts = mitigatedResult.get_counts(0)
+        mitigatedResult = measFilter.apply(jobResult)
+        # mitigatedCounts = mitigatedResult.get_counts(0)
 
-        return mitigatedCounts
+        return mitigatedResult
 
     def showCircuit(self, y):
         """Display the circuit for a signal y
@@ -408,7 +418,12 @@ class qft_framework():
         job = execute(qc, self.backend, shots=self.numOfShots).result()
         job_monitor(job, interval=5) #run a blocking monitor thread
 
-        counts = job.get_counts()
+        if self.mitigateResults:
+            jobResult = self.qubitNoiseFilter(job.result())
+        else:
+            jobResult = job.result()
+
+        counts = jobResult.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
         y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
