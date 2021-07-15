@@ -415,7 +415,8 @@ class qft_framework():
             print("Executing job...")
     
         #substitute with the desired backend
-        job = execute(qc, self.backend, shots=self.numOfShots).result()
+        job = execute(qc, self.backend, shots=self.numOfShots)
+        # if job.status != "COMPLETED":
         job_monitor(job, interval=5) #run a blocking monitor thread
 
         if self.mitigateResults:
