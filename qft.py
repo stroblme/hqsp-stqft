@@ -227,7 +227,7 @@ class qft_framework():
         # Results with mitigation
         mitigatedResult = measFilter.apply(jobResult)
         # mitigatedCounts = mitigatedResult.get_counts(0)
-        print(f"Filtering achieved at '0000': {jobResult.get_counts()['0000']} vs before: {mitigatedResult.get_counts()['0000']}")
+        print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
         return mitigatedResult
 
     def showCircuit(self, y):
@@ -338,7 +338,7 @@ class qft_framework():
         D = int(D)
         y_hat_densed = np.zeros(int(y_hat.size/D))
 
-        for i in range(y_hat_densed.size*D-1):
+        for i in range(y_hat_densed.size*D):
             # if i%D != 0:
             y_hat_densed[int(i/D)] += abs(y_hat[i])
 
@@ -437,13 +437,13 @@ class qft_framework():
         if self.mitigateResults:
             jobResult = self.qubitNoiseFilter(job.result())
         else:
-            print("Warning: Mitigatin results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
+            print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
             jobResult = job.result()
 
         counts = jobResult.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, n_qubits))
         # [:n_samples//2]
-        y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
+        # y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
         # top_indices = np.argsort(-np.array(fft))
         # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
