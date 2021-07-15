@@ -24,7 +24,9 @@ class stt_framework():
 
         y_hat = np.empty((self.transformationInst.estimateSize(y_split_list[0]),nParts), dtype=np.complex64)
         print(f"Transformation output will be of shape {y_hat.shape}")
+
         for i in range(0, nParts):
+            print(f"Running iteration {i} of {nParts}")
             y_hat[:, i] = self.transformationInst.transform(y_split_list[i])
             # spectrum = np.fft.fft(padded) / fft_size          # take the Fourier Transform and scale by the number of samples
             # autopower = np.abs(spectrum * np.conj(spectrum))  # find the autopower spectrum
