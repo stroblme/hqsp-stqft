@@ -97,7 +97,7 @@ def loadBackend(backendName, simulation=True):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, fixZeroSignal=False, suppressPrint=False, draw=False,
+    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
     simulation=True, backendName=None, reuseBackend=None):
         self.suppressPrint = suppressPrint
         self.show = show
@@ -114,8 +114,11 @@ class qft_framework():
         else:
             self.setBackend(backendName, simulation)
 
-        self.mitigateResults = False
+        self.mitigateResults = suppressNoise
         self.measFitter = None
+        self.filterResult = None
+        self.customFilter = True
+
 
     def getBackend(self):
         return self.backend
@@ -193,22 +196,38 @@ class qft_framework():
             self.measFitter = None
             return None
 
-        measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
+        if self.customFilter:
+            y = np.ones(2**nQubits)
+            q = QuantumRegister(nQubits,'q')
+            qc = QuantumCircuit(q)
+            ampls = y / np.linalg.norm(y)
+            qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            qc = self.qft(qc, nQubits)
+            qc.measure_all()
+            qc = transpile(qc, self.backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
+            job = execute(qc, self.backend, shots=self.numOfShots)
+            job_monitor(job, interval=5) #run a blocking monitor thread
+            jobResult = job.result()
+            self.filterResult = jobResult.get_counts()
 
-        print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
-        job = execute(measCalibrations, backend=self.backend, shots=nShots)
-        job_monitor(job, interval=5)
-        cal_results = job.result()
 
-        self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
-        print(self.measFitter.cal_matrix)
+        else:
+            measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
+
+            print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
+            job = execute(measCalibrations, backend=self.backend, shots=nShots)
+            job_monitor(job, interval=5)
+            cal_results = job.result()
+
+            self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
+            print(self.measFitter.cal_matrix)
 
         print(f"Enabling mitigating results from now on..")
         self.mitigateResults = True
 
         return self.measFitter
 
-    def qubitNoiseFilter(self, jobResult):
+    def qubitNoiseFilter(self, jobResult, nQubits):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -217,17 +236,26 @@ class qft_framework():
         Returns:
             [type]: [description]
         """
-        if self.measFitter == None:
-            print("Need to initialize measurement fitter first")
-            return jobResult
+        if self.customFilter:
+            if self.filterResult == None:
+                print("Need to initialize measurement fitter first")
+                self.setupMeasurementFitter(nQubits=nQubits)
+            mitigatedResult = jobResult
+            for idx, count in jobResult.results[0].data.counts.items():
+                mitigatedResult.results[0].data.counts[idx] = min(count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
+            return mitigatedResult
+        else:
+            if self.measFitter == None:
+                print("Need to initialize measurement fitter first")
+                self.setupMeasurementFitter(nQubits=len(jobResult.results[0].data.counts))
 
-        # Get the filter object
-        measFilter = self.measFitter.filter
+            # Get the filter object
+            measFilter = self.measFitter.filter
 
-        # Results with mitigation
-        mitigatedResult = measFilter.apply(jobResult)
-        # mitigatedCounts = mitigatedResult.get_counts(0)
-        print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
+            # Results with mitigation
+            mitigatedResult = measFilter.apply(jobResult)
+            # mitigatedCounts = mitigatedResult.get_counts(0)
+            print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
         return mitigatedResult
 
     def showCircuit(self, y):
@@ -387,19 +415,19 @@ class qft_framework():
         n_samples = y.size
         assert isPow2(n_samples)
 
-        n_qubits = int((log2(n_samples)/log2(2)))
+        nQubits = int((log2(n_samples)/log2(2)))
         if not self.suppressPrint:
-            print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
+            print(f"Using {nQubits} Qubits to encode {n_samples} Samples")     
 
         if y.max() == 0.0:
             if self.fixZeroSignal:
                 print(f"Warning: Signal's max value is zero and therefore amplitude initialization will fail. Setting signal to constant-one to continue")
                 y = np.ones(n_samples)
             else:
-                y_hat = np.zeros(2**n_qubits)
+                y_hat = np.zeros(2**nQubits)
                 return y_hat
 
-        q = QuantumRegister(n_qubits,'q')
+        q = QuantumRegister(nQubits,'q')
         qc = QuantumCircuit(q)
 
         # Normalize ampl, which is required for squared sum of amps=1
@@ -408,10 +436,10 @@ class qft_framework():
         # for 2^n amplitudes, we have n qubits for initialization
         # this means that the binary representation happens exactly here
 
-        qc.initialize(ampls, [q[i] for i in range(n_qubits)])
+        qc.initialize(ampls, [q[i] for i in range(nQubits)])
         # qc += QFT(num_qubits=n_qubits, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=False, name='qft')
 
-        qc = self.qft(qc, n_qubits)
+        qc = self.qft(qc, nQubits)
         qc.measure_all()
         
         if self.draw:
@@ -435,15 +463,19 @@ class qft_framework():
         job_monitor(job, interval=5) #run a blocking monitor thread
 
         if self.mitigateResults:
-            jobResult = self.qubitNoiseFilter(job.result())
+            jobResult = self.qubitNoiseFilter(job.result(), nQubits)
         else:
-            print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
+            if not self.suppressPrint:
+                print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
             jobResult = job.result()
 
         counts = jobResult.get_counts()
-        y_hat = np.array(get_fft_from_counts(counts, n_qubits))
+        y_hat = np.array(get_fft_from_counts(counts, nQubits))
+        
         # [:n_samples//2]
         # y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
+
+
         # top_indices = np.argsort(-np.array(fft))
         # freqs = top_indices*self.samplingRate/n_samples
         # get top 5 detected frequencies
