@@ -18,6 +18,8 @@ from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
 
+from qiskit.circuit.library import QFT
+
 
 from qiskit.tools.monitor import job_monitor
 
@@ -172,6 +174,13 @@ class qft_framework():
 
         return y_hat, f
 
+    def loadMeasurementFitter(self, measFitter):
+        self.measFitter = measFitter
+        print(self.measFitter.cal_matrix)
+
+        print(f"Enabling mitigating results from now on..")
+        self.mitigateResults = True
+
     def setupMeasurementFitter(self, nQubits, nShots=1024):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
@@ -182,10 +191,11 @@ class qft_framework():
         if self.backend is None:
             print("Need a backend first")
             self.measFitter = None
-            return
+            return None
 
         measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
 
+        print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
         job = execute(measCalibrations, backend=self.backend, shots=nShots)
         job_monitor(job, interval=5)
         cal_results = job.result()
@@ -193,7 +203,10 @@ class qft_framework():
         self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
         print(self.measFitter.cal_matrix)
 
+        print(f"Enabling mitigating results from now on..")
         self.mitigateResults = True
+
+        return self.measFitter
 
     def qubitNoiseFilter(self, jobResult):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
@@ -214,7 +227,7 @@ class qft_framework():
         # Results with mitigation
         mitigatedResult = measFilter.apply(jobResult)
         # mitigatedCounts = mitigatedResult.get_counts(0)
-
+        print(f"Filtering achieved at '0000': {jobResult.get_counts()['0000']} vs before: {mitigatedResult.get_counts()['0000']}")
         return mitigatedResult
 
     def showCircuit(self, y):
@@ -386,7 +399,7 @@ class qft_framework():
                 y_hat = np.zeros(2**n_qubits)
                 return y_hat
 
-        q = QuantumRegister(n_qubits)
+        q = QuantumRegister(n_qubits,'q')
         qc = QuantumCircuit(q)
 
         # Normalize ampl, which is required for squared sum of amps=1
@@ -394,7 +407,9 @@ class qft_framework():
 
         # for 2^n amplitudes, we have n qubits for initialization
         # this means that the binary representation happens exactly here
+
         qc.initialize(ampls, [q[i] for i in range(n_qubits)])
+        # qc += QFT(num_qubits=n_qubits, approximation_degree=0, do_swaps=True, inverse=False, insert_barriers=False, name='qft')
 
         qc = self.qft(qc, n_qubits)
         qc.measure_all()
@@ -422,6 +437,7 @@ class qft_framework():
         if self.mitigateResults:
             jobResult = self.qubitNoiseFilter(job.result())
         else:
+            print("Warning: Mitigatin results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
             jobResult = job.result()
 
         counts = jobResult.get_counts()
