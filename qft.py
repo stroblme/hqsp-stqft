@@ -181,8 +181,9 @@ class qft_framework():
         self.measFitter = measFitter
         print(self.measFitter.cal_matrix)
 
-        print(f"Enabling mitigating results from now on..")
-        self.mitigateResults = True
+        if not self.mitigateResults:
+            print(f"Enabling mitigating results from now on..")
+            self.mitigateResults = True
 
     def setupMeasurementFitter(self, nQubits, nShots=1024):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
@@ -222,12 +223,13 @@ class qft_framework():
             self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
             print(self.measFitter.cal_matrix)
 
-        print(f"Enabling mitigating results from now on..")
-        self.mitigateResults = True
+        if not self.mitigateResults:
+            print(f"Enabling mitigating results from now on..")
+            self.mitigateResults = True
 
         return self.measFitter
 
-    def qubitNoiseFilter(self, jobResult, nQubits):
+    def qubitNoiseFilter(self, jobResult, nQubits=None):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -239,14 +241,20 @@ class qft_framework():
         if self.customFilter:
             if self.filterResult == None:
                 print("Need to initialize measurement fitter first")
+                if nQubits == None:
+                    print(f"For auto-initialization, you must provide the number of qubits")
+                    return jobResult
                 self.setupMeasurementFitter(nQubits=nQubits)
             mitigatedResult = jobResult
             for idx, count in jobResult.results[0].data.counts.items():
-                mitigatedResult.results[0].data.counts[idx] = min(count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
+                mitigatedResult.results[0].data.counts[idx] = min(0,count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
             return mitigatedResult
         else:
             if self.measFitter == None:
                 print("Need to initialize measurement fitter first")
+                if nQubits == None:
+                    print(f"For auto-initialization, you must provide the number of qubits")
+                    return jobResult
                 self.setupMeasurementFitter(nQubits=len(jobResult.results[0].data.counts))
 
             # Get the filter object
@@ -462,6 +470,10 @@ class qft_framework():
         # if job.status != "COMPLETED":
         job_monitor(job, interval=5) #run a blocking monitor thread
 
+        
+        if not self.suppressPrint:
+            print("Post Processing...")
+        
         if self.mitigateResults:
             jobResult = self.qubitNoiseFilter(job.result(), nQubits)
         else:
