@@ -229,7 +229,7 @@ class qft_framework():
 
         return self.measFitter
 
-    def qubitNoiseFilter(self, jobResult, nQubits=None):
+    def qubitNoiseFilter(self, jobResult, nQubits, nShots):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -244,10 +244,10 @@ class qft_framework():
                 if nQubits == None:
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
-                self.setupMeasurementFitter(nQubits=nQubits)
+                self.setupMeasurementFitter(nQubits=nQubits, nShots=nShots)
             mitigatedResult = jobResult
             for idx, count in jobResult.results[0].data.counts.items():
-                mitigatedResult.results[0].data.counts[idx] = min(0,count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
+                mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
             return mitigatedResult
         else:
             if self.measFitter == None:
@@ -475,7 +475,7 @@ class qft_framework():
             print("Post Processing...")
         
         if self.mitigateResults:
-            jobResult = self.qubitNoiseFilter(job.result(), nQubits)
+            jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits, nShots=self.numOfShots)
         else:
             if not self.suppressPrint:
                 print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
