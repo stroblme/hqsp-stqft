@@ -121,7 +121,8 @@ class qft_framework():
         
         if filterBackend == None:
             self.filterBackend = self.backend
-
+        else:
+            self.filterBackend = filterBackend
 
     def getBackend(self):
         return self.backend
