@@ -304,21 +304,6 @@ class signal(frontend):
 
         return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot, plotType="plot")
 
-        if subplot is not None:
-            plt.subplot(*subplot, frameon=False)
-        else:
-            plt.figure(figsize = (10, 6))
-
-
-
-        plt.plot(xdata, ydata, '.-')
-        plt.ylabel(ylabel)
-        plt.xlabel(xlabel)
-        plt.title(type(self).__name__)
-        plt.tight_layout()
-
-        return {'xdata':xdata, 'ydata':ydata, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
-
 class transform(frontend):
     def __init__(self, transformation, **kwargs):
         self.transformation = transformation(**kwargs)
@@ -344,13 +329,6 @@ class transform(frontend):
 
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
-        # if t == None:
-        #     y_hat, f = self.transformation.postProcess(y_hat, f)
-        
-        # else:
-        #     y_hat, f, t = self.transformation.postProcess(y_hat, f, t)
-        
-        # get the one side frequency
         if autopower:
             y_hat = np.abs(y_hat)
             n = y_hat.shape[0]//2
@@ -405,38 +383,6 @@ class transform(frontend):
             
         return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot)
 
-        if subplot is not None:
-            plt.subplot(*subplot,frameon=False)
-            plt.subplots_adjust(wspace=0.58)
-        else:
-            plt.figure(figsize = (10, 6))
-
-        if x2Data is None:
-            plt.stem(x1Data, np.abs(yData))
-            if xlabel != "":
-                plt.xlabel(xlabel)
-            else:
-                plt.xlabel('Freq (Hz)')
-            if ylabel != "":
-                plt.ylabel(ylabel)
-            else:
-                plt.ylabel('Amplitude (abs)')
-        else:
-            plt.pcolormesh(x2Data, x1Data, yData, cmap=COLORMAP, shading=SHADING)
-            if xlabel != "":
-                plt.xlabel(xlabel)
-            else:
-                plt.xlabel('Time (s)')
-            if ylabel != "":
-                plt.ylabel(ylabel)
-            else:
-                plt.ylabel('Freq (Hz)')
-            # plt.colorbar(format='%+2.0f')
-
-        plt.tight_layout()
-        fighandle = plt.gca()
-
-        return fighandle
 
 class grader(frontend):
     epsilon=1e-10
@@ -550,16 +496,6 @@ class export():
         sha = repo.head.object.hexsha
         self.details[self.GITHASH] = sha
 
-    # def safePlot(self):
-    #     pltInstance = self.details[self.PLOTDATA]
-
-    #     path = self.getBasePath() + ".png"
-
-    #     gs = GridSpec(1,1,figure=pltInstance)[0]
-    #     pltInstance.axes[0].set_subplotspec(gs)
-
-    #     pltInstance.savefig(path)
-
     def safeDetails(self):
         path = self.getBasePath() + ".p"
 
@@ -569,10 +505,7 @@ class export():
         self.createTopicOnDemand()
         self.getGitCommitId()
 
-        # self.safePlot()
         self.safeDetails()
-
-        # del(self.details)
 # ----------------------------------------------------------
 # On-Import region
 # ----------------------------------------------------------
