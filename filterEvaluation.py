@@ -135,7 +135,7 @@ print("Processing Simulated QFT")
 
 qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=True, backendName=device)
 
-qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
+# qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
 
 y_hat, f = qft.forward(y)
 y_hat_sim_p, f_p = qft.postProcess(y_hat, f)
@@ -149,9 +149,9 @@ exp.doExport()
 
 print("Processing simulated qft with noise")
 
-qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=True, backendName=device)
+qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, suppressNoise=True, simulation=True, backendName=device)
 
-qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
+# qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
 
 y_hat, f = qft.forward(y)
 y_hat_sim_n_p, f_p = qft.postProcess(y_hat, f)
@@ -165,9 +165,7 @@ exp.doExport()
 
 print("Processing real qft")
 
-qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, simulation=False, backendName=device)
-
-qft.transformation.setupMeasurementFitter(nQubits)  #necessary to initialize measurement fitter
+qft = transform(qft_framework, fixZeroSignal=True, suppressPrint=False, suppressNoise=True, simulation=False, backendName=device)
 
 y_hat, f = qft.forward(y)
 y_hat_real_p, f_p = qft.postProcess(y_hat, f)
