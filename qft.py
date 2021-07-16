@@ -189,7 +189,7 @@ class qft_framework():
             print(f"Enabling mitigating results from now on..")
             self.mitigateResults = True
 
-    def setupMeasurementFitter(self, nQubits, nShots=1024):
+    def setupMeasurementFitter(self, nQubits, nShots, nRuns=4):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -210,11 +210,20 @@ class qft_framework():
             qc = self.qft(qc, nQubits)
             qc.measure_all()
             qc = transpile(qc, self.filterBackend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
-            job = execute(qc, self.filterBackend, shots=self.numOfShots)
-            job_monitor(job, interval=5) #run a blocking monitor thread
-            jobResult = job.result()
-            self.filterResult = jobResult.get_counts()
 
+            print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots")
+
+            jobResults = list()
+            for n in range(nRuns):
+                job = execute(qc, self.filterBackend, shots=self.numOfShots)
+                job_monitor(job, interval=5) #run a blocking monitor thread
+                jobResult = job.result()
+                jobResults.append(jobResult.get_counts())
+
+            self.filterResult = dict()
+            for result in jobResults:
+                self.filterResult = {k: self.filterResult.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(self.filterResult) | set(result)}
+            print(f"Filter Results: {self.filterResult}")
 
         else:
             measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
