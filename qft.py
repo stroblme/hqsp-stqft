@@ -98,7 +98,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -118,6 +118,9 @@ class qft_framework():
         self.measFitter = None
         self.filterResult = None
         self.customFilter = True
+        
+        if filterBackend == None:
+            self.filterBackend = self.backend
 
 
     def getBackend(self):
