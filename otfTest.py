@@ -1,3 +1,6 @@
+from qft import get_fft_from_counts
+
+
 # --- Standard imports
 
 # Importing standard Qiskit libraries and configuring account
