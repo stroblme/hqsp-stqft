@@ -208,8 +208,8 @@ class qft_framework():
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = self.qft(qc, nQubits)
             qc.measure_all()
-            qc = transpile(qc, self.backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
-            job = execute(qc, self.backend, shots=self.numOfShots)
+            qc = transpile(qc, self.filterBackend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
+            job = execute(qc, self.filterBackend, shots=self.numOfShots)
             job_monitor(job, interval=5) #run a blocking monitor thread
             jobResult = job.result()
             self.filterResult = jobResult.get_counts()
