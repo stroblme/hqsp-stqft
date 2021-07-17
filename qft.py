@@ -191,7 +191,7 @@ class qft_framework():
             print(f"Enabling mitigating results from now on..")
             self.mitigateResults = True
 
-    def setupMeasurementFitter(self, nQubits, nShots, nRuns=1):
+    def setupMeasurementFitter(self, nQubits, nShots, nRuns=4):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
