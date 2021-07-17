@@ -427,6 +427,8 @@ class export():
     DESCRIPTION = "description"
     IDENTIFIER = "identifier"
     BACKEND = "backend"
+    JOBRESULT = "jobresult"
+    FILTERRESULT = "filteresult"
     QCCIRCUIT = "qccircuit"
     SIGNAL = "SIGNAL"
     SIGNALPARAM = "signalparam"
