@@ -7,6 +7,8 @@ import datetime
 import numpy as np
 from numpy import array, pi
 
+import copy
+
 from math import log2
 
 from qiskit import *
@@ -116,7 +118,7 @@ class qft_framework():
 
         self.mitigateResults = suppressNoise
         self.measFitter = None
-        self.filterResult = None
+        self.filterResultCounts = None
         self.customFilter = True
         
         if filterBackend == None:
@@ -189,7 +191,7 @@ class qft_framework():
             print(f"Enabling mitigating results from now on..")
             self.mitigateResults = True
 
-    def setupMeasurementFitter(self, nQubits, nShots, nRuns=4):
+    def setupMeasurementFitter(self, nQubits, nShots, nRuns=1):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -220,10 +222,10 @@ class qft_framework():
                 jobResult = job.result()
                 jobResults.append(jobResult.get_counts())
 
-            self.filterResult = dict()
+            self.filterResultCounts = dict()
             for result in jobResults:
-                self.filterResult = {k: self.filterResult.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(self.filterResult) | set(result)}
-            print(f"Filter Results: {self.filterResult}")
+                self.filterResultCounts = {k: self.filterResultCounts.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(self.filterResultCounts) | set(result)}
+            print(f"Filter Results: {self.filterResultCounts}")
 
         else:
             measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
@@ -242,7 +244,7 @@ class qft_framework():
 
         return self.measFitter
 
-    def qubitNoiseFilter(self, jobResult, nQubits, nShots):
+    def qubitNoiseFilter(self, jobResult, nQubits):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -252,15 +254,17 @@ class qft_framework():
             [type]: [description]
         """
         if self.customFilter:
-            if self.filterResult == None:
+            if self.filterResultCounts == None:
                 print("Need to initialize measurement fitter first")
                 if nQubits == None:
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
-                self.setupMeasurementFitter(nQubits=nQubits, nShots=nShots)
-            mitigatedResult = jobResult
-            for idx, count in jobResult.results[0].data.counts.items():
-                mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResult[format(int(idx,16), f'0{int(log2(len(jobResult.results[0].data.counts)))}b')])
+                self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.result[0].shots)
+            mitigatedResult = copy.deepcopy(jobResult)
+            jobResultCounts = jobResult.results[0].data.counts
+
+            for idx, count in jobResultCounts.items():
+                mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(len(jobResultCounts)))}b')])
             return mitigatedResult
         else:
             if self.measFitter == None:
@@ -268,7 +272,7 @@ class qft_framework():
                 if nQubits == None:
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
-                self.setupMeasurementFitter(nQubits=len(jobResult.results[0].data.counts))
+                self.setupMeasurementFitter(nQubits=len(jobResultCounts))
 
             # Get the filter object
             measFilter = self.measFitter.filter
@@ -483,6 +487,7 @@ class qft_framework():
         # if job.status != "COMPLETED":
         job_monitor(job, interval=5) #run a blocking monitor thread
 
+        self.lastJobResultCounts = job.result().get_counts()
         
         if not self.suppressPrint:
             print("Post Processing...")
