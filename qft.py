@@ -220,7 +220,7 @@ class qft_framework():
                 job = execute(qc, self.filterBackend, shots=self.numOfShots)
                 job_monitor(job, interval=5) #run a blocking monitor thread
                 jobResult = job.result()
-                jobResults.append(jobResult.get_counts())
+                jobResults.append(jobResult.results[0].data.counts)
 
             self.filterResultCounts = dict()
             for result in jobResults:
@@ -266,10 +266,11 @@ class qft_framework():
             maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
 
             for idx, count in jobResultCounts.items():
-                if count/maxCount < 0.5:    # only filter counts which are less than half of the chance
+                if count/maxCount < 0.5 or idx == "0x0":    # only filter counts which are less than half of the chance
                     # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
                     # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
-                    mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(len(jobResultCounts)))}b')])
+                    # mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(nQubits))}b')])
+                    mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
             return mitigatedResult
         else:
             if self.measFitter == None:
@@ -277,7 +278,7 @@ class qft_framework():
                 if nQubits == None:
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
-                self.setupMeasurementFitter(nQubits=len(jobResultCounts))
+                self.setupMeasurementFitter(nQubits=nQubits)
 
             # Get the filter object
             measFilter = self.measFitter.filter
