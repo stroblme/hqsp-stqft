@@ -1,6 +1,4 @@
 import time
-from tkinter.constants import NO
-from IPython import get_ipython
 
 import datetime
 
