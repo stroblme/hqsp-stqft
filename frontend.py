@@ -311,14 +311,17 @@ class transform(frontend):
     def forward(self, y, **kwargs):
         y_hat = self.transformation.transform(y, **kwargs)
 
-        n = np.arange(y_hat.shape[0])
-        F = y_hat.shape[0]/y.samplingRate
-        f = n/F
-        
+        # n = np.arange(y_hat.shape[0])
+        # F = y_hat.shape[0]/y.samplingRate
+        # f = n/F
+        f = self.calcFreqArray(y, y_hat)
+
         if len(y_hat.shape) == 2:
-            n = np.arange(y_hat.shape[1])
-            T = y_hat.shape[1]/y.duration
-            t = n/T
+            # n = np.arange(y_hat.shape[1])
+            # T = y_hat.shape[1]/y.duration
+            # t = n/T
+            t = self.calcTimeArray(y, y_hat)
+
             return y_hat, f, t
         else:
             return y_hat, f
@@ -326,7 +329,19 @@ class transform(frontend):
     def backward(self, y_hat, **kwargs):
         y = self.transformation.transformInv(y_hat, **kwargs)
 
+    def calcFreqArray(self, y, y_hat):
+        n = np.arange(y_hat.shape[0])
+        F = y_hat.shape[0]/y.samplingRate
+        f = n/F
 
+        return f
+
+    def calcTimeArray(self, y, y_hat):
+        n = np.arange(y_hat.shape[1])
+        T = y_hat.shape[1]/y.duration
+        t = n/T
+
+        return t
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
         if autopower:
