@@ -263,10 +263,13 @@ class qft_framework():
             mitigatedResult = copy.deepcopy(jobResult)
             jobResultCounts = jobResult.results[0].data.counts
 
+            maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
+
             for idx, count in jobResultCounts.items():
-                # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
-                # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
-                mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(len(jobResultCounts)))}b')])
+                if count/maxCount < 0.5:    # only filter counts which are less than half of the chance
+                    # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
+                    # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
+                    mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(len(jobResultCounts)))}b')])
             return mitigatedResult
         else:
             if self.measFitter == None:
