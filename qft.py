@@ -98,7 +98,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -106,7 +106,9 @@ class qft_framework():
         self.draw = draw
 
         self.simulation = simulation
-        self.fixZeroSignal = fixZeroSignal        
+        self.fixZeroSignal = fixZeroSignal  
+
+        self.transpOptLvl = transpOptLvl      
 
         if reuseBackend != None:
             print(f"Reusing backend {reuseBackend}")
@@ -209,7 +211,7 @@ class qft_framework():
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = self.qft(qc, nQubits)
             qc.measure_all()
-            qc = transpile(qc, self.filterBackend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
+            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
             print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots")
 
@@ -477,7 +479,7 @@ class qft_framework():
         if not self.suppressPrint:
             print(f"Transpiling for {self.backend}")
     
-        qc = transpile(qc, self.backend, optimization_level=1) # opt level 0,1..3. 3: heaviest opt
+        qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
         if not self.suppressPrint:
             print("Executing job...")
