@@ -16,8 +16,8 @@ nQubits = 7
 windowLength = 2**nQubits
 overlapFactor=0.5
 windowType='hann'
-b = 3
-mrot = PI/2**(nQubits+1-b)
+b = 2
+mrot = PI/2**(nQubits-1-b)
 print(f"Mrot set to {mrot}")
 
 print("Initializing Signal")
@@ -50,17 +50,17 @@ exp.setData(export.DESCRIPTION, "stft, chirp, window: 'hann', length=2**7")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
-# print("Processing simulation STQFT")
-# stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
-# y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
-# plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
+print("Processing simulation STQFT")
+stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
+y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale='mel')
+plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
 
-# exp = export(topic=TOPIC, identifier="stqft")
-# exp.setData(export.SIGNAL, y_hat_stqft)
-# exp.setData(export.DESCRIPTION, f"stqft, chirp, window: 'hann', length=2**7, mrot:{mrot}")
-# exp.setData(export.PLOTDATA, plotData)
-# exp.doExport()
+exp = export(topic=TOPIC, identifier="stqft")
+exp.setData(export.SIGNAL, y_hat_stqft)
+exp.setData(export.DESCRIPTION, f"stqft, chirp, window: 'hann', length=2**7, mrot:{mrot}")
+exp.setData(export.PLOTDATA, plotData)
+exp.doExport()
 
 print("Processing real STQFT")
 device = "ibmq_casablanca"
