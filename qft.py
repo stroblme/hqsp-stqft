@@ -259,11 +259,13 @@ class qft_framework():
                 if nQubits == None:
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
-                self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.result[0].shots)
+                self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.results[0].shots)
             mitigatedResult = copy.deepcopy(jobResult)
             jobResultCounts = jobResult.results[0].data.counts
 
             for idx, count in jobResultCounts.items():
+                # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
+                # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
                 mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(len(jobResultCounts)))}b')])
             return mitigatedResult
         else:
@@ -493,7 +495,7 @@ class qft_framework():
             print("Post Processing...")
         
         if self.mitigateResults:
-            jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits, nShots=self.numOfShots)
+            jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits)
         else:
             if not self.suppressPrint:
                 print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
