@@ -1,7 +1,3 @@
-from matplotlib.pyplot import draw, text
-from numpy.random import random
-from qiskit.providers import backend
-from qft import loadBackend
 from stft import stft_framework
 from stqft import stqft_framework
 from frontend import frontend, grader, signal, transform, export
