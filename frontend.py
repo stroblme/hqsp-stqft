@@ -306,7 +306,12 @@ class signal(frontend):
 
 class transform(frontend):
     def __init__(self, transformation, **kwargs):
-        self.transformation = transformation(**kwargs)
+        # allow getting called with none to access internal tools
+        if transformation == None:
+            print("Warning: Transformation called with 'None' parameter. Use with caution!")
+            self.transformation = None
+        else:
+            self.transformation = transformation(**kwargs)
 
     def forward(self, y, **kwargs):
         y_hat = self.transformation.transform(y, **kwargs)
