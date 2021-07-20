@@ -1,3 +1,3 @@
 [submodule "data"]
 	path = data
-	url = https://github.com/stroblme/hqsp-stqft-data
+	url = git@github.com:stroblme/hqsp-stqft-data.git
