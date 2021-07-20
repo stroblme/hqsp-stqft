@@ -8,17 +8,17 @@ frontend.enableInteractive()
 TOPIC = "filterEvaluation"
 # export.checkWorkingTree()
 
-nQubits = 7
-b = 2
+nQubits = 4
+b = 1
 mrot = PI/2**(nQubits-b-1)
 print(f"Mrot set to {mrot}")
 
 print("Initializing Harmonic Signal")
 
-y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**nQubits)
+y = signal(samplingRate=1000, amplification=1, duration=0, nSamples=2**nQubits)
 
-y.addFrequency(1000)  # you should choose a frequency matching a multiple of samplingRate/nSamples
-y.addFrequency(2000)
+y.addFrequency(125)  # you should choose a frequency matching a multiple of samplingRate/nSamples
+y.addFrequency(250)
 
 plotData = y.show(subplot=[1,6,1], title='signal')
 

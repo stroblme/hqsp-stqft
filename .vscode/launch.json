@@ -62,10 +62,17 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Filter Evaluation",
+            "name": "STQFT: Filter Evaluation",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceRoot}/filterEvaluation.py",
+            "program": "${workspaceRoot}/sc_filterEvaluation.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Qiskit Filter",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_qiskitFilter.py",
             "console": "integratedTerminal"
         }
     ]
