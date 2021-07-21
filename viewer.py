@@ -1,9 +1,8 @@
-from tkinter import *
-from tkinter.ttk import *
+# from tkinter import *
+# from tkinter.ttk import *
 import pickle
-import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
+# matplotlib.use("TkAgg")
 import glob
 import os
 from qbstyles import mpl_style
