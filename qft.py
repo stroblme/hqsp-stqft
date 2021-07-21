@@ -20,8 +20,9 @@ from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasF
 
 from qiskit.circuit.library import QFT
 
-
 from qiskit.tools.monitor import job_monitor
+
+import mitiq
 
 from utils import isPow2
 
@@ -253,6 +254,7 @@ class qft_framework():
         Returns:
             [type]: [description]
         """
+        # TODO: implement filter selection here
         if self.customFilter:
             if self.filterResultCounts == None:
                 print("Need to initialize measurement fitter first")
@@ -518,6 +520,9 @@ class qft_framework():
 
         
         return y_hat
+
+    def executor(circuit: mitiq.QPROGRAM) -> float:
+        pass
 
     def processIQFT(self, y):
         n_samples = y.size
