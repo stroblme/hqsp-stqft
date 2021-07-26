@@ -1,4 +1,5 @@
 from qft import get_fft_from_counts, loadBackend, qft_framework
+from fft import fft_framework
 from frontend import frontend, signal, transform
 
 from qiskit.circuit.library import QFT as qiskit_qft
@@ -61,6 +62,19 @@ ys = signal(samplingRate=1000, amplification=1, duration=0, nSamples=2**nQubits)
 ys.addFrequency(125)
 ys.addFrequency(250)
 y = ys.sample()
+
+plotData = ys.show(subplot=[1,4,1], title='signal')
+
+print("Processing FFT")
+
+fft = transform(fft_framework)
+
+y_hat, f = fft.forward(ys)
+y_hat_ideal_p, f_p = fft.postProcess(y_hat, f)
+plotData = fft.show(y_hat_ideal_p, f_p, subplot=[1,4,2], title="FFT (ref)")
+
+
+
 # y.addFrequency(250)
 ampls = y / np.linalg.norm(y)
 
@@ -93,7 +107,7 @@ y_hat = np.array(get_fft_from_counts(result.get_counts(), nQubits))
 
 f = genTransform.calcFreqArray(ys, y_hat)
 y_hat_sim_p, f_p = genTransform.postProcess(y_hat, f)
-plotData = genTransform.show(y_hat_sim_p, f_p, subplot=[1,2,1], title=f"qft_sim_n")
+plotData = genTransform.show(y_hat_sim_p, f_p, subplot=[1,4,3], title=f"qft_sim_n")
 
 print(y_hat)
 
@@ -119,7 +133,7 @@ y_hat = np.array(get_fft_from_counts(mitigated_counts, nQubits))
 
 f = genTransform.calcFreqArray(ys, y_hat)
 y_hat_sim_p, f_p = genTransform.postProcess(y_hat, f)
-plotData = genTransform.show(y_hat_sim_p, f_p, subplot=[1,2,2], title=f"qft_sim_n_f")
+plotData = genTransform.show(y_hat_sim_p, f_p, subplot=[1,4,4], title=f"qft_sim_n_f")
 
 print(y_hat)
 

@@ -1,5 +1,5 @@
 from math import exp
-from qft import qft_framework, loadBackend, get_fft_from_counts
+from qft import qft_framework, loadBackend, get_fft_from_counts, hexKeyToBin
 from fft import fft_framework
 from frontend import frontend, signal, transform, export
 from utils import PI
@@ -11,6 +11,7 @@ TOPIC = "filterEvaluation"
 nQubits = 4
 b = 1
 mrot = PI/2**(nQubits-b-1)
+
 print(f"Mrot set to {mrot}")
 
 print("Initializing Harmonic Signal")
@@ -91,7 +92,7 @@ exp.setData(export.JOBRESULT, qft.transformation.lastJobResultCounts)
 exp.setData(export.FILTERRESULT, qft.transformation.filterResultCounts)
 exp.doExport()
 
-y_hat_f  = np.array(get_fft_from_counts(qft.transformation.filterResultCounts, nQubits))
+y_hat_f  = np.array(get_fft_from_counts(*hexKeyToBin(qft.transformation.filterResultCounts, nQubits)))
 y_hat_sim_n_p_f, f_p = qft.postProcess(y_hat_f, f)
 plotData = qft.show(y_hat_sim_n_p_f, f_p, subplot=[1,6,6], title=f"qft_filter")
 
