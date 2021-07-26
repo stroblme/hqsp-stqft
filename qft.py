@@ -38,6 +38,12 @@ def get_bit_string(n, n_qubits):
 
     return bs
 
+def hexKeyToBin(counts, n_qubits):
+    out = dict()
+    for key, value in counts.items():
+        out[format(int(key,16), f'0{int(n_qubits)}b')] = value
+    return out, n_qubits
+
 def get_fft_from_counts(counts, n_qubits):
 
     out = []
