@@ -57,7 +57,7 @@ class frontend():
         ax = event.inaxes
         if ax is not None:
             # Occurs when a region not in an axis is clicked...
-            if int(event.button) is 1:
+            if int(event.button) == 1:
                 # On left click, zoom the selected axes
                 ax._orig_position = ax.get_position()
                 ax.set_position([0.1, 0.1, 0.85, 0.85])
@@ -67,7 +67,7 @@ class frontend():
                         axis.set_visible(False)
                 event.canvas.draw()
 
-            elif int(event.button) is 3:
+            elif int(event.button) == 3:
                 # On right click, restore the axes
                 try:
                     ax.set_position(ax._orig_position)
