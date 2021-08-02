@@ -499,7 +499,8 @@ class qft_framework():
         #substitute with the desired backend
         job = execute(qc, self.backend, shots=self.numOfShots)
         # if job.status != "COMPLETED":
-        job_monitor(job, interval=5) #run a blocking monitor thread
+        if not self.suppressPrint:
+            job_monitor(job, interval=5) #run a blocking monitor thread
 
         self.lastJobResultCounts = job.result().get_counts()
         
