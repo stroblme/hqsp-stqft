@@ -14,6 +14,7 @@ nQubits = 7
 windowLength = 2**nQubits #nqubits. using results from minRot_harmonic
 overlapFactor=0.5
 windowType='hann'
+mrot = 0.2
 
 print("Initializing Chirp Signal")
 
@@ -36,32 +37,23 @@ plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,nQubits+2,nQubits+3])
 
 print("Processing Simulated STQFT")
 
-mrot = 0
-pt = 0
-grader_inst = grader()
 
-while mrot <= PI/2:
-    stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
-    y_hat_sim, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-    y_hat_sim_p, f_p, t_p = stqft.postProcess(y_hat_sim, f ,t, scale='mel')
-    ylabel = "Amplitude" if pt == 0 else " "
-    plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,nQubits+2,2+pt], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
-
-    snr = grader_inst.calculateNoisePower(y_hat_sim_p, y_hat_stft_p)
-    print(f"Calculated an snr of {snr} db")
-    grader_inst.log(snr, mrot)
-    print(f"Minimum rotation is: {mrot}")
-
-    pt += 1
-    mrot = PI/2**(nQubits-pt)
-
+stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
+y_hat_sim, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_hat_sim_p, f_p, t_p = stqft.postProcess(y_hat_sim, f ,t, scale='mel')
+plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,nQubits+3,1], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel="Amplitude")
 
 print("Processing Inverse STFT")
 
-stft = transform(stft_framework, ifft_framework)
-y_hat_stft, f ,t = stft.backward(y_hat_sim_p, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,nQubits+2,nQubits+3])
+y_i = y
+
+y_hat = signal()
+y_hat.externalSample(y_hat_sim_p, t)
+
+stft = transform(stft_framework, transform=ifft_framework)
+y_i_samples, f ,t = stft.forward(y_hat, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_i.externalSample(y_i_samples,t)
+y_i.show(subplot=[2,nQubits+3,2])
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking
