@@ -74,6 +74,13 @@
             "request": "launch",
             "program": "${workspaceRoot}/sc_qiskitFilter.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Inverse Transform",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_inverseTransform.py",
+            "console": "integratedTerminal"
         }
     ]
 }

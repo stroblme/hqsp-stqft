@@ -15,8 +15,8 @@ from fft import fft_framework
 from stt import stt_framework
 
 class stft_framework():
-    def __init__(self):
-        self.stt_inst = stt_framework(fft_framework)
+    def __init__(self, transform=fft_framework):
+        self.stt_inst = stt_framework(transform)
 
     def transform(self, y_signal, **kwargs):
         return self.stt_inst.stt_transform(y_signal, **kwargs)
