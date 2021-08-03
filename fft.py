@@ -1,4 +1,5 @@
 from IPython import get_ipython
+from librosa.core import fft
 
 import numpy as np
 from numpy import pi
@@ -19,12 +20,6 @@ class fft_framework():
         y_hat = self.fft_recurse(y)
 
         return y_hat
-
-    def transformInv(self, y_signal):
-        y_hat = y_signal.sample()
-        y = self.ifft_recurse(y_hat)
-
-        return y
 
     def postProcess(self, y_hat, f):
         return y_hat, f
@@ -47,7 +42,15 @@ class fft_framework():
 
         return y_hat
 
-    def ifft_recurse(self, y):
+    def estimateSize(self, y_signal):
+        assert isPow2(y_signal.nSamples)
+
+        n_bins = int((log2(y_signal.nSamples)/log2(2)))
+
+        return 2**n_bins
+
+class ifft_framework(fft_framework):
+    def fft_recurse(self, y):
         N = len(y)
         
         if N == 1:
@@ -64,10 +67,3 @@ class fft_framework():
                                     y_hat_even+rotation[int(N/2):]*y_hat_odd])
 
         return y_hat
-
-    def estimateSize(self, y_signal):
-        assert isPow2(y_signal.nSamples)
-
-        n_bins = int((log2(y_signal.nSamples)/log2(2)))
-
-        return 2**n_bins
