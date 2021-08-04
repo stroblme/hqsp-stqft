@@ -155,6 +155,7 @@ class signal(frontend):
         print(f"Signal duration set to {self.duration}s, resulting in {self.nSamples} samples")
         print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
         self.t = np.arange(0,self.duration,self.samplingInterval)
+        self.f = None
 
     def createEmptySignal(self, nSamples):
         self.y = np.zeros(nSamples)
@@ -224,9 +225,10 @@ class signal(frontend):
         self.frequencies.append(frequency)
         self.phases.append(phase)
 
-    def externalSample(self, y, t):
+    def externalSample(self, y, t, f=None):
         self.y = y
         self.t = t
+        self.f = f
         self.setNSamples(0,t.size)
         self.lockSampling=True
 
@@ -333,6 +335,8 @@ class transform(frontend):
 
     def backward(self, y_hat, **kwargs):
         y = self.transformation.transformInv(y_hat, **kwargs)
+
+        return y, y_hat.t
 
     def calcFreqArray(self, y, y_hat):
         n = np.arange(y_hat.shape[0])
