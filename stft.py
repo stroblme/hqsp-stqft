@@ -21,6 +21,9 @@ class stft_framework():
     def transform(self, y_signal, **kwargs):
         return self.stt_inst.stt_transform(y_signal, **kwargs)
 
+    def transformInv(self, y_signal, **kwargs):
+        return self.stt_inst.stt_transformInv(y_signal, **kwargs)
+
     def postProcess(self, y_hat, f, t):
         return self.stt_inst.postProcess(y_hat, f, t)
         
