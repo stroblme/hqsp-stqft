@@ -26,14 +26,14 @@ y.addFrequency(2000, y.duration)
 y.addFrequency(1000)
 y.addFrequency(3000, y.duration)
 
-plotData = y.show(subplot=[2,nQubits+2,1])
+plotData = y.show(subplot=[2,4,1])
 
 print("Processing STFT")
 
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,nQubits+2,nQubits+3])
+plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[2,4,3])
 
 print("Processing Simulated STQFT")
 
@@ -41,19 +41,19 @@ print("Processing Simulated STQFT")
 stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
 y_hat_sim, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_sim_p, f_p, t_p = stqft.postProcess(y_hat_sim, f ,t, scale='mel')
-plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,nQubits+3,1], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel="Amplitude")
+plotData = stqft.show(y_hat_sim_p, f_p, t_p, subplot=[2,4,2], title=f"STQFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel="Amplitude")
 
 print("Processing Inverse STFT")
 
 y_i = y
 
 y_hat = signal()
-y_hat.externalSample(y_hat_sim_p, t)
+y_hat.externalSample(y_hat_sim_p, t, f)
 
 stft = transform(stft_framework, transform=ifft_framework)
-y_i_samples, f ,t = stft.forward(y_hat, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+y_i_samples, t = stft.backward(y_hat, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_i.externalSample(y_i_samples,t)
-y_i.show(subplot=[2,nQubits+3,2])
+y_i.show(subplot=[2,4,4])
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking
