@@ -1,11 +1,13 @@
 from IPython import get_ipython
 
 import numpy as np
-from numpy import array, pi
+from numpy import array, pi, sign
 
 from math import log2
 
-import matplotlib.pyplot as plt
+from frontend import signal
+
+import matplotlib.pyplot as plt 
 from numpy.core.fromnumeric import size
 
 from qiskit import *
@@ -36,6 +38,22 @@ class stt_framework():
         
         # result = 20*np.log10(result)          # scale to db
         # result = np.clip(result, -40, 200)    # clip values
+
+        return y_hat
+
+    def stt_transformInv(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=False):
+        nParts = len(y_signal.t)
+        
+        y_hat = np.zeros(int(len(y_signal.t)*len(y_signal.f)*overlapFactor), dtype=np.complex64)
+        y_signal_part = signal()
+
+        for i in range(0,nParts):
+
+            y_signal_part.externalSample(y_signal.y[:,i], y_signal.t)
+
+            pt = i*len(y_signal.f)
+            if i == 0:
+                y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += self.transformationInst.transform(y_signal_part)
 
         return y_hat
 
