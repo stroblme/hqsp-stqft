@@ -42,18 +42,20 @@ class stt_framework():
         return y_hat
 
     def stt_transformInv(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=False):
-        nParts = len(y_signal.t)
+        hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
+        # nParts = np.int32(np.ceil(len(y_signal.t) / np.float32(hopSize)))
         
-        y_hat = np.zeros(int(len(y_signal.t)*len(y_signal.f)*overlapFactor), dtype=np.complex64)
+        y_hat = np.zeros((len(y_signal.t)+1)*hopSize, dtype=np.float64)
         y_signal_part = signal()
 
-        for i in range(0,nParts):
+        for i in range(0,len(y_signal.t)):
 
             y_signal_part.externalSample(y_signal.y[:,i], y_signal.t)
 
-            pt = i*len(y_signal.f)
-            if i == 0:
-                y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += self.transformationInst.transform(y_signal_part)
+            pt = i*hopSize
+            # if i == 0:
+                # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += self.transformationInst.transform(y_signal_part)
+            y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += np.float64(self.transformationInst.transform(y_signal_part))
 
         return y_hat
 
