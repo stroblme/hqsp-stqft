@@ -251,7 +251,9 @@ class signal(frontend):
 
         for i in range(0,nParts-1): # -1 because e.g with an overlap of 0.5 we will get 2*N - 1 segments
             currentHop = hopSize * i                        # figure out the current segment offset
+            
             segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
+            
             windowed = segment * window                       # multiply by the half cosine function
             
             y = deepcopy(self)
