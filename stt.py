@@ -57,20 +57,30 @@ class stt_framework():
 
             pt = i*hopSize
             # if i == 0:
-                # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += self.transformationInst.transform(y_signal_part)
+            #---a
+            # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += np.float64(self.transformationInst.transform(y_signal_part))            # y_hat_temp = np.float64(self.transformationInst.transform(y_signal_part))
+            #---
+
+            #---b
+            # y_hat_temp = np.float64(self.transformationInst.transform(y_signal_part))
+
+            # if i == 0:
+            #     y_hat[:len(y_signal.f)] += y_hat_temp
+            # elif i == nParts-1:
+            #     y_hat[-len(y_signal.f):] += y_hat_temp
+            # else:
+            #     y_hat[int(pt-hopSize/2):int(pt+len(y_signal.f)*overlapFactor+hopSize/2)] += y_hat_temp
+            #---
+
+            #---c
             y_hat_temp = np.float64(self.transformationInst.transform(y_signal_part))
-            
+
             n = y_hat_temp.shape[0]//2
-            # y_hat_sliced =y_hat_temp[n:]/n 
+            y_hat_sliced =y_hat_temp[n:]/n 
 
-            # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += y_hat_sliced
-            if i == 0:
-                y_hat[:len(y_signal.f)] += y_hat_temp
-            elif i == nParts:
-                y_hat[-len(y_signal.f):] += y_hat_temp
-            else:
-                y_hat[int(pt-hopSize/2):pt+int(len(y_signal.f)*overlapFactor+hopSize/2)] += y_hat_temp
+            y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += y_hat_sliced
 
+            #---
         return y_hat
 
     def postProcess(self, y_hat, f, t):
