@@ -48,14 +48,28 @@ class stt_framework():
         y_hat = np.zeros((len(y_signal.t)+1)*hopSize, dtype=np.float64)
         y_signal_part = signal()
 
-        for i in range(0,len(y_signal.t)):
+        nParts = len(y_signal.t)
+        for i in range(0,nParts):
+            if not suppressPrint:
+                print(f"Running iteration {i} of {nParts}")
 
             y_signal_part.externalSample(y_signal.y[:,i], y_signal.t)
 
             pt = i*hopSize
             # if i == 0:
                 # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += self.transformationInst.transform(y_signal_part)
-            y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += np.float64(self.transformationInst.transform(y_signal_part))
+            y_hat_temp = np.float64(self.transformationInst.transform(y_signal_part))
+            
+            n = y_hat_temp.shape[0]//2
+            # y_hat_sliced =y_hat_temp[n:]/n 
+
+            # y_hat[pt:pt+int(len(y_signal.f)*overlapFactor)] += y_hat_sliced
+            if i == 0:
+                y_hat[:len(y_signal.f)] += y_hat_temp
+            elif i == nParts:
+                y_hat[-len(y_signal.f):] += y_hat_temp
+            else:
+                y_hat[int(pt-hopSize/2):pt+int(len(y_signal.f)*overlapFactor+hopSize/2)] += y_hat_temp
 
         return y_hat
 
