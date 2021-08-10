@@ -188,7 +188,7 @@ class signal(frontend):
             else:
                 self.setNSamples(duration=duration, nSamples=0)
 
-        self.y = librosa.load(path, sr=self.samplingRate, duration=self.duration) * self.amplification
+        self.y, _ = librosa.load(path, sr=self.samplingRate, duration=self.duration) * self.amplification
 
 
         # mel_feat = librosa.feature.melspectrogram(y, sr=sr, n_fft=1024, hop_length=128, power=1.0, n_mels=60, fmin=40.0, fmax=sr/2)
