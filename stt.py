@@ -1,18 +1,6 @@
-from IPython import get_ipython
-
 import numpy as np
-from numpy import array, pi, sign
-
-from math import log2
 
 from frontend import signal
-
-import matplotlib.pyplot as plt 
-from numpy.core.fromnumeric import size
-
-from qiskit import *
-from qiskit.visualization import plot_histogram
-from qiskit.circuit.library import QFT as qiskit_qft
 
 class stt_framework():
     def __init__(self, transformation, **kwargs):
