@@ -15,7 +15,7 @@ def test_stft_scipy(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=
     
     return y_hat, f, t
 
-def test_stft_librosa(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
+def test_stft_librosa(y_signal, nSamplesWindow=2**10, overlapFactor=0.125, windowType=None):
     y_hat = librosa.stft(   y_signal.sample(), 
                             n_fft=nSamplesWindow, 
                             hop_length=int(overlapFactor*nSamplesWindow),
