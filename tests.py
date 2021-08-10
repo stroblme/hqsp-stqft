@@ -60,11 +60,9 @@ def test_melspectrogram(y_signal):
 
 def test_plot(y_hat, sr):
     fig, ax = plt.subplots()
-    img = librosa.display.specshow(y_hat, x_axis='time',
-
-                            y_axis='linear', sr=sr,
-
-                            fmax=sr/2, ax=ax)
+    img = librosa.display.specshow(y_hat, x_axis='time', y_axis='linear', sr=sr, fmax=sr/2, ax=ax)
 
     fig.colorbar(img, ax=ax, format='%+2.0f dB')
     ax.set(title='Mel-frequency spectrogram')
+
+    plt.show()
