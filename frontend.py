@@ -254,6 +254,10 @@ class signal(frontend):
             
             segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
             
+            #usefull when splitting and overlapping overshoots the available samples
+            if segment.size < window.size:
+                segment = self.y[-nSamplesWindow:]
+
             windowed = segment * window                       # multiply by the half cosine function
             
             y = deepcopy(self)
@@ -356,10 +360,12 @@ class transform(frontend):
 
     def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
         if autopower:
-            y_hat = np.abs(y_hat)
+            y_hat = np.float32(np.abs(y_hat))
+            # y_hat = np.abs(y_hat)
             n = y_hat.shape[0]//2
             f = f[:n]
-            y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
+            # y_hat =(y_hat[:n]/n if t is None else y_hat[:n,:]/n) 
+            y_hat =(y_hat[:n] if t is None else y_hat[:n,:]) 
 
         if fmax != None:
             if fmax >= f.max():
