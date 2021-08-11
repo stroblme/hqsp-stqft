@@ -152,7 +152,7 @@ class qft_framework():
 
         return 2**n_qubits
 
-    def transform(self, y_signal, draw=False):
+    def transform(self, y_signal):
         """Apply QFT on a given Signal
 
         Args:
@@ -163,6 +163,16 @@ class qft_framework():
         """
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
+
+        # rm when eval done
+        THRESHOLD=0.02
+        if y.max() < THRESHOLD:
+            print("Values too small")
+            return np.zeros(y.size)
+        
+        y_p = y
+        for i in range(y.size):
+            y[i] = 0 if abs(y_p[i]) < THRESHOLD else y_p[i]
 
         y_hat = self.processQFT(y)
 
@@ -268,7 +278,13 @@ class qft_framework():
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
                 self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.results[0].shots)
+            elif self.filterResultCounts.size == 1:
+                print("Seems like you try to mitigate noise of a simulation without any noise. You can either disable noise suppression or consider running with noise.")
+                return jobResult
+            
+            
             mitigatedResult = copy.deepcopy(jobResult)
+
             jobResultCounts = jobResult.results[0].data.counts
 
             maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
