@@ -358,7 +358,7 @@ class transform(frontend):
 
         return t
 
-    def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmax=None):
+    def postProcess(self, y_hat, f, t=None, scale=None, autopower=True, normalize=True, fmin=None, fmax=None, samplingRate=None, nMels=None, fOut=None):
         if autopower:
             y_hat = np.float32(np.abs(y_hat))
             # y_hat = np.abs(y_hat)
@@ -383,7 +383,12 @@ class transform(frontend):
             y_hat = 20*np.log10(y_hat)
             # plt.yscale('log',base=2)
         elif scale == 'mel':
-            y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
+            fSize = f.size if not autopower else f.size*2
+            mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax)
+
+            y_hat = np.dot(mel_basis[:,1:], y_hat)
+
+            # y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
             # plt.yscale('log',base=2)
 
         if t is None:
