@@ -167,7 +167,7 @@ class qft_framework():
         # rm when eval done
         THRESHOLD=0.02
         if y.max() < THRESHOLD:
-            print("Values too small")
+            # print("Values too small")
             return np.zeros(y.size)
         
         y_p = y
