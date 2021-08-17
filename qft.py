@@ -24,7 +24,7 @@ from qiskit.tools.monitor import job_monitor
 
 import mitiq
 
-from utils import isPow2
+from utils import filterByThreshold, isPow2
 
 
 def get_bit_string(n, n_qubits):
@@ -105,7 +105,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilterLvl=1):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -166,13 +166,7 @@ class qft_framework():
 
         # rm when eval done
         THRESHOLD=0.02
-        if y.max() < THRESHOLD:
-            # print("Values too small")
-            return np.zeros(y.size)
-        
-        y_p = y
-        for i in range(y.size):
-            y[i] = 0 if abs(y_p[i]) < THRESHOLD else y_p[i]
+        y = filterByThreshold(y, THRESHOLD)
 
         y_hat = self.processQFT(y)
 
@@ -479,6 +473,8 @@ class qft_framework():
                 print(f"Warning: Signal's max value is zero and therefore amplitude initialization will fail. Setting signal to constant-one to continue")
                 y = np.ones(n_samples)
             else:
+                if not self.suppressPrint:
+                    print(f"Zero Signal and fix should not be applied. Will return zero signal with expected length")
                 y_hat = np.zeros(2**nQubits)
                 return y_hat
 
