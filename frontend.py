@@ -241,6 +241,13 @@ class signal(frontend):
         elif windowType == 'hamm':
             window = np.hamming(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
+        elif windowType == 'blackman':
+            window = np.blackman(nSamplesWindow)
+            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
+        elif windowType == 'kaiser':
+            window = np.kaiser(nSamplesWindow, 8.6-overlapFactor*5.2) #starting from 8.6=blackman over 6=hanning and 5=hamming downtp 0=rect
+            print(f"Using {8.6-overlapFactor*5.2} as beta value for window type 'kaiser'")
+        
         else:
             window = 1.
 
