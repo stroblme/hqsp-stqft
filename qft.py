@@ -114,6 +114,9 @@ class qft_framework():
 
         self.simulation = simulation
         self.fixZeroSignal = fixZeroSignal  
+        self.signalFilter = signalFilter
+        if fixZeroSignal and signalFilter:
+            print("Signal Filter AND zero fixer are enabled. This might result in a wasteful transform. Consider disabling Zero Fixer if not needed.")
 
         self.transpOptLvl = transpOptLvl      
 
@@ -128,7 +131,6 @@ class qft_framework():
         self.filterResultCounts = None
         self.customFilter = True
 
-        self.signalFilter = signalFilter
         
         if filterBackend == None:
             self.filterBackend = self.backend
