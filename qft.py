@@ -113,6 +113,9 @@ class qft_framework():
         self.draw = draw
 
         self.simulation = simulation
+        if simulation and backendName==None and reuseBackend==None and minRotation > 0.0:
+            print("Simulation enabled and minimal rotation not zero. This will only decrease measurement quality")
+
         self.fixZeroSignal = fixZeroSignal  
         self.signalFilter = signalFilter
         if fixZeroSignal and signalFilter:
