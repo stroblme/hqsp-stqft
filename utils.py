@@ -1,7 +1,8 @@
+import numpy as np
+
 def isPow2(x):
     return (x!=0) and (x & (x-1)) == 0
 
-import numpy as np
 PI = np.pi
 
 def filterByThreshold(y, threshold):
@@ -16,3 +17,4 @@ def filterByThreshold(y, threshold):
     #     y[i] = 0 if abs(y[i]) < threshold else y[i]
 
     return y
+
