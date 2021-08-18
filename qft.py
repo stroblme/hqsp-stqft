@@ -105,7 +105,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilterLvl=1):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -127,6 +127,8 @@ class qft_framework():
         self.measFitter = None
         self.filterResultCounts = None
         self.customFilter = True
+
+        self.signalFilter = signalFilter
         
         if filterBackend == None:
             self.filterBackend = self.backend
@@ -164,9 +166,10 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
-        # rm when eval done
-        THRESHOLD=0.02
-        y = filterByThreshold(y, THRESHOLD)
+        if self.signalFilter:
+            # rm when eval done
+            THRESHOLD=0.02
+            y = filterByThreshold(y, THRESHOLD)
 
         y_hat = self.processQFT(y)
 
