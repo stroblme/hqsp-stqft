@@ -5,14 +5,17 @@ def isPow2(x):
 
 PI = np.pi
 
+def calcThreshold(y):
+    pass #needsidea
+
 def filterByThreshold(y, threshold):
     #shortcut, so that we don't need to iterate the whole signal
     if y.max() < threshold:
-            # print("Values too small")
-            return np.zeros(y.size)
+        # print("Values too small")
+        return np.zeros(y.size)
 
 
-    y = np.where(y < threshold, 0, y)  
+    y = np.where(abs(y) < threshold, 0, y)  
     # for i in range(y.size):
     #     y[i] = 0 if abs(y[i]) < threshold else y[i]
 
