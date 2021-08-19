@@ -6,7 +6,7 @@ class stt_framework():
     def __init__(self, transformation, **kwargs):
         self.transformationInst = transformation(**kwargs)
 
-    def stt_transform(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=False):
+    def stt_transform(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=True):
         
         y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         # y_split_list = y_signal.split(nSamplesWindow)
@@ -29,7 +29,7 @@ class stt_framework():
 
         return y_hat
 
-    def stt_transformInv(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=False):
+    def stt_transformInv(self, y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None, suppressPrint=True):
         hopSize = np.int32(np.floor(nSamplesWindow * (1-overlapFactor)))
         # nParts = np.int32(np.ceil(len(y_signal.t) / np.float32(hopSize)))
         
