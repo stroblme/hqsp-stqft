@@ -22,7 +22,7 @@ from qiskit.circuit.library import QFT
 
 from qiskit.tools.monitor import job_monitor
 
-import mitiq
+# import mitiq
 
 from utils import filterByThreshold, isPow2
 
@@ -548,8 +548,8 @@ class qft_framework():
         
         return y_hat
 
-    def executor(circuit: mitiq.QPROGRAM) -> float:
-        pass
+    # def executor(circuit: mitiq.QPROGRAM) -> float:
+    #     pass
 
     def processIQFT(self, y):
         n_samples = y.size

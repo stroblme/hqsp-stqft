@@ -1,5 +1,3 @@
-from IPython import get_ipython
-
 import numpy as np
 from numpy import pi
 
