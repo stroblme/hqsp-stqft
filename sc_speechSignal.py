@@ -16,7 +16,7 @@ speechSignal = '../dataset/zero/4634529e_nohash_2.wav'  #female noise
 
 windowLength = 2**10
 overlapFactor=0.5
-windowType='hann'
+windowType='hanning'
 
 print("Initializing Signal")
 

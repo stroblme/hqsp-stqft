@@ -15,7 +15,7 @@ export.checkWorkingTree()
 nQubits = 7
 windowLength = 2**nQubits #nqubits. using results from minRot_harmonic
 overlapFactor=0.5
-windowType='hann'
+windowType='hanning'
 mrot = 0.2
 
 print("Initializing Chirp Signal")

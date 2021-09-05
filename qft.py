@@ -3,7 +3,7 @@ import time
 import datetime
 
 import numpy as np
-from numpy import array, pi
+from numpy import pi
 
 import copy
 

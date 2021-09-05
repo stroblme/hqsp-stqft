@@ -11,7 +11,7 @@ TOPIC = "chirp_realDevice"
 nQubits = 7
 windowLength = 2**nQubits
 overlapFactor=0.5
-windowType='hann'
+windowType='hanning'
 b = 2
 mrot = PI/2**(nQubits-1-b)
 print(f"Mrot set to {mrot}")
@@ -42,7 +42,7 @@ plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,4,2], title="stft")
 
 exp = export(topic=TOPIC, identifier="stft")
 exp.setData(export.SIGNAL, y_hat_stft)
-exp.setData(export.DESCRIPTION, "stft, chirp, window: 'hann', length=2**7")
+exp.setData(export.DESCRIPTION, "stft, chirp, window: 'hanning', length=2**7")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
@@ -54,7 +54,7 @@ plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,4,3], title="stqft")
 
 exp = export(topic=TOPIC, identifier="stqft")
 exp.setData(export.SIGNAL, y_hat_stqft)
-exp.setData(export.DESCRIPTION, f"stqft, chirp, window: 'hann', length=2**7, mrot:{mrot}")
+exp.setData(export.DESCRIPTION, f"stqft, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
 exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
@@ -67,7 +67,7 @@ plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,4,4], title="stqft_nois
 
 exp = export(topic=TOPIC, identifier="stqft-noise")
 exp.setData(export.SIGNAL, y_hat_stqft)
-exp.setData(export.DESCRIPTION, f"stqft, {device}, chirp, window: 'hann', length=2**7, mrot:{mrot}")
+exp.setData(export.DESCRIPTION, f"stqft, {device}, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
 exp.setData(export.PLOTDATA, plotData)
 exp.setData(export.BACKEND, stqft.transformation.stt_inst.transformationInst.getBackend())
 exp.doExport()

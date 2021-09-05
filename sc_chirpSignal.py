@@ -7,7 +7,7 @@ frontend.enableInteractive()
 
 windowLength = 2**7
 overlapFactor=0.5
-windowType='hann'
+windowType='hanning'
 
 print("Initializing Signal")
 

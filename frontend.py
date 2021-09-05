@@ -235,10 +235,10 @@ class signal(frontend):
     def split(self, nSamplesWindow, overlapFactor=0, windowType=None):
         self.sample()
 
-        if windowType == 'hann':
+        if windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hanning window")
-        elif windowType == 'hamm':
+        elif windowType == 'hamming':
             window = np.hamming(nSamplesWindow)
             if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
         elif windowType == 'blackman':
