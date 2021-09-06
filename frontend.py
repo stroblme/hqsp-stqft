@@ -482,6 +482,7 @@ class export():
     GRADERX = "graderx"
     GRADERY = "gradery"
     GITHASH = "githash"
+    GENERICDATA = "gendata"
 
 
     def __init__(self, topic=None, identifier=None) -> None:
