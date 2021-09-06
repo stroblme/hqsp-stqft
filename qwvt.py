@@ -23,10 +23,10 @@ class qwvt_framework():
 
     def wvd(y_signal, t=None, N=None, trace=0, make_analytic=True):
         y=y_signal.sample()
-        if make_analytic:
-            x = hilbert(y)
-        else:
-            x = array(y)
+        # if make_analytic:
+        #     x = hilbert(y)
+        # else:
+        x = array(y)
 
         if x.ndim == 1: [xrow, xcol] = np.shape(array([x]))
         else: raise ValueError("Signal x must be one-dimensional.")
