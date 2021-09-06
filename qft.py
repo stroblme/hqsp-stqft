@@ -105,7 +105,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=False):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -118,7 +118,7 @@ class qft_framework():
 
         self.fixZeroSignal = fixZeroSignal  
         self.signalFilter = signalFilter
-        if fixZeroSignal and signalFilter:
+        if fixZeroSignal and signalFilter > 0:
             print("Signal Filter AND zero fixer are enabled. This might result in a wasteful transform. Consider disabling Zero Fixer if not needed.")
 
         self.transpOptLvl = transpOptLvl      
@@ -171,10 +171,9 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
-        if self.signalFilter:
+        if self.signalFilter > 0:
             # rm when eval done
-            THRESHOLD=0.02
-            y = filterByThreshold(y, THRESHOLD)
+            y = filterByThreshold(y, self.signalFilter)
 
         y_hat = self.processQFT(y)
 
