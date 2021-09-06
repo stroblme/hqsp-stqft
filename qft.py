@@ -334,7 +334,7 @@ class qft_framework():
 
         for qubit in range(n):
             rot = pi/2**(n-qubit)
-            if rot < self.minRotation:
+            if rot <= self.minRotation:
                 rotGateSaveCounter += 1
                 if not self.suppressPrint:
                     print(f"Rotations lower than {self.minRotation}: is {rot}")
