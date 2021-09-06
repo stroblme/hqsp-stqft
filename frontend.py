@@ -485,13 +485,15 @@ class export():
     GENERICDATA = "gendata"
 
 
-    def __init__(self, topic=None, identifier=None) -> None:
+    def __init__(self, topic=None, identifier=None, dataDir=DATADIRECTORY) -> None:
         self.details = dict()
 
         if topic is not None:
             self.setData(self.TOPIC, topic)
         if identifier is not None:
             self.setData(self.IDENTIFIER, identifier)
+            
+        self.DATADIRECTORY = dataDir
 
 
     def setData(self, dkey, data):
