@@ -492,7 +492,7 @@ class export():
             self.setData(self.TOPIC, topic)
         if identifier is not None:
             self.setData(self.IDENTIFIER, identifier)
-            
+
         self.DATADIRECTORY = dataDir
 
 
@@ -531,10 +531,22 @@ class export():
             print(e)
 
     @staticmethod
-    def checkWorkingTree():
-        repo = git.Repo(path=export.DATADIRECTORY)
+    def checkWorkingTree(dataDir=DATADIRECTORY):
+        try:
+            repo = git.Repo(path=dataDir)
+        except FileNotFoundError:
+            print("Invalid directory")
+            return
+        except git.InvalidGitRepositoryError:
+            print("Try to initialize this directory as a git repo first")
+            return
 
-        hcommit = repo.head.commit
+        try:
+            hcommit = repo.head.commit
+        except ValueError:
+            print("Try to make a commit in this repository first")
+            return
+
         d = hcommit.diff(None)
         if len(d) > 0:
             input(f"Working Tree in {export.DATADIRECTORY} is dirty. You might want to commit first. Press any key to continue regardless")
