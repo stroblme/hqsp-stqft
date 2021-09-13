@@ -541,6 +541,8 @@ class export():
             print("Try to initialize this directory as a git repo first")
             return
 
+        export.DATADIRECTORY=dataDir
+
         try:
             hcommit = repo.head.commit
         except ValueError:
