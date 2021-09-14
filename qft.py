@@ -114,7 +114,7 @@ class qft_framework():
 
         self.simulation = simulation
         if simulation and backendName==None and reuseBackend==None and minRotation > 0.0:
-            print("Simulation enabled and minimal rotation not zero. This might not always be")
+            print("Simulation enabled and minimal rotation not zero. This might not always be usefull")
 
         self.fixZeroSignal = fixZeroSignal  
         self.signalFilter = signalFilter
