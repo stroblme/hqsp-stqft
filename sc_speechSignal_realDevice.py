@@ -6,6 +6,7 @@ from tests import *
 
 frontend.enableInteractive()
 TOPIC = "speech_realDevice"
+export.checkWorkingTree()
 
 # speechSignal = '../dataset/zero/4a1e736b_nohash_2.wav' #male clear
 # speechSignal = '../dataset/zero/0fa1e7a9_nohash_1.wav' #male noise
@@ -37,7 +38,7 @@ y.show(subplot=[1,3,1])
 print("Processing STFT")
 stft = transform(stft_framework)
 y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t, scale='mel', fmax=4000)
+y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t, scale=scale, normalize=normalize, samplingRate=y.samplingRate, nMels=nMels, fmin=fmin, fmax=y.samplingRate/2)
 plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,3,2], title="stft")
 
 exp = export(topic=TOPIC, identifier="stft")
