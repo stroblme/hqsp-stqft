@@ -4,7 +4,7 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt 
 import numpy as np
-from qutip import *
+# from qutip import *
 
 def test_stft_scipy(y_signal, nSamplesWindow=2**10, overlapFactor=0, windowType=None):
     f, t, y_hat = scipySignal.stft( y_signal.sample(), y_signal.samplingRate, 
