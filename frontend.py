@@ -395,7 +395,7 @@ class transform(frontend):
             mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax, norm=np.inf)
 
             y_hat = np.dot(mel_basis[:,1:], y_hat)
-
+            f = np.dot(mel_basis[:,1:], f)
             # y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
             # plt.yscale('log',base=2)
         if normalize:
