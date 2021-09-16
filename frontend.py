@@ -382,21 +382,25 @@ class transform(frontend):
                 f = f[:f_idx]
                 y_hat = y_hat[:f_idx,:]    
 
-        if normalize:
-            y_hat = y_hat*(1/y_hat.max()) if y_hat.max() != 0 else y_hat
-            # y_hat = y_hat*(1/sqrt(y_hat.shape[0]))
 
         if scale == 'log':
             y_hat = 20*np.log10(y_hat)
             # plt.yscale('log',base=2)
         elif scale == 'mel':
             fSize = f.size if not autopower else f.size*2
-            mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax, norm=1)
+
+            # apply mel filters with normalization:
+            # np.inf -> max()=1
+            # 1 -> max()=
+            mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax, norm=np.inf)
 
             y_hat = np.dot(mel_basis[:,1:], y_hat)
 
             # y_hat = 1127*np.log10(1+y_hat/700) # mel scale formula
             # plt.yscale('log',base=2)
+        if normalize:
+            y_hat = y_hat*(1/y_hat.max()) if y_hat.max() != 0 else y_hat
+            # y_hat = y_hat*(1/sqrt(y_hat.shape[0]))
 
         if t is None:
             return y_hat, f
