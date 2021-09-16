@@ -2,12 +2,12 @@ import numpy as np
 from numpy import pi
 from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
-from math import log, ceil, floor, sqrt
+from math import log, floor
 from copy import deepcopy
 import os
 import pickle
 import git
-from matplotlib.gridspec import GridSpec
+# from matplotlib.gridspec import GridSpec
 
 import librosa
 
