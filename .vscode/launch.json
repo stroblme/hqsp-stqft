@@ -34,6 +34,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "STQFT: Speech Real Device",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_speechSignal_realDevice.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "STQFT: Min Rotations Harmonic",
             "type": "python",
             "request": "launch",
@@ -81,6 +88,6 @@
             "request": "launch",
             "program": "${workspaceRoot}/sc_inverseTransform.py",
             "console": "integratedTerminal"
-        }
+        },
     ]
 }
