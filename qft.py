@@ -18,7 +18,7 @@ from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
 
-from qiskit.circuit.library import QFT
+# from qiskit.circuit.library import QFT
 
 from qiskit.tools.monitor import job_monitor
 
@@ -28,8 +28,14 @@ from utils import filterByThreshold, isPow2
 
 
 def get_bit_string(n, n_qubits):
-    """
-    Returns the binary string of an integer with n_qubits characters
+    """Returns the binary string of an integer with n_qubits characters
+
+    Args:
+        n (int): integer to be converted
+        n_qubits (int): number of qubits
+
+    Returns:
+        string: binary string
     """
 
     assert n < 2**n_qubits, 'n too big to binarise, increase n_qubits or decrease n'
@@ -40,13 +46,31 @@ def get_bit_string(n, n_qubits):
     return bs
 
 def hexKeyToBin(counts, n_qubits):
+    """Generates binary representation of a hex based counts
+
+    Args:
+        counts (dict): dictionary with hex keys
+        n_qubits (int): number of qubits
+
+    Returns:
+        dict: dictionary with bin keys
+        n_qubits (int): number of qubits
+    """
     out = dict()
     for key, value in counts.items():
         out[format(int(key,16), f'0{int(n_qubits)}b')] = value
     return out, n_qubits
 
 def get_fft_from_counts(counts, n_qubits):
+    """Calculates the fft based on the counts of an experiment
 
+    Args:
+        counts (int): dictionary with binary keys
+        n_qubits (int): number of qubits
+
+    Returns:
+        dict: fft counts
+    """
     out = []
     keys = counts.keys()
     for i in range(2**n_qubits):
