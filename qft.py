@@ -535,10 +535,13 @@ class qft_framework():
 
         counts = jobResult.get_counts()
         y_hat = np.array(get_fft_from_counts(counts, nQubits))
-        
+
         # [:n_samples//2]
         # y_hat = self.dense(y_hat, D=max(n_qubits/(self.samplingRate/n_samples),1))
 
+        # Omitting normalization here, since we normalize in post
+        y_hat = y_hat * 1/self.numOfShots
+        # y_hat = y_hat*(1/y_hat.max())
 
         # top_indices = np.argsort(-np.array(fft))
         # freqs = top_indices*self.samplingRate/n_samples
