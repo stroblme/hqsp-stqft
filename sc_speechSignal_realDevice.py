@@ -48,10 +48,10 @@ exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing STQFT")
-device = "ibmq_casablanca"
+device = "ibmq_guadalupe"
 
-stqft = transform(stqft_framework, suppressPrint=True, signalFilter=signalFilter, minRotation=minRotation)
-y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType, simulation=True, backendName=device)
+stqft = transform(stqft_framework, suppressPrint=True, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device)
+y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=scale, normalize=normalize, samplingRate=y.samplingRate, nMels=nMels, fmin=fmin, fmax=y.samplingRate/2)
 
 plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,3,3], title="stqft_noise")
