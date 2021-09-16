@@ -391,7 +391,7 @@ class transform(frontend):
             # plt.yscale('log',base=2)
         elif scale == 'mel':
             fSize = f.size if not autopower else f.size*2
-            mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax)
+            mel_basis = librosa.filters.mel(samplingRate, fSize, n_mels=nMels, fmin=fmin, fmax=fmax, norm=1)
 
             y_hat = np.dot(mel_basis[:,1:], y_hat)
 
