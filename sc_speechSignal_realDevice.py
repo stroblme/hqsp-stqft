@@ -51,7 +51,7 @@ exp.doExport()
 print("Processing STQFT")
 device = "ibmq_guadalupe"
 
-stqft = transform(stqft_framework, suppressPrint=True, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device)
+stqft = transform(stqft_framework, suppressPrint=False, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=scale, normalize=normalize, samplingRate=y.samplingRate, nMels=nMels, fmin=fmin, fmax=y.samplingRate/2)
 
