@@ -12,7 +12,8 @@ export.checkWorkingTree()
 # speechSignal = '../dataset/zero/0fa1e7a9_nohash_1.wav' #male noise
 # speechSignal = '../dataset/zero/7ea032f3_nohash_3.wav'  #male questionary
 # speechSignal = '../dataset/zero/8e05039f_nohash_4.wav'  #female clear
-speechSignal = '../dataset/zero/4634529e_nohash_2.wav'  #female noise
+# speechSignal = '../dataset/zero/4634529e_nohash_2.wav'  #female noise
+speechSignal = '/storage/mstrobl/dataset/zero/4634529e_nohash_2.wav'  #female noise
 
 
 nQubits=10
