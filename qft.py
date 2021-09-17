@@ -25,7 +25,7 @@ from qiskit.tools.monitor import job_monitor
 # import mitiq
 
 from utils import filterByThreshold, isPow2
-
+import ibmAccounts #NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
 
 def get_bit_string(n, n_qubits):
     """Returns the binary string of an integer with n_qubits characters
@@ -534,7 +534,13 @@ class qft_framework():
         if not self.suppressPrint:
             print(f"Transpiling for {self.backend}")
     
+        if not self.suppressPrint:
+            print(f"Depth before transpiling: {qc.depth()}")
+
         qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
+        if not self.suppressPrint:
+            print(f"Depth after transpiling: {qc.depth()}")
 
         if not self.suppressPrint:
             print("Executing job...")
