@@ -1,6 +1,7 @@
 import time
 
 import datetime
+from git import exc
 
 import numpy as np
 from numpy import pi
@@ -111,14 +112,17 @@ def loadBackend(backendName, simulation=True):
     #                             and x.status().operational==True))
 
     nQubitsAvailable = len(props.qubits)
-    qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
-    qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
-    qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
 
-    print(f"Backend {backend} has {nQubitsAvailable} qubits available.")
-    print(f"ReadoutErrors are {qubitReadoutErrors}")
-    print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
-    print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+    try:
+        qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
+        qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
+        qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
+        print(f"Backend {backend} has {nQubitsAvailable} qubits available.")
+        print(f"ReadoutErrors are {qubitReadoutErrors}")
+        print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
+        print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+    except IndexError:
+        print(f"Failed to get some properties. This can mean that they are simply not stored together with the mock backend")
 
     if simulation:
         backend = AerSimulator.from_backend(backend)
