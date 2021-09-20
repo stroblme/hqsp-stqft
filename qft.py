@@ -196,8 +196,15 @@ class qft_framework():
                 print("Warning this might will lead an key error later in transform, as simulation has no noise but noise model was enabled and no filter backend provided")
             self.filterBackend = self.backend
         else:
-            _, tempBackend = loadBackend(filterBackend, True)
-            self.filterBackend = tempBackend
+            # check if noise model should be used
+            if not useNoiseModel:
+                _, tempBackend = loadBackend(filterBackend, True)
+                self.filterBackend = tempBackend
+            else:
+                _, tempBackend = loadBackend(backendName, True)
+                self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
+                self.filterBackend = self.getSimulatorBackend()
+
 
         # noise mitigation
         self.measFitter = None
@@ -217,6 +224,9 @@ class qft_framework():
         """
         return self.backend
 
+    def getSimulatorBackend(self):
+        return Aer.get_backend('qasm_simulator')
+
     def setBackend(self, backendName=None, simulation=True):
         if backendName != None:
             self.provider, self.backend = loadBackend(backendName=backendName, simulation=simulation)
@@ -224,7 +234,7 @@ class qft_framework():
             if not self.simulation:
                 print("Setting simulation to 'True', as no backend was specified")
                 self.simulation = True
-            self.backend = Aer.get_backend('qasm_simulator')
+            self.backend = self.getSimulatorBackend()
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
