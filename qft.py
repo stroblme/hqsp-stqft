@@ -460,38 +460,6 @@ class qft_framework():
 
         return y
 
-    def encode(self, circuit, integer):
-        if integer.bit_length() > circuit.width():
-            raise RuntimeError("Integer too large")
-
-        binary = bin(integer)[2:]
-        for i in range(0,min(len(binary),circuit.width()-1)):
-            if binary[i] == '1':
-                circuit.x(i)
-
-        return circuit
-
-    def runCircuit(self, circuit):
-        backend = Aer.get_backend("statevector_simulator")
-        qobj = assemble(circuit)
-        results = backend.run(qobj).result()
-        output = results.get_statevector()
-
-        return output
-
-    def decode(self, buffer, value):
-        # buffer = value.argmax(axis=0)
-        buffer = self.accumulate(buffer, value.argmax(axis=0))
-        # buffer = self.accumulate(buffer, int(bin(value.argmax(axis=0)),2))
-
-        return buffer
-
-    def accumulate(self, buffer, value, intense=1):
-        buffer[value] += intense
-
-        return buffer
-
-
     def dense(self, y_hat, D=3):
         if D==0:
             return y_hat
@@ -569,7 +537,7 @@ class qft_framework():
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = self.qft(qc, nQubits)
             qc.measure_all()
-            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+            qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
         if self.draw:
             self.draw=False
