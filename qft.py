@@ -12,6 +12,7 @@ from math import log2
 
 from qiskit import *
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
+from qiskit.providers.aer import noise
 from qiskit.circuit.library import QFT as qiskit_qft
 
 import inspect
@@ -133,16 +134,22 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
+    simulation=True, useNoiseModel=False, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
 
+        if useNoiseModel and not simulation:
+            print("Simulation disabled but noise model provided. Disabling simulation..")
+            simulation = False
+        if useNoiseModel:
+            self.noiseModel = AerSimulator.basic_device_noise_model()
         self.simulation = simulation
         if simulation and backendName==None and reuseBackend==None and minRotation > 0.0:
             print("Simulation enabled and minimal rotation not zero. This might not always be usefull")
+
 
         self.fixZeroSignal = fixZeroSignal  
         self.signalFilter = signalFilter
