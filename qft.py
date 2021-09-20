@@ -321,7 +321,7 @@ class qft_framework():
 
             jobResults = list()
             for n in range(nRuns):
-                job = execute(qc, self.filterBackend, shots=self.numOfShots)
+                job = execute(qc, self.filterBackend, noise_model=self.noiseModel, shots=self.numOfShots)
                 job_monitor(job, interval=5) #run a blocking monitor thread
                 jobResult = job.result()
                 jobResults.append(jobResult.results[0].data.counts)
@@ -331,16 +331,16 @@ class qft_framework():
                 self.filterResultCounts = {k: self.filterResultCounts.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(self.filterResultCounts) | set(result)}
             print(f"Filter Results: {self.filterResultCounts}")
 
-        else:
-            measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
+        # else:
+        #     measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
 
-            print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
-            job = execute(measCalibrations, backend=self.backend, shots=nShots)
-            job_monitor(job, interval=5)
-            cal_results = job.result()
+        #     print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
+        #     job = execute(measCalibrations, backend=self.backend, shots=nShots)
+        #     job_monitor(job, interval=5)
+        #     cal_results = job.result()
 
-            self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
-            print(self.measFitter.cal_matrix)
+        #     self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
+        #     print(self.measFitter.cal_matrix)
 
         if not self.mitigateResults:
             print(f"Enabling mitigating results from now on..")
@@ -365,7 +365,7 @@ class qft_framework():
                     print(f"For auto-initialization, you must provide the number of qubits")
                     return jobResult
                 self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.results[0].shots)
-            elif self.filterResultCounts.size == 1:
+            elif len(self.filterResultCounts) == 1:
                 print("Seems like you try to mitigate noise of a simulation without any noise. You can either disable noise suppression or consider running with noise.")
                 return jobResult
             
@@ -381,7 +381,11 @@ class qft_framework():
                     # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
                     # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
                     # mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(nQubits))}b')])
-                    mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
+                    if idx in self.filterResultCounts:
+                        mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
+                    else:
+                        print(f"Index {idx} not found in filter countlist")
+
             return mitigatedResult
         else:
             if self.measFitter == None:
