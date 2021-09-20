@@ -12,8 +12,8 @@ export.checkWorkingTree()
 # speechSignal = '../dataset/zero/0fa1e7a9_nohash_1.wav' #male noise
 # speechSignal = '../dataset/zero/7ea032f3_nohash_3.wav'  #male questionary
 # speechSignal = '../dataset/zero/8e05039f_nohash_4.wav'  #female clear
-# speechSignal = '../dataset/zero/4634529e_nohash_2.wav'  #female noise
-speechSignal = '/storage/mstrobl/dataset/zero/4634529e_nohash_2.wav'  #female noise
+speechSignal = '../dataset/zero/4634529e_nohash_2.wav'  #female noise
+# speechSignal = '/storage/mstrobl/dataset/zero/4634529e_nohash_2.wav'  #female noise
 
 
 nQubits=10
@@ -53,7 +53,7 @@ print("Processing STQFT")
 # device = "ibmq_melbourne"
 device = "ibmq_cambridge"
 
-stqft = transform(stqft_framework, suppressPrint=False, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device)
+stqft = transform(stqft_framework, suppressPrint=False, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device, useNoiseModel=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=scale, normalize=normalize, samplingRate=y.samplingRate, nMels=nMels, fmin=fmin, fmax=y.samplingRate/2)
 
