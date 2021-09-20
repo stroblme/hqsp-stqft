@@ -133,7 +133,7 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0):
+    simulation=True, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
@@ -162,6 +162,8 @@ class qft_framework():
         self.filterResultCounts = None
         self.customFilter = True
 
+        self.transpileOnce=transpileOnce
+        self.transpiled = False
         
         if filterBackend == None:
             self.filterBackend = self.backend
@@ -251,13 +253,25 @@ class qft_framework():
 
         if self.customFilter:
             y = np.ones(2**nQubits)
-            q = QuantumRegister(nQubits,'q')
-            qc = QuantumCircuit(q)
             ampls = y / np.linalg.norm(y)
-            qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = self.qft(qc, nQubits)
-            qc.measure_all()
-            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+            q = QuantumRegister(nQubits,'q')
+
+            if self.transpileOnce and not self.transpiled:
+                self.transpiledQC = QuantumCircuit(q)
+                self.transpiledQC = self.qft(self.transpiledQC, nQubits)
+                self.transpiledQC.measure_all()
+                self.transpiledQC = transpile(self.transpiledQC, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
+                qc = self.transpiledQC.initialize(ampls, [q[i] for i in range(nQubits)])
+            elif self.transpileOnce and self.transpiled:
+                qc = self.transpiledQC.initialize(ampls, [q[i] for i in range(nQubits)])
+            else:
+                qc = QuantumCircuit(q)
+
+                qc.initialize(ampls, [q[i] for i in range(nQubits)])
+                qc = self.qft(qc, nQubits)
+                qc.measure_all()
+                qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
             print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots")
 
