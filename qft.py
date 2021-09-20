@@ -196,7 +196,8 @@ class qft_framework():
                 print("Warning this might will lead an key error later in transform, as simulation has no noise but noise model was enabled and no filter backend provided")
             self.filterBackend = self.backend
         else:
-            self.filterBackend = filterBackend
+            _, tempBackend = loadBackend(filterBackend, True)
+            self.filterBackend = tempBackend
 
         # noise mitigation
         self.measFitter = None
