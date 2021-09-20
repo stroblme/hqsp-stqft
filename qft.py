@@ -190,6 +190,14 @@ class qft_framework():
         # transfer parameter
         self.mitigateResults = suppressNoise
 
+        # separate backend for noise filter provided?
+        if filterBackend == None:
+            if self.mitigateResults and self.simulation and useNoiseModel:
+                print("Warning this might will lead an key error later in transform, as simulation has no noise but noise model was enabled and no filter backend provided")
+            self.filterBackend = self.backend
+        else:
+            self.filterBackend = filterBackend
+
         # noise mitigation
         self.measFitter = None
         self.filterResultCounts = None
@@ -199,11 +207,6 @@ class qft_framework():
         self.transpileOnce=transpileOnce
         self.transpiled = False
         
-        # separate backend for noise filter provided?
-        if filterBackend == None:
-            self.filterBackend = self.backend
-        else:
-            self.filterBackend = filterBackend
 
     def getBackend(self):
         """returns the current backend
