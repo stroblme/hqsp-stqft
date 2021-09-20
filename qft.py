@@ -16,6 +16,7 @@ from qiskit.providers.aer import noise
 from qiskit.circuit.library import QFT as qiskit_qft
 
 import inspect
+from qiskit.providers.aer.noise import noise_model
 from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
@@ -141,37 +142,58 @@ class qft_framework():
         self.minRotation = minRotation
         self.draw = draw
 
+        # check if noise model should be used without imulation
         if useNoiseModel and not simulation:
             print("Simulation disabled but noise model provided. Disabling simulation..")
             simulation = False
-        if useNoiseModel:
-            self.noiseModel = AerSimulator.basic_device_noise_model()
+        # transfer parameter
         self.simulation = simulation
+
+        # check if provided parameters are usefull
         if simulation and backendName==None and reuseBackend==None and minRotation > 0.0:
             print("Simulation enabled and minimal rotation not zero. This might not always be usefull")
 
 
-        self.fixZeroSignal = fixZeroSignal  
-        self.signalFilter = signalFilter
+        # check if provided parameters are usefull
         if fixZeroSignal and signalFilter > 0:
             print("Signal Filter AND zero fixer are enabled. This might result in a wasteful transform. Consider disabling Zero Fixer if not needed.")
+        # transfer parameter
+        self.fixZeroSignal = fixZeroSignal  
+        self.signalFilter = signalFilter
 
+        # transfer parameter
         self.transpOptLvl = transpOptLvl      
 
+        # check if backend is provided
         if reuseBackend != None:
-            print(f"Reusing backend {reuseBackend}")
+            # set the backend provided (noise model doesn't matter)
             self.backend = reuseBackend
+            self.noiseModel = None
         else:
-            self.setBackend(backendName, simulation)
+            # check if noise model should be used
+            if useNoiseModel:
+                # set the noise model but do only load the simulator backend
+                self.noiseModel = noise.NoiseModel.from_backend(self.backend)
+                self.setBackend(None, simulation)
+            else:
+                # Null the noise model and load a backend for simulation
+                self.noiseModel = None
+                self.setBackend(backendName, simulation)
 
+        
+        # transfer parameter
         self.mitigateResults = suppressNoise
+
+        # noise mitigation
         self.measFitter = None
         self.filterResultCounts = None
         self.customFilter = True
 
+        # transpilation reuse
         self.transpileOnce=transpileOnce
         self.transpiled = False
         
+        # separate backend for noise filter provided?
         if filterBackend == None:
             self.filterBackend = self.backend
         else:
@@ -580,7 +602,7 @@ class qft_framework():
             print("Executing job...")
     
         #substitute with the desired backend
-        job = execute(qc, self.backend, shots=self.numOfShots)
+        job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModel)
         # if job.status != "COMPLETED":
         if not self.suppressPrint:
             job_monitor(job, interval=5) #run a blocking monitor thread
