@@ -533,10 +533,21 @@ class qft_framework():
             self.transpiledQC = QuantumCircuit(self.transpiledQ)
             self.transpiledQC = self.qft(self.transpiledQC, nQubits)
             self.transpiledQC.measure_all()
+    
+
+            if not self.suppressPrint:
+                print(f"Transpiling for {self.backend}")
+            if not self.suppressPrint:
+                print(f"Depth before transpiling: {self.transpiledQC.depth()}")
+
             self.transpiledQC = transpile(self.transpiledQC, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
+            if not self.suppressPrint:
+                print(f"Depth after transpiling: {self.transpiledQC.depth()}")
 
             qc = QuantumCircuit(q)
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl)
             qc = qc + self.transpiledQC
 
             self.transpiled = True
@@ -560,20 +571,13 @@ class qft_framework():
             qc.draw(output='mpl', filename=f'./export/{name}.png')
 
         
-        # if not self.suppressPrint:
-        #     print(f"Transpiling for {self.backend}")
-    
-        # if not self.suppressPrint:
-        #     print(f"Depth before transpiling: {qc.depth()}")
 
 
         # qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
-        # if not self.suppressPrint:
-        #     print(f"Depth after transpiling: {qc.depth()}")
 
-        # if not self.suppressPrint:
-        #     print("Executing job...")
+        if not self.suppressPrint:
+            print("Executing job...")
     
         #substitute with the desired backend
         job = execute(qc, self.backend, shots=self.numOfShots)
