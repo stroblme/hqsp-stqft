@@ -5,3 +5,4 @@ export
 *.log
 ibmAccounts.py
 sounds
+.vscode/settings.json
