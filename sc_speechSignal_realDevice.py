@@ -49,8 +49,8 @@ exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing STQFT")
-device = "ibmq_guadalupe"
-device = "ibmq_melbourne"
+# device = "ibmq_guadalupe"
+# device = "ibmq_melbourne"
 device = "ibmq_cambridge"
 
 stqft = transform(stqft_framework, suppressPrint=False, signalFilter=signalFilter, minRotation=minRotation, simulation=True, backendName=device)
