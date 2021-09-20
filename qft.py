@@ -172,9 +172,15 @@ class qft_framework():
         else:
             # check if noise model should be used
             if useNoiseModel:
-                # set the noise model but do only load the simulator backend
-                self.noiseModel = noise.NoiseModel.from_backend(self.backend)
-                self.setBackend(None, simulation)
+                # check if user provided a noise model
+                if backendName == None:
+                    print("No backend name specified which should be used as noise model. Disabling noise model..")
+                    self.noiseModel = None
+                else:
+                    # set the noise model but do only load the simulator backend
+                    _, tempBackend = loadBackend(backendName, True)
+                    self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
+                    self.setBackend(None, simulation)
             else:
                 # Null the noise model and load a backend for simulation
                 self.noiseModel = None
@@ -200,6 +206,11 @@ class qft_framework():
             self.filterBackend = filterBackend
 
     def getBackend(self):
+        """returns the current backend
+
+        Returns:
+            qiskit backend: backend used in qft
+        """
         return self.backend
 
     def setBackend(self, backendName=None, simulation=True):
