@@ -576,14 +576,14 @@ class qft_framework():
             if not self.suppressPrint:
                 print(f"Depth before transpiling: {self.transpiledQC.depth()}")
 
-            self.transpiledQC = transpile(self.transpiledQC, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+            self.transpiledQC = transpile(self.transpiledQC, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
             if not self.suppressPrint:
                 print(f"Depth after transpiling: {self.transpiledQC.depth()}")
 
             qc = QuantumCircuit(q)
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl)
+            qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
             qc = qc + self.transpiledQC
 
             self.transpiled = True
