@@ -293,7 +293,7 @@ class qft_framework():
             print(f"Enabling mitigating results from now on..")
             self.mitigateResults = True
 
-    def setupMeasurementFitter(self, nQubits, nShots, nRuns=4):
+    def setupMeasurementFitter(self, nQubits, nShots, nRuns=10):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -310,19 +310,20 @@ class qft_framework():
             ampls = y / np.linalg.norm(y)
 
             q = QuantumRegister(nQubits,'q')
-            qc = QuantumCircuit(q)
+            qc = QuantumCircuit(q,name="noise mitigation circuit")
 
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = self.qft(qc, nQubits)
             qc.measure_all()
             qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
-            print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots")
+            print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots.. This might take a while")
 
             jobResults = list()
             for n in range(nRuns):
                 job = execute(qc, self.filterBackend, noise_model=self.noiseModel, shots=self.numOfShots)
-                job_monitor(job, interval=5) #run a blocking monitor thread
+                if not self.suppressPrint:
+                    job_monitor(job, interval=5) #run a blocking monitor thread
                 jobResult = job.result()
                 jobResults.append(jobResult.results[0].data.counts)
 
@@ -376,6 +377,7 @@ class qft_framework():
 
             maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
 
+            nMitigated=0
             for idx, count in jobResultCounts.items():
                 if count/maxCount < 0.5 or idx == "0x0":    # only filter counts which are less than half of the chance
                     # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
@@ -383,8 +385,13 @@ class qft_framework():
                     # mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(nQubits))}b')])
                     if idx in self.filterResultCounts:
                         mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
-                    else:
-                        print(f"Index {idx} not found in filter countlist")
+                        nMitigated+=1
+                    # it can (and often will) happen, that the result list contains keys which are not in the filter result counts
+                    # especially in large circuits, this is the case, as there are so many computational basis states (2**nQubits)
+                    # that it's very unlikely every state is covered by just an initialized circuit (like the filter)
+
+            if not self.suppressPrint:
+                print(f"Mitigated {nMitigated} in total")
 
             return mitigatedResult
         else:
@@ -533,18 +540,19 @@ class qft_framework():
             if not self.suppressPrint:
                 print(f"Depth after transpiling: {self.transpiledQC.depth()}")
 
-            qc = QuantumCircuit(q)
+            qc = QuantumCircuit(q, name="qft circuit")
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
             qc = qc + self.transpiledQC
 
             self.transpiled = True
         elif self.transpileOnce and self.transpiled:
-            qc = QuantumCircuit(q)
+            qc = QuantumCircuit(q, name="qft circuit")
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
             qc = qc + self.transpiledQC
         else:
-            qc = QuantumCircuit(q)
+            qc = QuantumCircuit(q, name="qft circuit")
 
             # for 2^n amplitudes, we have n qubits for initialization
             # this means that the binary representation happens exactly here
@@ -573,7 +581,7 @@ class qft_framework():
         if not self.suppressPrint:
             job_monitor(job, interval=5) #run a blocking monitor thread
 
-        self.lastJobResultCounts = job.result().get_counts()
+        # self.lastJobResultCounts = job.result().get_counts()
         
         if not self.suppressPrint:
             print("Post Processing...")
