@@ -49,9 +49,9 @@ exp.setData(export.PLOTDATA, plotData)
 exp.doExport()
 
 print("Processing STQFT")
-# device = "ibmq_guadalupe"
-# device = "ibmq_melbourne"
-device = "ibmq_cambridge"
+# device = "ibmq_guadalupe" #+++
+# device = "ibmq_melbourne" #++
+device = "ibmq_cambridge"   #+
 
 stqft = transform(stqft_framework, suppressPrint=True, signalFilter=signalFilter, minRotation=minRotation, simulation=True, useNoiseModel=True, backendName=device, transpileOnce=True)
 y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
