@@ -26,7 +26,7 @@ from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasF
 
 from qiskit.tools.monitor import job_monitor
 
-# import mitiq
+import mitiq
 
 from utils import filterByThreshold, isPow2
 import ibmAccounts #NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
@@ -141,7 +141,7 @@ class qft_framework():
                         minRotation:int=0, signalThreshold:int=0, fixZeroSignal:bool=False, 
                         suppressPrint:bool=False, draw:bool=False,
                         simulation:bool=True,
-                        suppressNoise:bool=False, useNoiseModel:bool=False, backend=None, 
+                        noiseMitigationOpt:int=0, useNoiseModel:bool=False, backend=None, 
                         transpileOnce:bool=False, transpOptLvl:int=1):
                         
         self.suppressPrint = suppressPrint
@@ -228,7 +228,7 @@ class qft_framework():
         # -------------------------------------------------
         
         # transfer parameter
-        self.suppressNoise = suppressNoise
+        self.noiseMitigationOpt = noiseMitigationOpt
         self.filterBackend = self.backend
         # # separate backend for noise filter provided?
         # if filterBackend == None:
@@ -329,9 +329,9 @@ class qft_framework():
         self.measFitter = measFitter
         print(self.measFitter.cal_matrix)
 
-        if not self.suppressNoise:
-            print(f"Enabling mitigating results from now on..")
-            self.suppressNoise = True
+        if self.noiseMitigationOpt != 1:
+            print(f"Enabling noise mitigating option 1 from now on..")
+            self.noiseMitigationOpt = 1
 
     def setupMeasurementFitter(self, nQubits, nShots, nRuns=10):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
@@ -383,9 +383,9 @@ class qft_framework():
         #     self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
         #     print(self.measFitter.cal_matrix)
 
-        if not self.suppressNoise:
-            print(f"Enabling mitigating results from now on..")
-            self.suppressNoise = True
+        if self.noiseMitigationOpt != 1:
+            print(f"Enabling noise mitigating option 1 from now on..")
+            self.noiseMitigationOpt = 1
 
         return self.measFitter
 
@@ -450,6 +450,9 @@ class qft_framework():
             # mitigatedCounts = mitigatedResult.get_counts(0)
             print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
         return mitigatedResult
+
+    def mitiqNoiseFilter(self, jobResult, nQubits):
+        return jobResult
 
     def showCircuit(self, y):
         """Display the circuit for a signal y
@@ -626,8 +629,10 @@ class qft_framework():
         if not self.suppressPrint:
             print("Post Processing...")
         
-        if self.suppressNoise:
+        if self.noiseMitigationOpt == 1:
             jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits)
+        if self.noiseMitigationOpt == 2:
+            jobResult = self.mitiqNoiseFilter(job.result(), nQubits=nQubits)
         else:
             if not self.suppressPrint:
                 print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
