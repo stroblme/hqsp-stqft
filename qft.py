@@ -1,3 +1,4 @@
+from _typeshed import NoneType
 import time
 
 import datetime
@@ -134,12 +135,12 @@ def loadBackend(backendName:str, simulation=True):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self,  numOfShots=2048,
-                        minRotation=0, signalThreshold=0, fixZeroSignal=False, 
-                        suppressPrint=False, draw=False,
-                        simulation=True,
-                        suppressNoise=False, useNoiseModel=False, backend=None, 
-                        transpileOnce=False, transpOptLvl=1):
+    def __init__(self,  numOfShots:int=2048,
+                        minRotation:int=0, signalThreshold:int=0, fixZeroSignal:bool=False, 
+                        suppressPrint:bool=False, draw:bool=False,
+                        simulation:bool=True,
+                        suppressNoise:bool=False, useNoiseModel:bool=False, backend=None, 
+                        transpileOnce:bool=False, transpOptLvl:int=1):
                         
         self.suppressPrint = suppressPrint
         self.numOfShots = numOfShots
