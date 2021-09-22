@@ -134,20 +134,24 @@ def loadBackend(backendName, simulation=True):
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
-    def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, useNoiseModel=False, backend=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
+    def __init__(self,  numOfShots=2048,
+                        minRotation=0, signalThreshold=0, fixZeroSignal=False, 
+                        suppressPrint=False, draw=False,
+                        simulation=True,
+                        suppressNoise=False, useNoiseModel=False, backend=None, 
+                        transpileOnce=False, transpOptLvl=1):
+                        
         self.suppressPrint = suppressPrint
-        self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
 
         # check if provided parameters are usefull
-        if fixZeroSignal and signalFilter > 0:
+        if fixZeroSignal and signalThreshold > 0:
             print("Signal Filter AND zero fixer are enabled. This might result in a wasteful transform. Consider disabling Zero Fixer if not needed.")
         # transfer parameter
         self.fixZeroSignal = fixZeroSignal  
-        self.signalFilter = signalFilter
+        self.signalThreshold = signalThreshold
 
         # transfer parameter
         self.transpOptLvl = transpOptLvl      
@@ -220,28 +224,28 @@ class qft_framework():
         # -------------------------------------------------
         
         # transfer parameter
-        self.mitigateResults = suppressNoise
+        self.suppressNoise = suppressNoise
 
-        # separate backend for noise filter provided?
-        if filterBackend == None:
-            if self.mitigateResults and self.simulation and useNoiseModel:
-                print("Warning this might will lead an key error later in transform, as simulation has no noise but noise model was enabled and no filter backend provided")
-            self.filterBackend = self.backend
-        else:
-            # check if noise model should be used
-            if not useNoiseModel:
-                self.provider, tempBackend = loadBackend(filterBackend, True)
-                self.filterBackend = tempBackend
-            else:
-                self.provider, tempBackend = loadBackend(backend, True)
-                self.noiseModelBackend = noise.NoiseModel.from_backend(tempBackend)
-                self.filterBackend = self.getSimulatorBackend()
+        # # separate backend for noise filter provided?
+        # if filterBackend == None:
+        #     if self.suppressNoise and self.simulation and useNoiseModel:
+        #         print("Warning this might will lead an key error later in transform, as simulation has no noise but noise model was enabled and no filter backend provided")
+        #     self.filterBackend = self.backend
+        # else:
+        #     # check if noise model should be used
+        #     if not useNoiseModel:
+        #         self.provider, tempBackend = loadBackend(filterBackend, True)
+        #         self.filterBackend = tempBackend
+        #     else:
+        #         self.provider, tempBackend = loadBackend(backend, True)
+        #         self.noiseModelBackend = noise.NoiseModel.from_backend(tempBackend)
+        #         self.filterBackend = self.getSimulatorBackend()
 
 
         # noise mitigation
         self.measFitter = None
         self.filterResultCounts = None
-        self.customFilter = True
+        self.customFilter = True    #TODO: rework such that we can choose a mitigation approach
 
         # transpilation reuse
         self.transpileOnce=transpileOnce
@@ -287,9 +291,9 @@ class qft_framework():
         self.samplingRate = y_signal.samplingRate
         y = y_signal.sample()
 
-        if self.signalFilter > 0:
+        if self.signalThreshold > 0:
             # rm when eval done
-            y = filterByThreshold(y, self.signalFilter)
+            y = filterByThreshold(y, self.signalThreshold)
 
         y_hat = self.processQFT(y)
 
@@ -321,9 +325,9 @@ class qft_framework():
         self.measFitter = measFitter
         print(self.measFitter.cal_matrix)
 
-        if not self.mitigateResults:
+        if not self.suppressNoise:
             print(f"Enabling mitigating results from now on..")
-            self.mitigateResults = True
+            self.suppressNoise = True
 
     def setupMeasurementFitter(self, nQubits, nShots, nRuns=10):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
@@ -375,9 +379,9 @@ class qft_framework():
         #     self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
         #     print(self.measFitter.cal_matrix)
 
-        if not self.mitigateResults:
+        if not self.suppressNoise:
             print(f"Enabling mitigating results from now on..")
-            self.mitigateResults = True
+            self.suppressNoise = True
 
         return self.measFitter
 
@@ -618,7 +622,7 @@ class qft_framework():
         if not self.suppressPrint:
             print("Post Processing...")
         
-        if self.mitigateResults:
+        if self.suppressNoise:
             jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits)
         else:
             if not self.suppressPrint:
