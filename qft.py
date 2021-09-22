@@ -85,7 +85,7 @@ def get_fft_from_counts(counts, n_qubits):
 
     return out
 
-def loadBackend(backendName, simulation=True):
+def loadBackend(backendName:str, simulation=True):
     provider = IBMQ.load_account()
     provider = IBMQ.get_provider("ibm-q")
 
@@ -171,7 +171,7 @@ class qft_framework():
             self.simulation = True
             if useNoiseModel:
                 print("Noise model can be used without a corresponding backend")
-            self.noiseModelBackend = None
+            self.noiseModel = None
 
             self.backend = None
             self.provider = None
@@ -184,9 +184,10 @@ class qft_framework():
                     print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
                 self.simulation = True
 
-                # set the noise model but do only load the simulator backend
+                # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
                 self.provider, tempBackend = loadBackend(backendName=backend, simulation=True)
-                self.noiseModelBackend = noise.NoiseModel.from_backend(tempBackend)
+                # generate noise model from backend properties
+                self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
                 self.backend = self.getSimulatorBackend()
 
             else:
@@ -196,7 +197,7 @@ class qft_framework():
                 self.simulation = False
 
                 # Null the noise model and load a backend for simulation or real device
-                self.noiseModelBackend = None
+                self.noiseModel = None
                 self.provider, self.backend = loadBackend(backendName=backend, simulation=self.simulation)
 
         # user provided full backend instance
@@ -207,8 +208,8 @@ class qft_framework():
                     print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
                 self.simulation = True
 
-                # get the noise model backend
-                self.noiseModelBackend = backend
+                # generate noise model from backend properties
+                self.noiseModel = noise.NoiseModel.from_backend(backend)
                 # and set the backend as simulator
                 self.backend = self.getSimulatorBackend()
                 self.provider = None #TODO: check if this will cause problems
@@ -217,7 +218,7 @@ class qft_framework():
                     print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
                 self.simulation = False
 
-                self.noiseModelBackend = None
+                self.noiseModel = None
                 self.provider = None #TODO: check if this will cause problems
                 self.backend = backend
 
@@ -225,7 +226,7 @@ class qft_framework():
         
         # transfer parameter
         self.suppressNoise = suppressNoise
-
+        self.filterBackend = self.backend
         # # separate backend for noise filter provided?
         # if filterBackend == None:
         #     if self.suppressNoise and self.simulation and useNoiseModel:
@@ -357,7 +358,7 @@ class qft_framework():
 
             jobResults = list()
             for n in range(nRuns):
-                job = execute(qc, self.filterBackend, noise_model=self.noiseModelBackend, shots=self.numOfShots)
+                job = execute(qc, self.filterBackend, noise_model=self.noiseModel, shots=self.numOfShots)
                 if not self.suppressPrint:
                     job_monitor(job, interval=5) #run a blocking monitor thread
                 jobResult = job.result()
@@ -612,7 +613,7 @@ class qft_framework():
             print("Executing job...")
     
         #substitute with the desired backend
-        job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModelBackend)
+        job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModel)
         # if job.status != "COMPLETED":
         if not self.suppressPrint:
             job_monitor(job, interval=5) #run a blocking monitor thread
