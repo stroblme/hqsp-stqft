@@ -86,7 +86,7 @@ def get_fft_from_counts(counts, n_qubits):
 
     return out
 
-def loadBackend(backendName:str, simulation=True):
+def loadBackend(backendName:str, simulation:bool=True, suppressPrint:bool=True):
     provider = IBMQ.load_account()
     provider = IBMQ.get_provider("ibm-q")
 
@@ -120,10 +120,12 @@ def loadBackend(backendName:str, simulation=True):
         qubitReadoutErrors = [props.qubits[i][4].value for i in range(0, nQubitsAvailable)]
         qubitProbMeas0Prep1 = [props.qubits[i][5].value for i in range(0, nQubitsAvailable)]
         qubitProbMeas1Prep0 = [props.qubits[i][6].value for i in range(0, nQubitsAvailable)]
-        print(f"Backend {backend} has {nQubitsAvailable} qubits available.")
-        print(f"ReadoutErrors are {qubitReadoutErrors}")
-        print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
-        print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
+
+        if not suppressPrint:
+            print(f"Backend {backend} has {nQubitsAvailable} qubits available.")
+            print(f"ReadoutErrors are {qubitReadoutErrors}")
+            print(f"ProbMeas0Prep1 are {qubitProbMeas0Prep1}")
+            print(f"ProbMeas1Prep0 are {qubitProbMeas1Prep0}")
     except IndexError:
         print(f"Failed to get some properties. This can mean that they are simply not stored together with the mock backend")
 
