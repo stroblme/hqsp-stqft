@@ -135,24 +135,12 @@ class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
     def __init__(self, numOfShots=2048, show=-1, minRotation=0, suppressNoise=False, fixZeroSignal=False, suppressPrint=False, draw=False,
-    simulation=True, useNoiseModel=False, backendName=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
+    simulation=True, useNoiseModel=False, backend=None, reuseBackend=None, filterBackend=None, transpOptLvl=1, signalFilter=0, transpileOnce=False):
         self.suppressPrint = suppressPrint
         self.show = show
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
-
-        # check if noise model should be used without imulation
-        if useNoiseModel and not simulation:
-            print("Simulation disabled but noise model provided. Disabling simulation..")
-            simulation = False
-        # transfer parameter
-        self.simulation = simulation
-
-        # check if provided parameters are usefull
-        if simulation and backendName==None and reuseBackend==None and minRotation > 0.0:
-            print("Simulation enabled and minimal rotation not zero. This might not always be usefull")
-
 
         # check if provided parameters are usefull
         if fixZeroSignal and signalFilter > 0:
@@ -164,28 +152,72 @@ class qft_framework():
         # transfer parameter
         self.transpOptLvl = transpOptLvl      
 
-        # check if backend is provided
-        if reuseBackend != None:
-            # set the backend provided (noise model doesn't matter)
-            self.backend = reuseBackend
-            self.noiseModel = None
-        else:
+        # The following code will set:
+        # backend
+        # provider
+        # simulation
+        # noiseModelBackend
+        # -------------------------------------------------
+
+        # no backend -> simulation only
+        if backend == None:
+            # no simulation without a valid backend doesn't make sense
+            if not simulation:
+                print("Simulation was disabled but no backend provided. Will enable simulation")
+            self.simulation = True
+            if useNoiseModel:
+                print("Noise model can be used without a corresponding backend")
+            self.noiseModelBackend = None
+
+            self.backend = None
+            self.provider = None
+        # user provided backend only as a name, not instance
+        elif type(backend) == str:
             # check if noise model should be used
             if useNoiseModel:
-                # check if user provided a noise model
-                if backendName == None:
-                    print("No backend name specified which should be used as noise model. Disabling noise model..")
-                    self.noiseModel = None
-                else:
-                    # set the noise model but do only load the simulator backend
-                    _, tempBackend = loadBackend(backendName, True)
-                    self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
-                    self.setBackend(None, simulation)
-            else:
-                # Null the noise model and load a backend for simulation
-                self.noiseModel = None
-                self.setBackend(backendName, simulation)
+                # check if simulation was disabled
+                if not simulation:
+                    print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
+                self.simulation = True
 
+                # set the noise model but do only load the simulator backend
+                self.provider, tempBackend = loadBackend(backendName=backend, simulation=True)
+                self.noiseModelBackend = noise.NoiseModel.from_backend(tempBackend)
+                self.backend = self.getSimulatorBackend()
+
+            else:
+                # check if simulation was enabled
+                if simulation:
+                    print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
+                self.simulation = False
+
+                # Null the noise model and load a backend for simulation or real device
+                self.noiseModelBackend = None
+                self.provider, self.backend = loadBackend(backendName=backend, simulation=self.simulation)
+
+        # user provided full backend instance
+        else:
+            # check if user provided a noise model
+            if useNoiseModel:
+                if not simulation:
+                    print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
+                self.simulation = True
+
+                # get the noise model backend
+                self.noiseModelBackend = backend
+                # and set the backend as simulator
+                self.backend = self.getSimulatorBackend()
+                self.provider = None #TODO: check if this will cause problems
+            else:
+                if simulation:
+                    print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
+                self.simulation = False
+
+                self.noiseModelBackend = None
+                self.provider = None #TODO: check if this will cause problems
+                self.backend = backend
+
+        # -------------------------------------------------
         
         # transfer parameter
         self.mitigateResults = suppressNoise
@@ -198,11 +230,11 @@ class qft_framework():
         else:
             # check if noise model should be used
             if not useNoiseModel:
-                _, tempBackend = loadBackend(filterBackend, True)
+                self.provider, tempBackend = loadBackend(filterBackend, True)
                 self.filterBackend = tempBackend
             else:
-                _, tempBackend = loadBackend(backendName, True)
-                self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
+                self.provider, tempBackend = loadBackend(backend, True)
+                self.noiseModelBackend = noise.NoiseModel.from_backend(tempBackend)
                 self.filterBackend = self.getSimulatorBackend()
 
 
@@ -227,14 +259,14 @@ class qft_framework():
     def getSimulatorBackend(self):
         return Aer.get_backend('qasm_simulator')
 
-    def setBackend(self, backendName=None, simulation=True):
-        if backendName != None:
-            self.provider, self.backend = loadBackend(backendName=backendName, simulation=simulation)
-        else:
-            if not self.simulation:
-                print("Setting simulation to 'True', as no backend was specified")
-                self.simulation = True
-            self.backend = self.getSimulatorBackend()
+    # def setBackend(self, backendName=None, simulation=True):
+    #     if backendName != None:
+    #         self.provider, self.backend = loadBackend(backendName=backendName, simulation=simulation)
+    #     else:
+    #         if not self.simulation:
+    #             print("Setting simulation to 'True', as no backend was specified")
+    #             self.simulation = True
+    #         self.backend = self.getSimulatorBackend()
 
     def estimateSize(self, y_signal):
         assert isPow2(y_signal.nSamples)
@@ -321,7 +353,7 @@ class qft_framework():
 
             jobResults = list()
             for n in range(nRuns):
-                job = execute(qc, self.filterBackend, noise_model=self.noiseModel, shots=self.numOfShots)
+                job = execute(qc, self.filterBackend, noise_model=self.noiseModelBackend, shots=self.numOfShots)
                 if not self.suppressPrint:
                     job_monitor(job, interval=5) #run a blocking monitor thread
                 jobResult = job.result()
@@ -576,7 +608,7 @@ class qft_framework():
             print("Executing job...")
     
         #substitute with the desired backend
-        job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModel)
+        job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModelBackend)
         # if job.status != "COMPLETED":
         if not self.suppressPrint:
             job_monitor(job, interval=5) #run a blocking monitor thread
