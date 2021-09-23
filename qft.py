@@ -529,7 +529,7 @@ class qft_framework():
 
         return y_hat_densed
 
-    def processQFT(self, y:list):
+    def processQFT(self, y:np.array):
         n_samples = y.size
         assert isPow2(n_samples)
 
@@ -643,7 +643,7 @@ class qft_framework():
     # def executor(circuit: mitiq.QPROGRAM) -> float:
     #     pass
 
-    def processIQFT(self, y:list):
+    def processIQFT(self, y:np.array):
         n_samples = y.size
         assert isPow2(n_samples)
 
