@@ -1,8 +1,6 @@
-from _typeshed import NoneType
 import time
 
 import datetime
-from git import exc
 
 import numpy as np
 from numpy import pi
@@ -27,7 +25,7 @@ from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.tools.monitor import job_monitor
 
 from frontend import signal
-import mitiq
+# import mitiq
 
 from utils import filterByThreshold, isPow2
 import ibmAccounts #NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
