@@ -14,18 +14,19 @@ from math import log2
 from qiskit import *
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
 from qiskit.providers.aer import noise
-from qiskit.circuit.library import QFT as qiskit_qft
+# from qiskit.circuit.library import QFT as qiskit_qft
 
 import inspect
-from qiskit.providers.aer.noise import noise_model
+# from qiskit.providers.aer.noise import noise_model
 from qiskit.test import mock
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
-from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
+# from qiskit.ignis.mitigation.measurement import (complete_meas_cal,CompleteMeasFitter)
 
 # from qiskit.circuit.library import QFT
 
 from qiskit.tools.monitor import job_monitor
 
+from frontend import signal
 import mitiq
 
 from utils import filterByThreshold, isPow2
@@ -276,14 +277,14 @@ class qft_framework():
     #             self.simulation = True
     #         self.backend = self.getSimulatorBackend()
 
-    def estimateSize(self, y_signal):
+    def estimateSize(self, y_signal:signal):
         assert isPow2(y_signal.nSamples)
 
         n_qubits = int((log2(y_signal.nSamples)/log2(2)))
 
         return 2**n_qubits
 
-    def transform(self, y_signal):
+    def transform(self, y_signal:signal):
         """Apply QFT on a given Signal
 
         Args:
@@ -303,7 +304,7 @@ class qft_framework():
 
         return y_hat
 
-    def transformInv(self, y_signal, draw=False):
+    def transformInv(self, y_signal:signal):
         """Apply QFT on a given Signal
 
         Args:
@@ -319,12 +320,6 @@ class qft_framework():
 
         return y
 
-    def postProcess(self, y_hat, f):
-        y_hat, f = self.qubitNoiseFilter(y_hat=y_hat, f=f)
-
-
-        return y_hat, f
-
     def loadMeasurementFitter(self, measFitter):
         self.measFitter = measFitter
         print(self.measFitter.cal_matrix)
@@ -333,7 +328,7 @@ class qft_framework():
             print(f"Enabling noise mitigating option 1 from now on..")
             self.noiseMitigationOpt = 1
 
-    def setupMeasurementFitter(self, nQubits, nShots, nRuns=10):
+    def setupMeasurementFitter(self, nQubits:int, nShots:int, nRuns:int=10):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -389,7 +384,7 @@ class qft_framework():
 
         return self.measFitter
 
-    def qubitNoiseFilter(self, jobResult, nQubits):
+    def qubitNoiseFilter(self, jobResult, nQubits:int):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
 
         Args:
@@ -451,7 +446,7 @@ class qft_framework():
             print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
         return mitigatedResult
 
-    def mitiqNoiseFilter(self, jobResult, nQubits):
+    def mitiqNoiseFilter(self, jobResult, nQubits:int):
         return jobResult
 
     def showCircuit(self, y):
@@ -536,15 +531,7 @@ class qft_framework():
 
         return y_hat_densed
 
-    def processQFT(self, y):
-
-        """
-        Args:
-        amplitudes: List - A list of amplitudes with length equal to power of 2
-        normalize: Bool - Optional flag to control normalization of samples, True by default
-        Returns:
-        circuit: QuantumCircuit - a quantum circuit initialized to the state given by amplitudes
-        """
+    def processQFT(self, y:list):
         n_samples = y.size
         assert isPow2(n_samples)
 
@@ -630,9 +617,9 @@ class qft_framework():
             print("Post Processing...")
         
         if self.noiseMitigationOpt == 1:
-            jobResult = self.qubitNoiseFilter(job.result(), nQubits=nQubits)
+            jobResult = self.qubitNoiseFilter(jobResult=job.result(), nQubits=nQubits)
         if self.noiseMitigationOpt == 2:
-            jobResult = self.mitiqNoiseFilter(job.result(), nQubits=nQubits)
+            jobResult = self.mitiqNoiseFilter(jobResult=job.result(), nQubits=nQubits)
         else:
             if not self.suppressPrint:
                 print("Warning: Mitigating results is implicitly disabled. Consider enabling it by running 'setupMeasurementFitter'")
@@ -658,7 +645,7 @@ class qft_framework():
     # def executor(circuit: mitiq.QPROGRAM) -> float:
     #     pass
 
-    def processIQFT(self, y):
+    def processIQFT(self, y:list):
         n_samples = y.size
         assert isPow2(n_samples)
 
