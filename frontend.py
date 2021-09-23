@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import pi
+from numpy import pi, string_
 from scipy import signal as scipySignal
 import matplotlib.pyplot as plt
 from math import log, floor
@@ -82,7 +82,7 @@ class frontend():
 
         frontend.clickEventHandled = True
 
-    def _show(self, yData, x1Data, title, xlabel, ylabel, x2Data=None, subplot=None, plotType='stem', log=False):
+    def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False):
         # fighandle = plt.figure()
 
         if subplot is not None:
@@ -120,7 +120,7 @@ class frontend():
         return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'plotType':plotType, 'log':log, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
 class signal(frontend):
-    def __init__(self, samplingRate=40, amplification=1, duration=2, nSamples=80, signalType='sin', path='') -> None:
+    def __init__(self, samplingRate:int=40, amplification:int=1, duration:int=2, nSamples:int=80, signalType:str='sin', path:str='') -> None:
         """Signal Init
 
         Args:
