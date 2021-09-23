@@ -195,7 +195,7 @@ class signal(frontend):
         # all_wave.append(np.expand_dims(mel_feat, axis=2))
         # all_label.append(label)
 
-    def setSamplingRate(self, samplingRate):
+    def setSamplingRate(self, samplingRate:int):
         """Sets the sampling rate for the current signal instance
 
         Args:
@@ -204,7 +204,7 @@ class signal(frontend):
         self.samplingRate = samplingRate
         self.samplingInterval = 1/self.samplingRate
 
-    def setNSamples(self, duration=2, nSamples=80):
+    def setNSamples(self, duration:int=2, nSamples:int=80):
         # Either use the duration or the number of samples depending on what's longer
         t_max = max(duration, nSamples*self.samplingInterval)
 
@@ -218,7 +218,7 @@ class signal(frontend):
 
         return self.duration
 
-    def addFrequency(self, frequency, phase=0):
+    def addFrequency(self, frequency:float, phase:int=0):
         if frequency > self.samplingRate/2:
             print("WARNING: Nyquist not fulfilled!")
             
@@ -232,7 +232,7 @@ class signal(frontend):
         self.setNSamples(0,t.size)
         self.lockSampling=True
 
-    def split(self, nSamplesWindow, overlapFactor=0, windowType=None):
+    def split(self, nSamplesWindow:int, overlapFactor:float=0, windowType:str=None):
         self.sample()
 
         if windowType == 'hanning':
@@ -301,7 +301,7 @@ class signal(frontend):
             print('Must be either sin, chirp')
         return self.y
     
-    def show(self, subplot=None, ignorePhaseShift=False, xlabel="Time (s)", ylabel="Amplitude", title=""):
+    def show(self, subplot=None, ignorePhaseShift:bool=False, xlabel:str="Time (s)", ylabel:str="Amplitude", title:str=""):
 
         if self.signalType=='file':
             minSamples = self.y.size-1 # Use all samples
