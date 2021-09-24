@@ -214,7 +214,7 @@ class qft_framework():
                 self.noiseModel = noise.NoiseModel.from_backend(backend)
                 # and set the backend as simulator
                 self.backend = self.getSimulatorBackend()
-                self.provider = None #TODO: check if this will cause problems
+                self.provider = None
             else:
                 if simulation:
                     print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
