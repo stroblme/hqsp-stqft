@@ -9,9 +9,9 @@ import copy
 
 from math import log2
 
-from qiskit import *
+from qiskit import QuantumRegister, QuantumCircuit, transpile, execute
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
-from qiskit.providers.aer import noise
+from qiskit.providers.aer import Aer, noise
 # from qiskit.circuit.library import QFT as qiskit_qft
 
 import inspect
@@ -28,7 +28,7 @@ from frontend import signal
 # import mitiq
 
 from utils import filterByThreshold, isPow2
-import ibmAccounts #NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
+from ibmAccounts import IBMQ#NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
 
 def get_bit_string(n, n_qubits):
     """Returns the binary string of an integer with n_qubits characters
