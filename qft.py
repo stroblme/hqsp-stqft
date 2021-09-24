@@ -551,7 +551,9 @@ class qft_framework():
         ampls = y / np.linalg.norm(y)
         q = QuantumRegister(nQubits,'q')
 
+        # transpile once enabled but not transpiled yet -> run full process
         if self.transpileOnce and not self.transpiled:
+            # setup the transpiled circuit storage for the generic qft circuit
             self.transpiledQ = QuantumRegister(nQubits,'q')
             self.transpiledQC = QuantumCircuit(self.transpiledQ)
             self.transpiledQC = self.qft(self.transpiledQC, nQubits)
@@ -563,22 +565,38 @@ class qft_framework():
             if not self.suppressPrint:
                 print(f"Depth before transpiling: {self.transpiledQC.depth()}")
 
+            # do the transpilation of the qft
             self.transpiledQC = transpile(self.transpiledQC, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
             if not self.suppressPrint:
                 print(f"Depth after transpiling: {self.transpiledQC.depth()}")
 
+            # initialize the "first" layer
             qc = QuantumCircuit(q, name="qft circuit")
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
+
+            # do the transpilation of the encoding layer
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
+
+            # append the transpiled qft circuit to the encoding layer
             qc = qc + self.transpiledQC
 
+            # set transpiled flag
             self.transpiled = True
+
+        # transpile once enabled and qft circuit already transpiled -> only encoding layer needs to be transpiled
         elif self.transpileOnce and self.transpiled:
+            # initialize the "first" layer
             qc = QuantumCircuit(q, name="qft circuit")
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
+
+            # do the transpilation of the encoding layer
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
+
+            # append the transpiled qft circuit to the encoding layer
             qc = qc + self.transpiledQC
+
+        # transpile once disabled -> regular process but no seperate transpilation for encoding and qft
         else:
             qc = QuantumCircuit(q, name="qft circuit")
 
