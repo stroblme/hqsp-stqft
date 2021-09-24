@@ -10,6 +10,7 @@ import copy
 from math import log2
 
 from qiskit import QuantumRegister, QuantumCircuit, transpile, execute
+from qiskit.extensions import UnitaryGate, Initialize
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
 from qiskit.providers.aer import Aer, noise
 # from qiskit.circuit.library import QFT as qiskit_qft
@@ -27,7 +28,7 @@ from qiskit.tools.monitor import job_monitor
 from frontend import signal
 # import mitiq
 
-from utils import filterByThreshold, isPow2
+from utils import PI, filterByThreshold, isPow2
 from ibmAccounts import IBMQ#NOT redundant! needed to get account information! Can be commented out if loading e.g. noise data is not needed
 
 def get_bit_string(n, n_qubits):
@@ -529,10 +530,18 @@ class qft_framework():
 
         return y_hat_densed
 
-    def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=True):
+    def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=False):
         if customInitialize:
+            ident = np.identity(2**nQubits)
+            np.fill_diagonal(ident, y)
+            uEncoded = UnitaryGate(ident)
+            circuit.append(uEncoded, [registers[i] for i in range(nQubits)])
+
             for i in range(nQubits):
-                circuit.rx(y[i], registers[i])
+                # uMatrix = np.reshape(y,(1,2**nQubits))
+                # circuit.ry(y[i]*PI, registers[i])
+                pass
+
         else:
             circuit.initialize(y, [registers[i] for i in range(nQubits)])
 
