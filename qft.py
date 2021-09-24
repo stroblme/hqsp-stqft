@@ -529,6 +529,14 @@ class qft_framework():
 
         return y_hat_densed
 
+    def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=False):
+        if customInitialize:
+            pass
+        else:
+            circuit.initialize(y, [registers[i] for i in range(nQubits)])
+
+        return circuit
+
     def processQFT(self, y:np.array):
         n_samples = y.size
         assert isPow2(n_samples)
@@ -573,8 +581,8 @@ class qft_framework():
 
             # initialize the "first" layer
             qc = QuantumCircuit(q, name="qft circuit")
-            qc.initialize(ampls, [q[i] for i in range(nQubits)])
-
+            # qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            qc = self.encoding(y=ampls, nQubits=nQubits, circuit=qc, registers=q)
             # do the transpilation of the encoding layer
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
 
@@ -588,7 +596,8 @@ class qft_framework():
         elif self.transpileOnce and self.transpiled:
             # initialize the "first" layer
             qc = QuantumCircuit(q, name="qft circuit")
-            qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            # qc.initialize(ampls, [q[i] for i in range(nQubits)])
+            qc = self.encoding(y=ampls, nQubits=nQubits, circuit=qc, registers=q)
 
             # do the transpilation of the encoding layer
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
