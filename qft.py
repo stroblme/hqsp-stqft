@@ -529,9 +529,10 @@ class qft_framework():
 
         return y_hat_densed
 
-    def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=False):
+    def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=True):
         if customInitialize:
-            pass
+            for i in range(nQubits):
+                circuit.rx(y[i], registers[i])
         else:
             circuit.initialize(y, [registers[i] for i in range(nQubits)])
 
