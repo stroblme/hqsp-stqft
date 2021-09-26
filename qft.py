@@ -727,12 +727,7 @@ class qft_framework():
             circuit = self.gen_circuit(angles=angles, nQubits=nQubits, circuit=circuit, registers=registers)
 
         else:
-            new_y=list()
-            for k in range(len(y)//2):
-                new_y.append(y[k*2])
-
-            new_y = new_y / np.linalg.norm(new_y)
-            circuit.initialize(new_y, [registers[i] for i in range(nQubits)])
+            circuit.initialize(y, [registers[i] for i in range(nQubits)])
 
         return circuit
 
