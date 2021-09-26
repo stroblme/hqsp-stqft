@@ -7,12 +7,18 @@ from numpy import pi
 
 import copy
 
-from math import log2
+from math import log2, asin, floor
 
 from qiskit import QuantumRegister, QuantumCircuit, transpile, execute
 from qiskit.extensions import UnitaryGate, Initialize
 from qiskit.providers.aer.backends.aer_simulator import AerSimulator
 from qiskit.providers.aer import Aer, noise
+from qiskit.circuit.library.standard_gates.rz import RZGate
+from qiskit.circuit.library.standard_gates.ry import RYGate, CRYGate
+from qiskit.circuit.library.standard_gates.ry import RYGate
+from qiskit.circuit.library.standard_gates.x import CXGate, XGate
+
+
 # from qiskit.circuit.library import QFT as qiskit_qft
 
 import inspect
@@ -530,20 +536,203 @@ class qft_framework():
 
         return y_hat_densed
 
+    def gram_schmidt(self,A):
+    
+        (n, m) = A.shape
+        
+        for i in range(m):
+            
+            q = A[:, i] # i-th column of A
+            
+            for j in range(i):
+                q = q - np.dot(A[:, j], A[:, i]) * A[:, j]
+            
+            if np.array_equal(q, np.zeros(q.shape)):
+                raise np.linalg.LinAlgError("The column vectors are not linearly independent")
+            
+            # normalize q
+            q = q / np.sqrt(np.dot(q, q))
+            
+            # write the vector back in the matrix
+            A[:, i] = q
+
+        return A
+
+    def _multiplex(self, target_gate, list_of_angles, last_cnot=True):
+        """
+        Return a recursive implementation of a multiplexor circuit,
+        where each instruction itself has a decomposition based on
+        smaller multiplexors.
+
+        The LSB is the multiplexor "data" and the other bits are multiplexor "select".
+
+        Args:
+            target_gate (Gate): Ry or Rz gate to apply to target qubit, multiplexed
+                over all other "select" qubits
+            list_of_angles (list[float]): list of rotation angles to apply Ry and Rz
+            last_cnot (bool): add the last cnot if last_cnot = True
+
+        Returns:
+            DAGCircuit: the circuit implementing the multiplexor's action
+        """
+        list_len = len(list_of_angles)
+        local_num_qubits = int(log2(list_len)) + 1
+
+        q = QuantumRegister(local_num_qubits)
+        circuit = QuantumCircuit(q, name="multiplex" + local_num_qubits.__str__())
+
+        lsb = q[0]
+        msb = q[local_num_qubits - 1]
+
+        # case of no multiplexing: base case for recursion
+        if local_num_qubits == 1:
+            circuit.append(target_gate(list_of_angles[0]), [q[0]])
+            return circuit
+
+        # calc angle weights, assuming recursion (that is the lower-level
+        # requested angles have been correctly implemented by recursion
+        angle_weight = np.kron([[0.5, 0.5], [0.5, -0.5]], np.identity(2 ** (local_num_qubits - 2)))
+
+        # calc the combo angles
+        list_of_angles = angle_weight.dot(np.array(list_of_angles)).tolist()
+
+        # recursive step on half the angles fulfilling the above assumption
+        multiplex_1 = self._multiplex(target_gate, list_of_angles[0 : (list_len // 2)], False)
+        circuit.append(multiplex_1.to_instruction(), q[0:-1])
+
+        # attach CNOT as follows, thereby flipping the LSB qubit
+        circuit.append(CXGate(), [msb, lsb])
+
+        # implement extra efficiency from the paper of cancelling adjacent
+        # CNOTs (by leaving out last CNOT and reversing (NOT inverting) the
+        # second lower-level multiplex)
+        multiplex_2 = self._multiplex(target_gate, list_of_angles[(list_len // 2) :], False)
+        if list_len > 1:
+            circuit.append(multiplex_2.to_instruction().reverse_ops(), q[0:-1])
+        else:
+            circuit.append(multiplex_2.to_instruction(), q[0:-1])
+
+        # attach a final CNOT
+        if last_cnot:
+            circuit.append(CXGate(), [msb, lsb])
+
+        return circuit
+
+    def qiskitDebugInitialize(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister):
+        circuit.reset([registers[i] for i in range(nQubits)])
+
+        # ident = np.identity(2**nQubits)
+        # y += 0.0004
+        # np.fill_diagonal(ident, y)
+        # ident = self.gram_schmidt(ident)
+        # uEncoded = UnitaryGate(ident)
+        # circuit.append(uEncoded, [registers[i] for i in range(nQubits)])
+
+        q = QuantumRegister(nQubits)
+        disentangling_circuit = QuantumCircuit(q, name="disentangler")
+
+        # kick start the peeling loop, and disentangle one-by-one from LSB to MSB
+        remaining_param = y
+
+        for i in range(nQubits):
+            # work out which rotations must be done to disentangle the LSB
+            # qubit (we peel away one qubit at a time)
+            (remaining_param, thetas, phis) = Initialize._rotations_to_disentangle(remaining_param)
+
+            # perform the required rotations to decouple the LSB qubit (so that
+            # it can be "factored" out, leaving a shorter amplitude vector to peel away)
+
+            add_last_cnot = True
+            if np.linalg.norm(phis) != 0 and np.linalg.norm(thetas) != 0:
+                add_last_cnot = False
+
+            if np.linalg.norm(phis) != 0:
+                rz_mult = self._multiplex(RZGate, phis, last_cnot=add_last_cnot)
+                disentangling_circuit.append(rz_mult.to_instruction(), q[i : nQubits])
+
+            if np.linalg.norm(thetas) != 0:
+                ry_mult = self._multiplex(RYGate, thetas, last_cnot=add_last_cnot)
+                disentangling_circuit.append(ry_mult.to_instruction().reverse_ops(), q[i : nQubits])
+        disentangling_circuit.global_phase -= np.angle(sum(remaining_param))
+
+
+        initialize_instr = disentangling_circuit.to_instruction().inverse()
+
+        q = QuantumRegister(self.num_qubits, "q")
+        circuit = QuantumCircuit(q, name="init_def")
+        for qubit in q:
+            circuit.append(Reset(), [qubit])
+        circuit.append(initialize_instr, q[:])
+
+    def gen_angles(self, y:np.array):
+        angles = list()
+        if len(y) > 1:
+            new_y = list()
+            for k in range(int(len(y)/2)):
+                new_y.append(np.sqrt(y[2*k]**2 + y[2*k+1]**2))
+            inner_angles = self.gen_angles(new_y)
+
+            for k in range(len(new_y)):
+                if new_y[k] != 0:
+                    if y[2*k] > 0:
+                        angles.append(2*asin((y[2*k+1])/new_y[k]))
+                    else:
+                        angles.append(2*pi-2*asin((y[2*k+1])/new_y[k]))
+                else:
+                    angles.append(0)
+        return angles
+
+    def gen_angles_z(self, y:np.array):
+        angles_z = list()
+
+        if len(y) > 1:
+            new_y = list()
+            for k in range(int(len(y)/2)):
+                new_y.append((y[2*k] + y[2*k+1])/2)
+            inner_angles_z = self.gen_angles(new_y)
+
+            for k in range(len(new_y)):
+                angles_z.append(y[2*k+1]-y[2*k])
+
+            angles_z = inner_angles_z + angles_z
+
+    def gen_circuit(self, angles:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister):
+        for k in range(len(angles)-2):
+            if k==0:
+                circuit.ry(angles[k], registers[k])
+            else:
+                if angles[k] > self.minRotation:
+                    circuit.mcry(angles[k], [registers[i] for i in range(max(floor(log2(k)),1))], registers[max(floor(log2(k)),1)])
+        
+        return circuit
+
+    def gen_circuit_fast(self, angles:np.array, angles_z:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister):
+        for k in range(len(angles)-2):
+            if angles[k] != 0:
+                circuit.ry(angles[k], registers[log2(k)])
+
+        for k in range(len(angles_z)-2):
+            if angles_z[k] != 0:
+                circuit.ry(angles_z[k], registers[log2(k)])
+
+        
+
+
     def encoding(self, y:np.array, nQubits:int, circuit:QuantumCircuit, registers:QuantumRegister, customInitialize:bool=False):
         if customInitialize:
-            ident = np.identity(2**nQubits)
-            np.fill_diagonal(ident, y)
-            uEncoded = UnitaryGate(ident)
-            circuit.append(uEncoded, [registers[i] for i in range(nQubits)])
-
-            for i in range(nQubits):
-                # uMatrix = np.reshape(y,(1,2**nQubits))
-                # circuit.ry(y[i]*PI, registers[i])
-                pass
+            circuit.reset([registers[i] for i in range(nQubits)])
+            angles=self.gen_angles(y)
+            # angles_z=self.gen_angles_z(y)
+            # circuit = self.gen_circuit_fast(angles=angles, angles_z=angles_z, nQubits=nQubits, circuit=circuit, registers=registers)
+            circuit = self.gen_circuit(angles=angles, nQubits=nQubits, circuit=circuit, registers=registers)
 
         else:
-            circuit.initialize(y, [registers[i] for i in range(nQubits)])
+            new_y=list()
+            for k in range(len(y)//2):
+                new_y.append(y[k*2])
+
+            new_y = new_y / np.linalg.norm(new_y)
+            circuit.initialize(new_y, [registers[i] for i in range(nQubits)])
 
         return circuit
 
