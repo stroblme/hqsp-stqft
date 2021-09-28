@@ -251,7 +251,7 @@ class qft_framework():
                         suppressPrint:bool=False, draw:bool=False,
                         simulation:bool=True,
                         noiseMitigationOpt:int=0, filterResultCounts=None,
-                        useNoiseModel:bool=False, backend=None, 
+                        useNoiseModel:bool=False, noiseModel=None, backend=None, 
                         transpileOnce:bool=False, transpOptLvl:int=1):
                         
         self.suppressPrint = suppressPrint
@@ -297,11 +297,13 @@ class qft_framework():
                     print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
                 self.simulation = True
 
-                # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
-                # self.provider, tempBackend = loadBackend(backendName=backend, simulation=True)
-                # generate noise model from backend properties
-                # self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
-                self.noiseModel = loadNoiseModel(backend)
+                # if noise model was provided, use it
+                if noiseModel!=None:
+                    self.noiseModel = noiseModel
+                # load it otherwise
+                else:
+                    # generate noise model from backend properties
+                    self.provider, self.noiseModel = loadNoiseModel(backend)
                 self.backend = self.getSimulatorBackend()
 
             else:
@@ -322,11 +324,16 @@ class qft_framework():
                     print("Simulation was disabled but backend provided and noise model enabled. Will enable simulation")
                 self.simulation = True
 
-                # generate noise model from backend properties
-                self.noiseModel = noise.NoiseModel.from_backend(backend)
+                # if noise model was provided, use it
+                if noiseModel!=None:
+                    self.noiseModel = noiseModel
+                # load it otherwise
+                else:
+                    # generate noise model from backend properties
+                    self.provider, self.noiseModel = loadNoiseModel(backend)
+
                 # and set the backend as simulator
                 self.backend = self.getSimulatorBackend()
-                self.provider = None
             else:
                 if simulation:
                     print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
@@ -359,6 +366,8 @@ class qft_framework():
 
         # noise mitigation
         self.measFitter = None # used for qiskit noise filter
+
+        # use provided filter resultcounts if possible
         self.filterResultCounts = filterResultCounts # used for custom noise filter
         self.customFilter = True    #TODO: rework such that we can choose a mitigation approach
 
