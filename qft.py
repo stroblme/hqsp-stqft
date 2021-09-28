@@ -140,6 +140,109 @@ def loadBackend(backendName:str, simulation:bool=True, suppressPrint:bool=True):
 
     return provider, backend
 
+def loadNoiseModel(backend):
+    # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
+    provider, tempBackend = loadBackend(backendName=backend, simulation=True)
+    # generate noise model from backend properties
+    noiseModel = noise.NoiseModel.from_backend(tempBackend)
+
+    return provider, noiseModel
+
+def setupMeasurementFitter( backend, noiseModel, 
+                            transpOptLvl, nQubits:int, 
+                            nShots:int, nRuns:int=1,
+                            suppressPrint:bool=True):
+    """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
+
+    Args:
+        nQubits ([type]): [description]
+        nShots (int, optional): [description]. Defaults to 1024.
+    """
+    # if self.backend is None:
+    #     print("Need a backend first")
+    #     self.measFitter = None
+    #     return None
+
+    # if self.customFilter:
+    y = np.ones(2**nQubits)
+    ampls = y / np.linalg.norm(y)
+
+    q = QuantumRegister(nQubits,'q')
+    qc = QuantumCircuit(q,name="noise mitigation circuit")
+
+    qc.initialize(ampls, [q[i] for i in range(nQubits)])
+    qc = qft(qc, nQubits)
+    qc.measure_all()
+    qc = transpile(qc, backend, optimization_level=transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
+    print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots.. This might take a while")
+
+    jobResults = list()
+    for n in range(nRuns):
+        job = execute(qc, backend, noise_model=noiseModel, shots=nShots)
+        if not suppressPrint:
+            job_monitor(job, interval=5) #run a blocking monitor thread
+        jobResult = job.result()
+        jobResults.append(jobResult.results[0].data.counts)
+
+    filterResultCounts = dict()
+    for result in jobResults:
+        filterResultCounts = {k: filterResultCounts.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(filterResultCounts) | set(result)}
+    print(f"Filter Results: {filterResultCounts}")
+
+    # else:
+    #     measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
+
+    #     print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
+    #     job = execute(measCalibrations, backend=self.backend, shots=nShots)
+    #     job_monitor(job, interval=5)
+    #     cal_results = job.result()
+
+    #     self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
+    #     print(self.measFitter.cal_matrix)
+
+    # if self.noiseMitigationOpt != 1:
+    #     print(f"Enabling noise mitigating option 1 from now on..")
+    #     self.noiseMitigationOpt = 1
+
+    return filterResultCounts
+
+def qft_rotations(circuit, n, minRotation=0, suppressPrint=True):
+    """Performs qft on the first n qubits in circuit (without swaps)"""
+    if n == 0:
+        return circuit
+    n -= 1
+    circuit.h(n) # apply hadamard
+    
+    rotGateSaveCounter = 0
+
+    for qubit in range(n):
+        rot = pi/2**(n-qubit)
+        if rot <= minRotation:
+            rotGateSaveCounter += 1
+            if not suppressPrint:
+                print(f"Rotations lower than {minRotation}: is {rot}")
+        else:
+            circuit.cp(rot, qubit, n)
+
+    # At the end of our function, we call the same function again on
+    # the next qubits (we reduced n by one earlier in the function)
+    if n != 0 and rotGateSaveCounter != 0 and not suppressPrint:
+        print(f"Saved {rotGateSaveCounter} rotation gates which is {int(100*rotGateSaveCounter/n)}% of {n} qubits")
+    qft_rotations(circuit, n, minRotation=minRotation, suppressPrint=suppressPrint)
+    
+def swap_registers(circuit, n):
+    for qubit in range(n//2):
+        circuit.swap(qubit, n-qubit-1)
+    return circuit
+
+def qft(circuit, n, minRotation=0, suppressPrint=False):
+    """QFT on the first n qubits in circuit"""
+    qft_rotations(circuit, n, minRotation=minRotation, suppressPrint=suppressPrint)
+    swap_registers(circuit, n)
+    # self.measure(circuit,n)
+    return circuit
+
 class qft_framework():
     # minRotation = 0.2 #in [0, pi/2)
 
@@ -147,7 +250,8 @@ class qft_framework():
                         minRotation:int=0, signalThreshold:int=0, fixZeroSignal:bool=False, 
                         suppressPrint:bool=False, draw:bool=False,
                         simulation:bool=True,
-                        noiseMitigationOpt:int=0, useNoiseModel:bool=False, backend=None, 
+                        noiseMitigationOpt:int=0, filterResultCounts=None,
+                        useNoiseModel:bool=False, backend=None, 
                         transpileOnce:bool=False, transpOptLvl:int=1):
                         
         self.suppressPrint = suppressPrint
@@ -194,9 +298,10 @@ class qft_framework():
                 self.simulation = True
 
                 # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
-                self.provider, tempBackend = loadBackend(backendName=backend, simulation=True)
+                # self.provider, tempBackend = loadBackend(backendName=backend, simulation=True)
                 # generate noise model from backend properties
-                self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
+                # self.noiseModel = noise.NoiseModel.from_backend(tempBackend)
+                self.noiseModel = loadNoiseModel(backend)
                 self.backend = self.getSimulatorBackend()
 
             else:
@@ -253,12 +358,12 @@ class qft_framework():
 
 
         # noise mitigation
-        self.measFitter = None
-        self.filterResultCounts = None
+        self.measFitter = None # used for qiskit noise filter
+        self.filterResultCounts = filterResultCounts # used for custom noise filter
         self.customFilter = True    #TODO: rework such that we can choose a mitigation approach
 
         # transpilation reuse
-        self.transpileOnce=transpileOnce
+        self.transpileOnce = transpileOnce
         self.transpiled = False
         
 
@@ -333,61 +438,7 @@ class qft_framework():
             print(f"Enabling noise mitigating option 1 from now on..")
             self.noiseMitigationOpt = 1
 
-    def setupMeasurementFitter(self, nQubits:int, nShots:int, nRuns:int=10):
-        """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
-
-        Args:
-            nQubits ([type]): [description]
-            nShots (int, optional): [description]. Defaults to 1024.
-        """
-        if self.backend is None:
-            print("Need a backend first")
-            self.measFitter = None
-            return None
-
-        if self.customFilter:
-            y = np.ones(2**nQubits)
-            ampls = y / np.linalg.norm(y)
-
-            q = QuantumRegister(nQubits,'q')
-            qc = QuantumCircuit(q,name="noise mitigation circuit")
-
-            qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = self.qft(qc, nQubits)
-            qc.measure_all()
-            qc = transpile(qc, self.filterBackend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
-
-            print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots.. This might take a while")
-
-            jobResults = list()
-            for n in range(nRuns):
-                job = execute(qc, self.filterBackend, noise_model=self.noiseModel, shots=self.numOfShots)
-                if not self.suppressPrint:
-                    job_monitor(job, interval=5) #run a blocking monitor thread
-                jobResult = job.result()
-                jobResults.append(jobResult.results[0].data.counts)
-
-            self.filterResultCounts = dict()
-            for result in jobResults:
-                self.filterResultCounts = {k: self.filterResultCounts.get(k, 0) + 1/nRuns*result.get(k, 0) for k in set(self.filterResultCounts) | set(result)}
-            print(f"Filter Results: {self.filterResultCounts}")
-
-        # else:
-        #     measCalibrations, state_labels = complete_meas_cal(qr=QuantumRegister(nQubits), circlabel='mcal')
-
-        #     print(f"Running measurement for filter on {nQubits} Qubits using {nShots} shots")
-        #     job = execute(measCalibrations, backend=self.backend, shots=nShots)
-        #     job_monitor(job, interval=5)
-        #     cal_results = job.result()
-
-        #     self.measFitter = CompleteMeasFitter(cal_results, state_labels, circlabel='mcal')
-        #     print(self.measFitter.cal_matrix)
-
-        if self.noiseMitigationOpt != 1:
-            print(f"Enabling noise mitigating option 1 from now on..")
-            self.noiseMitigationOpt = 1
-
-        return self.measFitter
+    
 
     def qubitNoiseFilter(self, jobResult, nQubits:int):
         """In parts taken from https://quantumcomputing.stackexchange.com/questions/10152/mitigating-the-noise-in-a-quantum-circuit
@@ -398,57 +449,57 @@ class qft_framework():
         Returns:
             [type]: [description]
         """
-        # TODO: implement filter selection here
-        if self.customFilter:
-            if self.filterResultCounts == None:
-                print("Need to initialize measurement fitter first")
-                if nQubits == None:
-                    print(f"For auto-initialization, you must provide the number of qubits")
-                    return jobResult
-                self.setupMeasurementFitter(nQubits=nQubits, nShots=jobResult.results[0].shots)
-            elif len(self.filterResultCounts) == 1:
-                print("Seems like you try to mitigate noise of a simulation without any noise. You can either disable noise suppression or consider running with noise.")
+        # if self.customFilter:
+        if self.filterResultCounts == None:
+            print("Need to initialize measurement fitter first")
+            if nQubits == None:
+                print(f"For auto-initialization, you must provide the number of qubits")
                 return jobResult
-            
-            
-            mitigatedResult = copy.deepcopy(jobResult)
+            self.filterResultCounts=setupMeasurementFitter( backend=self.filterBackend, noiseModel=self.noiseModel,
+                                                            transpOptLvl=self.transpOptLvl, nQubits=nQubits, 
+                                                            nShots=jobResult.results[0].shots)
+        elif len(self.filterResultCounts) == 1:
+            print("Seems like you try to mitigate noise of a simulation without any noise. You can either disable noise suppression or consider running with noise.")
+            return jobResult
+        
+        
+        mitigatedResult = copy.deepcopy(jobResult)
 
-            jobResultCounts = jobResult.results[0].data.counts
+        jobResultCounts = jobResult.results[0].data.counts
 
-            maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
+        maxCount = max(jobResultCounts.values()) #get max. number of counts in the plot
 
-            nMitigated=0
-            for idx, count in jobResultCounts.items():
-                if count/maxCount < 0.5 or idx == "0x0":    # only filter counts which are less than half of the chance
-                    # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
-                    # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
-                    # mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(nQubits))}b')])
-                    if idx in self.filterResultCounts:
-                        mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
-                        nMitigated+=1
-                    # it can (and often will) happen, that the result list contains keys which are not in the filter result counts
-                    # especially in large circuits, this is the case, as there are so many computational basis states (2**nQubits)
-                    # that it's very unlikely every state is covered by just an initialized circuit (like the filter)
+        nMitigated=0
+        for idx, count in jobResultCounts.items():
+            if count/maxCount < 0.5 or idx == "0x0":    # only filter counts which are less than half of the chance
+                # pretty complicated line, but we are converting just from hex indexing to binary here and padding zeros where necessary
+                # filterResultCounts[bin_zero_padded]: idx:hex -> bin -> bin zero padded 
+                # mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[format(int(idx,16), f'0{int(log2(nQubits))}b')])
+                if idx in self.filterResultCounts:
+                    mitigatedResult.results[0].data.counts[idx] = max(0,count - self.filterResultCounts[idx])
+                    nMitigated+=1
+                # it can (and often will) happen, that the result list contains keys which are not in the filter result counts
+                # especially in large circuits, this is the case, as there are so many computational basis states (2**nQubits)
+                # that it's very unlikely every state is covered by just an initialized circuit (like the filter)
 
-            if not self.suppressPrint:
-                print(f"Mitigated {nMitigated} in total")
+        if not self.suppressPrint:
+            print(f"Mitigated {nMitigated} in total")
 
-            return mitigatedResult
-        else:
-            if self.measFitter == None:
-                print("Need to initialize measurement fitter first")
-                if nQubits == None:
-                    print(f"For auto-initialization, you must provide the number of qubits")
-                    return jobResult
-                self.setupMeasurementFitter(nQubits=nQubits)
+        # else:
+            # if self.measFitter == None:
+            #     print("Need to initialize measurement fitter first")
+            #     if nQubits == None:
+            #         print(f"For auto-initialization, you must provide the number of qubits")
+            #         return jobResult
+            #     self.setupMeasurementFitter(nQubits=nQubits)
 
-            # Get the filter object
-            measFilter = self.measFitter.filter
+            # # Get the filter object
+            # measFilter = self.measFitter.filter
 
-            # Results with mitigation
-            mitigatedResult = measFilter.apply(jobResult)
-            # mitigatedCounts = mitigatedResult.get_counts(0)
-            print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
+            # # Results with mitigation
+            # mitigatedResult = measFilter.apply(jobResult)
+            # # mitigatedCounts = mitigatedResult.get_counts(0)
+            # print(f"Filtering achieved at '0000': {mitigatedResult.get_counts()['0000']} vs before: {jobResult.get_counts()['0000']}")
         return mitigatedResult
 
     def mitiqNoiseFilter(self, jobResult, nQubits:int):
@@ -463,46 +514,16 @@ class qft_framework():
         self.transform(y,int(y.size / 3))
 
 
-    def qft_rotations(self, circuit, n):
-        """Performs qft on the first n qubits in circuit (without swaps)"""
-        if n == 0:
-            return circuit
-        n -= 1
-        circuit.h(n) # apply hadamard
-        
-        rotGateSaveCounter = 0
+    
 
-        for qubit in range(n):
-            rot = pi/2**(n-qubit)
-            if rot <= self.minRotation:
-                rotGateSaveCounter += 1
-                if not self.suppressPrint:
-                    print(f"Rotations lower than {self.minRotation}: is {rot}")
-            else:
-                circuit.cp(rot, qubit, n)
-
-        # At the end of our function, we call the same function again on
-        # the next qubits (we reduced n by one earlier in the function)
-        if n != 0 and rotGateSaveCounter != 0 and not self.suppressPrint:
-            print(f"Saved {rotGateSaveCounter} rotation gates which is {int(100*rotGateSaveCounter/n)}% of {n} qubits")
-        self.qft_rotations(circuit, n)
-
-    def swap_registers(self, circuit, n):
-        for qubit in range(n//2):
-            circuit.swap(qubit, n-qubit-1)
-        return circuit
+    
 
     def measure(self, circuit, n):
         for qubit in range(n):
             circuit.barrier(qubit)
         circuit.measure_all()
 
-    def qft(self, circuit, n):
-        """QFT on the first n qubits in circuit"""
-        self.qft_rotations(circuit, n)
-        self.swap_registers(circuit, n)
-        # self.measure(circuit,n)
-        return circuit
+
 
     def inverseQft(self, circuit, n):
         """Inverse QFT on the first n qubits in the circuit"""
