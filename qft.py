@@ -272,6 +272,7 @@ class qft_framework():
         # The following code will set:
         # backend
         # provider
+        # noiseModel
         # simulation
         # noiseModelBackend
         # -------------------------------------------------
