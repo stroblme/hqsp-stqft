@@ -140,7 +140,7 @@ def loadBackend(backendName:str, simulation:bool=True, suppressPrint:bool=True):
 
     return provider, backend
 
-def loadNoiseModel(backend):
+def loadNoiseModel(backendName=backend):
     # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
     provider, tempBackend = loadBackend(backendName=backend, simulation=True)
     # generate noise model from backend properties
