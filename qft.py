@@ -140,9 +140,9 @@ def loadBackend(backendName:str, simulation:bool=True, suppressPrint:bool=True):
 
     return provider, backend
 
-def loadNoiseModel(backendName=backend):
+def loadNoiseModel(backendName):
     # set the noise model but do only load the simulator backend. Careful! IBMQ has a request limit ;)
-    provider, tempBackend = loadBackend(backendName=backend, simulation=True)
+    provider, tempBackend = loadBackend(backendName=backendName, simulation=True)
     # generate noise model from backend properties
     noiseModel = noise.NoiseModel.from_backend(tempBackend)
 
@@ -304,7 +304,7 @@ class qft_framework():
                 # load it otherwise
                 else:
                     # generate noise model from backend properties
-                    self.provider, self.noiseModel = loadNoiseModel(backend)
+                    self.provider, self.noiseModel = loadNoiseModel(backendName=backend)
                 self.backend = self.getSimulatorBackend()
 
             else:
@@ -331,7 +331,7 @@ class qft_framework():
                 # load it otherwise
                 else:
                     # generate noise model from backend properties
-                    self.provider, self.noiseModel = loadNoiseModel(backend)
+                    self.provider, self.noiseModel = loadNoiseModel(backendName=backend)
 
                 # and set the backend as simulator
                 self.backend = self.getSimulatorBackend()
