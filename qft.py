@@ -537,7 +537,7 @@ class qft_framework():
 
     def inverseQft(self, circuit, n):
         """Inverse QFT on the first n qubits in the circuit"""
-        q_circuit = self.qft(QuantumCircuit(n), n)
+        q_circuit = qft(QuantumCircuit(n), n)
         inv_q_ciruit = q_circuit.inverse()
         circuit.append(inv_q_ciruit, circuit.qubits[:n])
 
@@ -789,7 +789,7 @@ class qft_framework():
             # setup the transpiled circuit storage for the generic qft circuit
             self.transpiledQ = QuantumRegister(nQubits,'q')
             self.transpiledQC = QuantumCircuit(self.transpiledQ)
-            self.transpiledQC = self.qft(self.transpiledQC, nQubits)
+            self.transpiledQC = qft(self.transpiledQC, nQubits)
             self.transpiledQC.measure_all()
     
 
@@ -837,7 +837,7 @@ class qft_framework():
             # for 2^n amplitudes, we have n qubits for initialization
             # this means that the binary representation happens exactly here
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = self.qft(qc, nQubits)
+            qc = qft(qc, nQubits)
             qc.measure_all()
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
@@ -917,7 +917,7 @@ class qft_framework():
         # this means that the binary representation happens exactly here
         qc.initialize(ampls, [q[i] for i in range(n_qubits)])
 
-        qc = self.qft(qc, n_qubits)
+        qc = qft(qc, n_qubits)
         qc.inverse()
         qc.measure_all()
 
