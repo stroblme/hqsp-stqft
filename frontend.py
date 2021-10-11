@@ -1,3 +1,5 @@
+from matplotlib import colors
+import matplotlib as mpl
 import numpy as np
 from numpy import pi, string_
 from scipy import signal as scipySignal
@@ -7,16 +9,22 @@ from copy import deepcopy
 import os
 import pickle
 import git
+from cycler import cycler
 # from matplotlib.gridspec import GridSpec
 
 import librosa
 
 from qbstyles import mpl_style
 
-
 class frontend():
     COLORMAP = 'plasma'
     SHADING='nearest'
+    MAIN='#06574b'
+    WHITE='#FFFFFF'
+    GRAY='#BBBBBB'
+    HIGHLIGHT='#9202e1'
+    LIGHTGRAY='#EEEEEE'
+
     DARK=True
     clickEventHandled = True
 
@@ -66,7 +74,12 @@ class frontend():
                     if axis is not ax:
                         axis.set_visible(False)
                 event.canvas.draw()
+            elif int(event.button) == 2:
+                ax.remove()
+                # ax.set_visible(False)
+                event.canvas.draw()
 
+                pass
             elif int(event.button) == 3:
                 # On right click, restore the axes
                 try:
@@ -84,6 +97,7 @@ class frontend():
 
     def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False):
         # fighandle = plt.figure()
+        mpl.rcParams['axes.prop_cycle'] = cycler('color',[frontend.MAIN, frontend.HIGHLIGHT])
 
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
@@ -96,6 +110,7 @@ class frontend():
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.tight_layout()
         
+        
 
         if x2Data is None:
             if log:
@@ -106,7 +121,7 @@ class frontend():
                 plt.xlim(min(x1Data), max(x1Data))
 
             if plotType == 'stem':
-                plt.stem(x1Data, yData)
+                plt.stem(x1Data, yData, linefmt=frontend.MAIN, markerfmt="C1o")
             else:
                 plt.plot(x1Data, yData, 'o--')
 
