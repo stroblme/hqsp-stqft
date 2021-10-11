@@ -9,7 +9,7 @@ from qbstyles import mpl_style
 
 from frontend import frontend
 
-frontend.setTheme(dark=True)
+frontend.setTheme(dark=False)
 
 cdir = "./data/"
 ignoreList = ["venv", ".vscode"]
@@ -44,6 +44,7 @@ pt = 0
 class matplotLibViewer(frontend):
 
     def createPlots(self):
+        subplots = list()
         for filePath in fileList:
             try:
                 data = pickle.load(open(filePath,'rb'))
@@ -66,6 +67,10 @@ class matplotLibViewer(frontend):
             plotType = data["plotdata"]["plotType"]
             log = data["plotdata"]["log"]
 
+            if subplot in subplots:
+                continue
+            subplots.append(subplot)
+
             self._show( yData=yData, 
                     x1Data=x1Data, 
                     title=title, 
@@ -78,7 +83,11 @@ class matplotLibViewer(frontend):
 
         fig = plt.gcf()
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
+
         plt.show()
+        dec = input("Save? [y/n] Sorry need to know that a-priori due to limitations of matplotlib.")
+        if dec == "y":
+            plt.savefig(f'/home/stroblme/Documents/Studium/Semester_12/Masterarbeit/Thesis/figures/{selection}.pdf', format="pdf")
 
 mplv = matplotLibViewer()
 
