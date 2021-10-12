@@ -6,7 +6,7 @@
     "configurations": [
 
         {
-            "name": "Viewer",
+            "name": "STQFT: Viewer",
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/viewer.py",
