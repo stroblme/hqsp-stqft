@@ -292,7 +292,7 @@ class qft_framework():
                 print("Noise model can be used without a corresponding backend")
             self.noiseModel = None
 
-            self.backend = None
+            self.backend = self.getSimulatorBackend()
             self.provider = None
         # user provided backend only as a name, not instance
         elif type(backend) == str:
@@ -314,10 +314,10 @@ class qft_framework():
 
             else:
                 # check if simulation was enabled
-                if simulation:
-                    print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
-                self.simulation = False
-
+                # if simulation:
+                #     print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
+                # self.simulation = False
+                self.simulation = simulation
                 # Null the noise model and load a backend for simulation or real device
                 self.noiseModel = None
                 self.provider, self.backend = loadBackend(backendName=backend, simulation=self.simulation)
@@ -849,7 +849,18 @@ class qft_framework():
         if self.draw:
             self.draw=False
             name = str(time.mktime(datetime.datetime.now().timetuple()))[:-2]
-            qc.draw(output='mpl', filename=f'./export/{name}.png')
+            # qc.draw(output='mpl', filename=f'./export/{name}.png')
+            MAIN='#06574b'
+            WHITE='#FFFFFF'
+            GRAY='#BBBBBB'
+            HIGHLIGHT='#9202e1'
+            LIGHTGRAY='#EEEEEE'
+            qc.draw(output='mpl', filename=f"./harmonicSignal_qftCircuit.pdf", fold=-1, style={'displaycolor': {  'cp': (MAIN, WHITE),
+                                                                                                                    'x': (MAIN, WHITE),
+                                                                                                                    'measure': (MAIN, WHITE),
+                                                                                                                    'initialize': (MAIN, WHITE),
+                                                                                                                    'swap': (MAIN, WHITE),
+                                                                                                                    'h': (MAIN, WHITE)}})
 
         
 
