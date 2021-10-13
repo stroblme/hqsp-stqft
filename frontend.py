@@ -25,7 +25,7 @@ class frontend():
     HIGHLIGHT='#9202e1'
     LIGHTGRAY='#EEEEEE'
 
-    DARK=True
+    DARK=False
     clickEventHandled = True
 
     @staticmethod
@@ -39,7 +39,7 @@ class frontend():
         plt.ioff()
 
     @staticmethod
-    def setTheme(dark=True):
+    def setTheme(dark=DARK):
         frontend.DARK = dark
 
         mpl_style(dark=frontend.DARK, minor_ticks=False)
@@ -99,29 +99,36 @@ class frontend():
         # fighandle = plt.figure()
         mpl.rcParams['axes.prop_cycle'] = cycler('color',[frontend.MAIN, frontend.HIGHLIGHT])
 
+        fig = plt.gcf()
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
             plt.subplots_adjust(wspace=0.58)
+            fig.set_size_inches(16,9)
         else:
-            plt.figure(figsize = (10, 6))
+            plt.subplots_adjust(left=0.15, right=0.95, top=0.92)
+            fig.set_size_inches(6,6)
+            # plt.figure(figsize = (10, 6))
 
-        fig = plt.gcf()
-        fig.set_size_inches(16,9)
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.tight_layout()
         
         
 
         if x2Data is None:
-            if log:
-                ax = plt.gca()
+            ax = plt.gca()
+            if log and plotType != 'box':
                 ax.set_yscale('log')
                 plt.autoscale(False)
-                plt.ylim(max(min(min(yData)*0.92,0.1),0.01),1)
+                if type(yData) == np.ndarray:
+                    plt.ylim(max(min(yData.min()*0.92,0.1),0.01),1)
+                else:
+                    plt.ylim(max(min(min(yData)*0.92,0.1),0.01),1)
                 plt.xlim(min(x1Data), max(x1Data))
 
             if plotType == 'stem':
                 plt.stem(x1Data, yData, linefmt=frontend.MAIN, markerfmt="C1o")
+            elif plotType == 'box':
+                ax.boxplot(yData)
             else:
                 plt.plot(x1Data, yData, 'o--')
 
@@ -432,14 +439,14 @@ class transform(frontend):
         if x2Data is None:
             yData = np.abs(yData)
             if xlabel == "":
-                xlabel = 'Freq (Hz)'
+                xlabel = 'Frequency (Hz)'
             if ylabel == "":
                 ylabel = 'Amplitude (abs)'
         else:
             if xlabel == "":
                 xlabel ='Time (s)'
             if ylabel == "":
-                ylabel ='Freq (Hz)'
+                ylabel ='Frequency (Hz)'
                 
         if title=="":
             title = type(self.transformation).__name__
@@ -477,7 +484,7 @@ class grader(frontend):
         x1Data = self.xValues
         title = 'Grader'
         xlabel = 'Tick'
-        ylabel = 'SNR'
+        ylabel = 'g'
         x2Data = None
 
         return self._show(yData, x1Data, title, xlabel, ylabel, x2Data=x2Data, subplot=subplot, plotType='plot', log=True)
