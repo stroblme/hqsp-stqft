@@ -801,24 +801,31 @@ class qft_framework():
             if not self.suppressPrint:
                 print(f"Transpiling for {self.backend}")
             if not self.suppressPrint:
-                print(f"Depth before transpiling: {self.transpiledQC.depth()}")
+                print(f"QFT Depth before transpiling: {self.transpiledQC.depth()}")
 
             # do the transpilation of the qft
             self.transpiledQC = transpile(self.transpiledQC, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
             if not self.suppressPrint:
-                print(f"Depth after transpiling: {self.transpiledQC.depth()}")
+                print(f"QFT Depth after transpiling: {self.transpiledQC.depth()}")
 
+                
             # initialize the "first" layer
             qc = QuantumCircuit(q, name="qft circuit")
             # qc.initialize(ampls, [q[i] for i in range(nQubits)])
             qc = self.encoding(y=ampls, nQubits=nQubits, circuit=qc, registers=q)
+
+            if not self.suppressPrint:
+                print(f"Starting transpile for initialization circuit")
+
             # do the transpilation of the encoding layer
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl)
 
             # append the transpiled qft circuit to the encoding layer
             qc = qc + self.transpiledQC
 
+            if not self.suppressPrint:
+                print(f"Transpile once enabled, so next time we only need to transpile the encoding layer")
             # set transpiled flag
             self.transpiled = True
 
@@ -858,7 +865,8 @@ class qft_framework():
 
 
         if not self.suppressPrint:
-            print("Executing job...")
+            start = time.time()
+            print(f"Executing job at {start}...")
     
         #substitute with the desired backend
         job = execute(qc, self.backend,shots=self.numOfShots,noise_model=self.noiseModel)
@@ -868,6 +876,9 @@ class qft_framework():
 
         # self.lastJobResultCounts = job.result().get_counts()
         
+        if not self.suppressPrint:
+            end = time.time()
+            print(f"Finished at {end}; took {end-start}")
         if not self.suppressPrint:
             print("Post Processing...")
         
