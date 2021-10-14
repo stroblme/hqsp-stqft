@@ -67,3 +67,4 @@ def test_plot(y_hat, sr):
     ax.set(title='Mel-frequency spectrogram')
 
     plt.show()
+
