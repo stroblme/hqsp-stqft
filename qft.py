@@ -884,7 +884,7 @@ class qft_framework():
         
         if self.noiseMitigationOpt == 1:
             jobResult = self.qubitNoiseFilter(jobResult=job.result(), nQubits=nQubits)
-        if self.noiseMitigationOpt == 2:
+        elif self.noiseMitigationOpt == 2:
             jobResult = self.mitiqNoiseFilter(jobResult=job.result(), nQubits=nQubits)
         else:
             if not self.suppressPrint:
