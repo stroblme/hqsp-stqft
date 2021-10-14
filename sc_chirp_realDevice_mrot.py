@@ -95,7 +95,7 @@ for expIt in range(0, nExp):
     while mrot <= PI/2:
 
         print("Processing simulation STQFT with noise, mitigated")
-        stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts)
+        stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, suppressPrint=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts)
 
 
 
