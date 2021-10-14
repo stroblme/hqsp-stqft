@@ -10,7 +10,7 @@ TOPIC = "chirp_realDevice_small"
 export.checkWorkingTree()
 device = "ibmq_quito"
 
-nQubits = 4
+nQubits = 7
 windowLength = 2**nQubits
 overlapFactor=0.5
 windowType='hanning'
@@ -21,7 +21,7 @@ print(f"Mrot set to {mrot}")
 
 print("Initializing Signal")
 
-y = signal(samplingRate=500, amplification=1, duration=0, nSamples=2**16, signalType='chirp')
+y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**12, signalType='chirp')
 
 y.addFrequency(62.5)
 y.addFrequency(250, y.duration)
