@@ -55,6 +55,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "STQFT: Min Rotations Harmonic Real Device Mitig",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_minRot_harmonic_realDevice_mitig.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "STQFT: Min Rotations Chirp",
             "type": "python",
             "request": "launch",
@@ -66,6 +73,13 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/sc_chirp_realDevice.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "STQFT: Chirp Real Device Small",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_chirp_realDevice_small.py",
             "console": "integratedTerminal"
         },
         {
