@@ -289,7 +289,7 @@ class qft_framework():
                 print("Simulation was disabled but no backend provided. Will enable simulation")
             self.simulation = True
             if useNoiseModel:
-                print("Noise model can be used without a corresponding backend")
+                print("Noise model can't be used without a corresponding backend")
             self.noiseModel = None
 
             self.backend = self.getSimulatorBackend()
@@ -340,6 +340,8 @@ class qft_framework():
 
                 # and set the backend as simulator
                 self.backend = self.getSimulatorBackend()
+                # and use the backend provided
+                # self.backend = backend
             else:
                 if simulation:
                     print("Simulation was enabled but backend provided and noise model disabled. Will disable simulation")
@@ -849,7 +851,7 @@ class qft_framework():
             # for 2^n amplitudes, we have n qubits for initialization
             # this means that the binary representation happens exactly here
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = qft(qc, nQubits)
+            qc = qft(qc, nQubits, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
             qc.measure_all()
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 

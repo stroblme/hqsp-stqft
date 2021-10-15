@@ -83,6 +83,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "STQFT: Chirp Real Device MRot",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/sc_chirp_realDevice_mrot.py",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "STQFT: Filter Evaluation",
             "type": "python",
             "request": "launch",

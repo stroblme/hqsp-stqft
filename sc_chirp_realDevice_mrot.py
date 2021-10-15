@@ -7,9 +7,11 @@ from frontend import frontend, grader, signal, transform, export
 from utils import PI
 
 frontend.enableInteractive()
-TOPIC = "chirp_realDevice"
+TOPIC = "chirp_realDevice_mrot_mitig"
+# TOPIC = "chirp_realDevice_mrot"
 export.checkWorkingTree()
-device = "ibmq_casablanca"
+device = "ibmq_casablanca" #noisy
+# device = "ibmq_guadalupe"
 
 nQubits = 7
 windowLength = 2**nQubits
@@ -17,10 +19,9 @@ overlapFactor=0.5
 windowType='hanning'
 b = 2
 w=4
+# mrot = PI/2**(nQubits-1)
 mrot=0
-mrot = PI/2**(nQubits-1)
 # mrot = PI/2**(nQubits-1-b)
-nExp=5
 
 print(f"Mrot set to {mrot}")
 
@@ -34,85 +35,39 @@ y.addFrequency(2000, y.duration)
 y.addFrequency(1000)
 y.addFrequency(3000, y.duration)
 
-# plotData = y.show(subplot=[1,w,1], title="signal")
+nShots=2048
 
-# exp = export(topic=TOPIC, identifier="signal")
-# # exp.setData(export.SIGNAL, y)
-# exp.setData(export.DESCRIPTION, "Harmonic Signal, 125 and 250 Hz at 1kHz, 2^4 samples")
-# exp.setData(export.PLOTDATA, plotData)
-# exp.doExport()
-
-# print("Processing STFT")
-# stft = transform(stft_framework)
-# y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-# plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,w,1], title="stft")
-# # plotData = stft.show(y_hat_stft_p, f_p, t_p, subplot=[1,w,2], title="stft")
-
-# exp = export(topic=TOPIC, identifier="stft")
-# exp.setData(export.SIGNAL, y_hat_stft)
-# exp.setData(export.DESCRIPTION, "stft, chirp, window: 'hanning', length=2**7")
-# exp.setData(export.PLOTDATA, plotData)
-# exp.doExport()
-
-# print("Processing simulation STQFT")
-# stqft = transform(stqft_framework, minRotation=mrot, suppressPrint=True)
-# y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t)
-# plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,w,2], title="stqft")
-# # plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[1,w,3], title="stqft")
-
-# exp = export(topic=TOPIC, identifier="stqft")
-# exp.setData(export.SIGNAL, y_hat_stqft)
-# exp.setData(export.DESCRIPTION, f"stqft, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
-# exp.setData(export.PLOTDATA, plotData)
-# exp.doExport()
-
-# print("Processing simulation STQFT with noise")
-# stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, backend=device)
-# y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-# y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t)
-# plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,w,3], title="stqft_noise")
-# # plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,w,4], title="stqft_noise")
-
-# exp = export(topic=TOPIC, identifier="stqft-noise")
-# exp.setData(export.SIGNAL, y_hat_stqft)
-# exp.setData(export.DESCRIPTION, f"stqft, {device}, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
-# exp.setData(export.PLOTDATA, plotData)
-# exp.setData(export.BACKEND, stqft.transformation.stt_inst.transformationInst.getBackend())
-# exp.doExport()
 _, backendInstance = loadBackend(backendName=device, simulation=True)
 _, noiseModel = loadNoiseModel(backendName=backendInstance)
 filterResultCounts = setupMeasurementFitter(backendInstance, noiseModel,
-                                                    transpOptLvl=1, nQubits=nQubits, nShots=2048)
-                                                    
-for expIt in range(0, nExp):
-    print(f"Experiment {expIt}\n")
-    mrot = 0
-    pt = 0
-    grader_inst = grader()
+                                                    transpOptLvl=1, nQubits=nQubits, nShots=nShots)
 
-    while mrot <= PI/2:
+mrot = 0
+pt = 0
 
-        print("Processing simulation STQFT with noise, mitigated")
-        stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, suppressPrint=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts)
+while mrot <= PI/2:
+
+    print("Processing simulation STQFT with noise, mitigated")
+    stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, suppressPrint=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts, numOfShots=nShots)
+    
+    # stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, noiseModel=noiseModel, backend=backendInstance, suppressPrint=True)
+
+    ylabel = "" if pt == 0 else " "
 
 
+    y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
+    y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t)
+    plotData = stqft.show(y_hat_stqft_p, f_p, t_p, subplot=[2,nQubits/2+1,pt+1], title=f"STQFT_real, mr:{mrot:.2f}", ylabel=ylabel)
 
-        y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
-        y_hat_sqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t)
-        plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,1,pt+1], title="STQFT_real, mr:{mrot:.2f}")
-        # plotData = stqft.show(y_hat_sqft_p, f_p, t_p, subplot=[1,w,4], title="stqft_noise")
+    exp = export(topic=TOPIC, identifier=f"stqft_real_mr_{mrot:.2f}")
+    exp.setData(export.SIGNAL, y_hat_stqft_p)
+    exp.setData(export.DESCRIPTION, f"stqft, {device}, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
+    exp.setData(export.PLOTDATA, plotData)
+    exp.setData(export.BACKEND, stqft.transformation.stt_inst.transformationInst.getBackend())
+    exp.doExport()
 
-        exp = export(topic=TOPIC, identifier=f"{expIt}_stqft_real_mr_{mrot:.2f}")
-        exp.setData(export.SIGNAL, y_hat_stqft)
-        exp.setData(export.DESCRIPTION, f"stqft, {device}, chirp, window: 'hanning', length=2**7, mrot:{mrot}")
-        exp.setData(export.PLOTDATA, plotData)
-        exp.setData(export.BACKEND, stqft.transformation.stt_inst.transformationInst.getBackend())
-        exp.doExport()
-
-        pt += 1
-        mrot = PI/2**(nQubits+1-pt)
+    pt += 1
+    mrot = PI/2**(nQubits-pt)
 
 print("Showing all figures")
 frontend.primeTime() # Show all with blocking

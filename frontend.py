@@ -17,7 +17,8 @@ import librosa
 from qbstyles import mpl_style
 
 class frontend():
-    COLORMAP = 'plasma'
+    # COLORMAP = 'gist_ncar'
+    COLORMAP = 'twilight'
     SHADING='nearest'
     MAIN='#06574b'
     WHITE='#FFFFFF'
@@ -97,14 +98,29 @@ class frontend():
 
     def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False):
         # fighandle = plt.figure()
+        SMALL_SIZE = 10
+        MEDIUM_SIZE = 12
+        BIGGER_SIZE = 14
+
+        plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
+        plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+        plt.rc('axes', labelsize=BIGGER_SIZE)    # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+        plt.rc('ytick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+        plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+
         mpl.rcParams['axes.prop_cycle'] = cycler('color',[frontend.MAIN, frontend.HIGHLIGHT])
 
         fig = plt.gcf()
         if subplot is not None:
             plt.subplot(*subplot,frameon=False)
-            plt.subplots_adjust(wspace=0.58)
-            fig.set_size_inches(16,9)
+            plt.subplots_adjust(wspace=0.58, top=0.9, left=0.081, bottom=0.16)
+            fig.set_size_inches(3*int(subplot[1]),int(subplot[0])*4)
         else:
+            # plt.xticks(fontsize=14)
+            # plt.yticks(fontsize=14)
             plt.subplots_adjust(left=0.15, right=0.95, top=0.92)
             fig.set_size_inches(6,6)
             # plt.figure(figsize = (10, 6))
@@ -133,7 +149,10 @@ class frontend():
                 plt.plot(x1Data, yData, 'o--')
 
         else:
-            plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING)
+            # ax = plt.gca()
+            m = plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING,linewidth=0, rasterized=True)
+            # ax.set_rasterized(True)
+
                 
         plt.title(title)
         plt.xlabel(xlabel)

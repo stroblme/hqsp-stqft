@@ -58,6 +58,9 @@ class matplotLibViewer(frontend):
             if fileName in plotsDone:
                 continue
 
+            if "chirp" in selection and 'signal' in fileName:
+                continue
+
             dataList=list()
             try:
                 expN=int(fileName[0])
@@ -106,6 +109,9 @@ class matplotLibViewer(frontend):
                 if ntitle != "":
                     title = ntitle
                     # title = None
+                nylabel = input("Enter new ylabel for figure (leave empty to dismiss)\n")
+                if nylabel != "":
+                    ylabel = nylabel
 
             if len(dataList) > 1:
                 yDataList = np.zeros(shape=(len(dataList), len(yData)))
@@ -139,7 +145,11 @@ class matplotLibViewer(frontend):
                         log=log)
 
             if filterString != "":
-                break
+                plt.show()
+
+                dec=input("Show more?")
+                if dec == "":
+                    break
 
         fig = plt.gcf()
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
