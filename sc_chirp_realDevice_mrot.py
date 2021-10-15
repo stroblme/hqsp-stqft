@@ -7,8 +7,8 @@ from frontend import frontend, grader, signal, transform, export
 from utils import PI
 
 frontend.enableInteractive()
-TOPIC = "chirp_realDevice_mrot_mitig"
-# TOPIC = "chirp_realDevice_mrot"
+# TOPIC = "chirp_realDevice_mrot_mitig"
+TOPIC = "chirp_realDevice_mrot"
 export.checkWorkingTree()
 device = "ibmq_casablanca" #noisy
 # device = "ibmq_guadalupe"
@@ -48,11 +48,11 @@ pt = 0
 while mrot <= PI/2:
 
     print("Processing simulation STQFT with noise, mitigated")
-    stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, suppressPrint=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts, numOfShots=nShots)
+    # stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, suppressPrint=True, noiseModel=noiseModel, backend=backendInstance, noiseMitigationOpt=1,  filterResultCounts=filterResultCounts, numOfShots=nShots)
     
-    # stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, noiseModel=noiseModel, backend=backendInstance, suppressPrint=True)
+    stqft = transform(stqft_framework, minRotation=mrot, simulation=True, useNoiseModel=True, noiseModel=noiseModel, backend=backendInstance, suppressPrint=True)
 
-    ylabel = "" if pt == 0 else " "
+    ylabel = "" if pt == 0 or pt == 4 else " "
 
 
     y_hat_stqft, f, t = stqft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)

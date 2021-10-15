@@ -72,7 +72,7 @@ y_hat_ideal_p, f_p = fft.postProcess(y_hat, f)
 #         exp.doExport()
 
 #         pt += 1
-#         mrot = PI/2**(nQubits+1-pt)
+#         mrot = PI/2**(nQubits-pt)
 #     mrot = 0
 #     pt = 0
 
@@ -116,7 +116,7 @@ y_hat_ideal_p, f_p = fft.postProcess(y_hat, f)
 #         exp.doExport()
 
 #         pt += 1
-#         mrot = PI/2**(nQubits+1-pt)
+#         mrot = PI/2**(nQubits-pt)
 
 #     plotData = grader_inst.show(subplot=[rows,nQubits+3,2*(nQubits+3)])
 
@@ -145,7 +145,7 @@ for expIt in range(0, nExp):
         y_hat_real_p, f_p = qft.postProcess(y_hat, f)
         ylabel = "Amplitude" if pt == 0 else " "
         # 2nd entry in 2nd row: 0+1+(nQubits+3)+1)
-        plotData = qft.show(y_hat_real_p, f_p, subplot=[rows,nQubits+3,pt+2], title=f"QFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
+        plotData = qft.show(y_hat_real_p, f_p, subplot=[rows,nQubits+2,pt+2], title=f"QFT_real, mr:{mrot:.2f}",  xlabel="Freq (Hz)", ylabel=ylabel)
         
         snr = grader_inst.calculateNoisePower(y_hat_real_p, y_hat_ideal_p)
         print(f"Calculated an snr of {snr} db")
@@ -160,7 +160,7 @@ for expIt in range(0, nExp):
         exp.doExport()
 
         pt += 1
-        mrot = PI/2**(nQubits+1-pt)
+        mrot = PI/2**(nQubits-pt)
 
     plotData = grader_inst.show(subplot=[rows,nQubits+3,(nQubits+3)])
 

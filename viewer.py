@@ -54,6 +54,8 @@ class matplotLibViewer(frontend):
             fileName = os.path.basename(filePath)
             if filterString != "" and filterString not in fileName:
                 continue
+            elif filterString != "":
+                print(f"got {fileName}")
 
             if fileName in plotsDone:
                 continue

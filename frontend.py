@@ -19,7 +19,8 @@ from qbstyles import mpl_style
 class frontend():
     # COLORMAP = 'gist_ncar'
     COLORMAP = 'twilight'
-    SHADING='nearest'
+    # SHADING='nearest'
+    SHADING='flat'
     MAIN='#06574b'
     WHITE='#FFFFFF'
     GRAY='#BBBBBB'
