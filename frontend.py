@@ -13,6 +13,7 @@ from cycler import cycler
 # from matplotlib.gridspec import GridSpec
 
 import librosa
+import librosa.display
 
 from qbstyles import mpl_style
 
@@ -96,7 +97,7 @@ class frontend():
 
         frontend.clickEventHandled = True
 
-    def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False, sr=None):
+    def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False, sr=None, xticks=None):
         # fighandle = plt.figure()
         SMALL_SIZE = 10
         MEDIUM_SIZE = 12
@@ -127,16 +128,17 @@ class frontend():
 
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.tight_layout()
+
+        ax = plt.gca()
         
         if plotType == 'librosa' and sr!=None:
-            fig, ax = plt.subplots()
+            plt.subplot(*subplot,frameon=False)
             plt.subplots_adjust(left=0.15, bottom=0.145, right=0.96, top=0.92)
             img = librosa.display.specshow(yData, x_axis='time', y_axis='linear', sr=sr, fmax=sr/2, ax=ax, cmap=frontend.COLORMAP)
             fig.colorbar(img, ax=ax, format='%+2.0f dB')
 
         else:
             if x2Data is None:
-                ax = plt.gca()
                 if log and plotType != 'box':
                     ax.set_yscale('log')
                     plt.autoscale(False)
@@ -158,7 +160,8 @@ class frontend():
                 m = plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING,linewidth=0, rasterized=True)
                 # ax.set_rasterized(True)
 
-                
+        if xticks != None:
+            ax.set_xticks[xticks]
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
