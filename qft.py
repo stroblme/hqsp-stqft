@@ -178,7 +178,9 @@ def setupMeasurementFitter( backend, noiseModel,
     qc.initialize(ampls, [q[i] for i in range(nQubits)])
     qc = qft(qc, nQubits)
     qc.measure_all()
-    qc = transpile(qc, backend, optimization_level=transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
+    if noiseModel==None:
+        qc = transpile(qc, backend, optimization_level=transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
     print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots.. This might take a while")
 
