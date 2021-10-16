@@ -19,8 +19,7 @@ from qbstyles import mpl_style
 class frontend():
     # COLORMAP = 'gist_ncar'
     COLORMAP = 'twilight'
-    # SHADING='nearest'
-    SHADING='flat'
+    SHADING='nearest'
     MAIN='#06574b'
     WHITE='#FFFFFF'
     GRAY='#BBBBBB'
@@ -97,7 +96,7 @@ class frontend():
 
         frontend.clickEventHandled = True
 
-    def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False):
+    def _show(self, yData:np.array, x1Data:np.array, title:str, xlabel:str, ylabel:str, x2Data:np.array=None, subplot:tuple=None, plotType:str='stem', log:bool=False, sr=None):
         # fighandle = plt.figure()
         SMALL_SIZE = 10
         MEDIUM_SIZE = 12
@@ -129,30 +128,35 @@ class frontend():
         fig.canvas.mpl_connect('button_press_event', frontend.on_click)
         plt.tight_layout()
         
-        
-
-        if x2Data is None:
-            ax = plt.gca()
-            if log and plotType != 'box':
-                ax.set_yscale('log')
-                plt.autoscale(False)
-                if type(yData) == np.ndarray:
-                    plt.ylim(max(min(yData.min()*0.92,0.1),0.01),1)
-                else:
-                    plt.ylim(max(min(min(yData)*0.92,0.1),0.01),1)
-                plt.xlim(min(x1Data), max(x1Data))
-
-            if plotType == 'stem':
-                plt.stem(x1Data, yData, linefmt=frontend.MAIN, markerfmt="C1o")
-            elif plotType == 'box':
-                ax.boxplot(yData)
-            else:
-                plt.plot(x1Data, yData, 'o--')
+        if plotType == 'librosa' and sr!=None:
+            fig, ax = plt.subplots()
+            plt.subplots_adjust(left=0.15, bottom=0.145, right=0.96, top=0.92)
+            img = librosa.display.specshow(yData, x_axis='time', y_axis='linear', sr=sr, fmax=sr/2, ax=ax, cmap=frontend.COLORMAP)
+            fig.colorbar(img, ax=ax, format='%+2.0f dB')
 
         else:
-            # ax = plt.gca()
-            m = plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING,linewidth=0, rasterized=True)
-            # ax.set_rasterized(True)
+            if x2Data is None:
+                ax = plt.gca()
+                if log and plotType != 'box':
+                    ax.set_yscale('log')
+                    plt.autoscale(False)
+                    if type(yData) == np.ndarray:
+                        plt.ylim(max(min(yData.min()*0.92,0.1),0.01),1)
+                    else:
+                        plt.ylim(max(min(min(yData)*0.92,0.1),0.01),1)
+                    plt.xlim(min(x1Data), max(x1Data))
+
+                if plotType == 'stem':
+                    plt.stem(x1Data, yData, linefmt=frontend.MAIN, markerfmt="C1o")
+                elif plotType == 'box':
+                    ax.boxplot(yData)
+                else:
+                    plt.plot(x1Data, yData, 'o--')
+
+            else:
+                # ax = plt.gca()
+                m = plt.pcolormesh(x2Data, x1Data, yData, cmap=frontend.COLORMAP, shading=frontend.SHADING,linewidth=0, rasterized=True)
+                # ax.set_rasterized(True)
 
                 
         plt.title(title)
