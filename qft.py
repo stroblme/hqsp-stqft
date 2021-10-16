@@ -181,6 +181,9 @@ def setupMeasurementFitter( backend, noiseModel,
 
     if noiseModel==None:
         qc = transpile(qc, backend, optimization_level=transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+    else:
+        qc = transpile(qc, Aer.get_backend('qasm_simulator'), optimization_level=transpOptLvl) # opt level 0,1..3. 3: heaviest opt
+
 
     print(f"Running noise measurement {nRuns} times on {nQubits} Qubits with {nShots} shots.. This might take a while")
 
@@ -798,7 +801,7 @@ class qft_framework():
             # setup the transpiled circuit storage for the generic qft circuit
             self.transpiledQ = QuantumRegister(nQubits,'q')
             self.transpiledQC = QuantumCircuit(self.transpiledQ)
-            self.transpiledQC = qft(self.transpiledQC, nQubits)
+            self.transpiledQC = qft(self.transpiledQC, nQubits, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
             self.transpiledQC.measure_all()
     
 
