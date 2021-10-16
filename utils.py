@@ -15,7 +15,7 @@ def filterByThreshold(y, threshold):
         return np.zeros(y.size)
 
 
-    y = np.where(abs(y) < threshold, 0, y)  
+    # y = np.where(abs(y) < threshold, 0, y)  
     # for i in range(y.size):
     #     y[i] = 0 if abs(y[i]) < threshold else y[i]
 
