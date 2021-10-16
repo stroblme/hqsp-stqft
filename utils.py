@@ -1,5 +1,5 @@
 import numpy as np
-
+ctr = 0
 def isPow2(x):
     return (x!=0) and (x & (x-1)) == 0
 
@@ -9,9 +9,12 @@ def calcThreshold(y):
     pass #needsidea
 
 def filterByThreshold(y, threshold):
+    global ctr
     #shortcut, so that we don't need to iterate the whole signal
     if y.max() < threshold:
+        ctr += 1
         # print("Values too small")
+        # print(ctr)
         return np.zeros(y.size)
 
 
