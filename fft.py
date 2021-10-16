@@ -3,6 +3,7 @@ from math import log2
 
 from utils import isPow2
 
+import random
 class fft_framework():
     def transform(self, y_signal):
         """
@@ -29,8 +30,10 @@ class fft_framework():
             y_hat_even = self.fft_recurse(y[::2])
             y_hat_odd = self.fft_recurse(y[1::2])
 
+            # epsilon = 0.01 * random.randint(0,10)
+            epsilon = 0
             # Fourier factor
-            rotation = np.exp(-2j*np.pi*np.arange(N)/ N)
+            rotation = np.exp(-2j*np.pi*np.arange(N)/ N + epsilon)
             
             y_hat = np.concatenate([y_hat_even+rotation[:int(N/2)]*y_hat_odd,
                                     y_hat_even+rotation[int(N/2):]*y_hat_odd])
