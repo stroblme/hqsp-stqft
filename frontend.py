@@ -161,7 +161,7 @@ class frontend():
                 # ax.set_rasterized(True)
 
         if xticks != None:
-            ax.set_xticks[xticks]
+            ax.set_xticks(xticks)
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
