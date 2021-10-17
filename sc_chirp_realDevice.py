@@ -12,15 +12,14 @@ frontend.enableInteractive()
 # export.checkWorkingTree()
 # device = "ibmq_guadalupe"
 
-nQubits=10
-samplingRate=16000    #careful: this may be modified when calling gen_features
+nQubits=7
+samplingRate=8000    #careful: this may be modified when calling gen_features
 numOfShots=4096
 signalThreshold=0.06 #optimized according to thesis
 minRotation=0.2 #PI/2**(nQubits-4)
-nSamplesWindow=1024
-overlapFactor=0.875
+overlapFactor=0.5
 windowLength = 2**nQubits
-windowType='blackman'
+windowType='hanning'
 suppressPrint=True
 useNoiseModel=True
 backend="ibmq_guadalupe" #ibmq_guadalupe, ibmq_melbourne (noisier)
@@ -42,7 +41,7 @@ print(f"Mrot set to {mrot}")
 
 print("Initializing Signal")
 
-y = signal(samplingRate=8000, amplification=1, duration=0, nSamples=2**12, signalType='chirp')
+y = signal(samplingRate=8000, amplification=1, duration=4.1, signalType='chirp')
 
 y.addFrequency(500)
 y.addFrequency(2000, y.duration)
@@ -60,26 +59,50 @@ filterResultCounts = None
 # stft = transform(stft_framework)
 # y_hat_stft, f ,t = stft.forward(y, nSamplesWindow=windowLength, overlapFactor=overlapFactor, windowType=windowType)
 # y_hat_stft_p, f_p, t_p = stft.postProcess(y_hat_stft, f ,t)
-# plotData = stft.show(y_hat_stft_p, f_p, t_p, title="stft")
+# # plotData = stft.show(y_hat_stft_p, f_p, t_p, title="stft")
+
+# stqft = transform(stqft_framework, 
+#                         numOfShots=numOfShots, 
+#                         minRotation=minRotation, fixZeroSignal=fixZeroSignal,
+#                         suppressPrint=suppressPrint, draw=False,
+#                         simulation=simulation,
+#                         transpileOnce=transpileOnce, transpOptLvl=transpOptLvl)
+
+# # STQFT init
+# y_hat_stqft, f, t = stqft.forward(y, 
+#                         nSamplesWindow=windowLength,
+#                         overlapFactor=overlapFactor,
+#                         windowType=windowType,
+#                         suppressPrint=suppressPrint)
+
+
+# y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=None, normalize=normalize, samplingRate=y.samplingRate)
+
+# stqft.show(y_hat_stqft_p, f_p, t_p)
 
 # QFT init
-stqft = transform(stqft_framework, 
-                    numOfShots=numOfShots, 
-                    minRotation=minRotation, fixZeroSignal=fixZeroSignal,
-                    suppressPrint=suppressPrint, draw=False,
-                    simulation=simulation,
-                    transpileOnce=transpileOnce, transpOptLvl=transpOptLvl)
+for i in range(1,5):
 
-# STQFT init
-y_hat_stqft, f, t = stqft.forward(y, 
-                        nSamplesWindow=nSamplesWindow,
-                        overlapFactor=overlapFactor,
-                        windowType=windowType,
-                        suppressPrint=suppressPrint)
+    stqft = transform(stqft_framework, 
+                        numOfShots=numOfShots, 
+                        minRotation=minRotation, fixZeroSignal=fixZeroSignal,
+                        suppressPrint=suppressPrint, draw=False,
+                        simulation=simulation,
+                        transpileOnce=transpileOnce, transpOptLvl=transpOptLvl)
 
-y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=None, normalize=normalize, samplingRate=y.samplingRate, nMels=nMels, fmin=fmin, fmax=y.samplingRate/2)
+    # STQFT init
+    y_hat_stqft, f, t = stqft.forward(y, 
+                            nSamplesWindow=windowLength,
+                            overlapFactor=overlapFactor,
+                            windowType=windowType,
+                            suppressPrint=suppressPrint)
 
-stqft.show(y_hat_stqft_p, f_p, t_p, title=f"STQFT")
+    ylabel = "Frequency (Hz)" if i == 1 or i == 3 else " "
+    xlabel = "Time (s)" if i > 2 else " "
+
+    y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=None, normalize=normalize, samplingRate=y.samplingRate)
+
+    stqft.show(y_hat_stqft_p, f_p, t_p, title=f"STQFT_sim, er:{0.12+0.03*(i-1)}", subplot=[2,2,i], xlabel=xlabel, ylabel=ylabel)
 
 
 print("Showing all figures")
