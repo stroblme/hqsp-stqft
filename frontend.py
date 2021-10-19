@@ -132,7 +132,6 @@ class frontend():
         ax = plt.gca()
         
         if plotType == 'librosa' and sr!=None:
-            plt.subplot(*subplot,frameon=False)
             plt.subplots_adjust(left=0.15, bottom=0.145, right=0.96, top=0.92)
             img = librosa.display.specshow(yData, x_axis='time', y_axis='linear', sr=sr, fmax=sr/2, ax=ax, cmap=frontend.COLORMAP)
             fig.colorbar(img, ax=ax, format='%+2.0f dB')
