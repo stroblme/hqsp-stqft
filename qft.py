@@ -218,7 +218,7 @@ def setupMeasurementFitter( backend, noiseModel,
     return filterResultCounts
 
 # epsilon = 0.12 #enable for error
-epsilon = 0
+epsilon = 0 #disable for error
 # import random
 def qft_rotations(circuit, n, minRotation=0, suppressPrint=True):
     """Performs qft on the first n qubits in circuit (without swaps)"""
@@ -234,7 +234,7 @@ def qft_rotations(circuit, n, minRotation=0, suppressPrint=True):
     # epsilon = 0.04 * random.randint(0,10)
     # epsilon = float(input('epsilon'))
     for qubit in range(n):
-        rot = pi/2**(n-qubit)
+        rot = pi/2**(n-qubit) #disable for error
         # rot = pi/2**(n-qubit) + epsilon #enable for error
         if rot <= minRotation:
             rotGateSaveCounter += 1
