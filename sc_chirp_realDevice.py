@@ -97,12 +97,12 @@ for i in range(1,5):
                             windowType=windowType,
                             suppressPrint=suppressPrint)
 
-    ylabel = "Frequency (Hz)" if i == 1 or i == 3 else " "
-    xlabel = "Time (s)" if i > 2 else " "
+    ylabel = "Frequency (Hz)" if i == 1 else " "
+    xlabel = "Time (s)"
 
     y_hat_stqft_p, f_p, t_p = stqft.postProcess(y_hat_stqft, f ,t, scale=None, normalize=normalize, samplingRate=y.samplingRate)
 
-    stqft.show(y_hat_stqft_p, f_p, t_p, title=f"STQFT_sim, er:{0.12+0.03*(i-1)}", subplot=[2,2,i], xlabel=xlabel, ylabel=ylabel)
+    stqft.show(y_hat_stqft_p, f_p, t_p, title=f"STQFT_sim, er:{0.12+0.03*(i-1)}", subplot=[1,4,i], xlabel=xlabel, ylabel=ylabel)
 
 
 print("Showing all figures")

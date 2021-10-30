@@ -217,15 +217,15 @@ def setupMeasurementFitter( backend, noiseModel,
 
     return filterResultCounts
 
-# epsilon = 0.12
-epsilon = 0
+epsilon = 0.12
+# epsilon = 0
 # import random
 def qft_rotations(circuit, n, minRotation=0, suppressPrint=True):
     """Performs qft on the first n qubits in circuit (without swaps)"""
     global epsilon
 
     if n == 0:
-        # epsilon += 0.03
+        epsilon += 0.03
         return circuit
     n -= 1
     circuit.h(n) # apply hadamard
