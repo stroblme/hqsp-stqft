@@ -10,4 +10,5 @@ date-released: 2021-11-02
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/stroblme/hqsp-stqft"
 title: "Hybrid Quantum Speech Processing - STQFT Repository"
+version: "1.0"
 ...
