@@ -39,7 +39,7 @@ from ibmAccounts import IBMQ#NOT redundant! needed to get account information! C
 
 def get_bit_string(n, n_qubits):
     """Returns the binary string of an integer with n_qubits characters
-
+    Derived from https://sarangzambare.github.io/jekyll/update/2020/06/13/quantum-frequencies.html
     Args:
         n (int): integer to be converted
         n_qubits (int): number of qubits
@@ -47,17 +47,14 @@ def get_bit_string(n, n_qubits):
     Returns:
         string: binary string
     """
+    binaryString = "{0:b}".format(n)
+    binaryString = "0"*(n_qubits - len(binaryString)) + binaryString
 
-    assert n < 2**n_qubits, 'n too big to binarise, increase n_qubits or decrease n'
-
-    bs = "{0:b}".format(n)
-    bs = "0"*(n_qubits - len(bs)) + bs
-
-    return bs
+    return binaryString
 
 def hexKeyToBin(counts, n_qubits):
     """Generates binary representation of a hex based counts
-
+    Derived from https://sarangzambare.github.io/jekyll/update/2020/06/13/quantum-frequencies.html
     Args:
         counts (dict): dictionary with hex keys
         n_qubits (int): number of qubits
@@ -73,7 +70,7 @@ def hexKeyToBin(counts, n_qubits):
 
 def get_fft_from_counts(counts, n_qubits):
     """Calculates the fft based on the counts of an experiment
-
+    Derived from https://sarangzambare.github.io/jekyll/update/2020/06/13/quantum-frequencies.html
     Args:
         counts (int): dictionary with binary keys
         n_qubits (int): number of qubits
