@@ -22,6 +22,10 @@ class qwvt_framework():
         return self.stt_inst.stt_transform(y_signal, **kwargs)
 
     def wvd(y_signal, t=None, N=None, trace=0, make_analytic=True):
+        '''
+        Initial draft from https://www.frank-zalkow.de/de/the-wigner-ville-distribution-with-python.html
+        Not functional.
+        '''
         y=y_signal.sample()
         # if make_analytic:
         #     x = hilbert(y)
