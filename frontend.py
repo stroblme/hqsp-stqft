@@ -199,15 +199,19 @@ class signal(frontend):
             self.createEmptySignal(self.nSamples)
 
             self.lockSampling = False
+        self.shape = self.y.shape
 
         print(f"Signal duration set to {self.duration}s, resulting in {self.nSamples} samples")
         print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
         self.t = np.arange(0,self.duration,self.samplingInterval)
         self.f = None
 
+
+    # def __getattr__(self, attr):
+    #     return getattr(self.y, attr)
+
     def createEmptySignal(self, nSamples):
         self.y = np.zeros(nSamples)
-
 
     def loadFile(self, path, zeroPadding=True):
         """Loads an audio sample from file
