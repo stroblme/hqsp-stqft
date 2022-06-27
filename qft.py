@@ -256,6 +256,9 @@ def qft(circuit, n, parameters=None, minRotation=0, suppressPrint=False):
     """QFT on the first n qubits in circuit"""
     p = (np.ones(n), np.zeros(n)) if parameters is None else parameters
 
+    if parameters is not None:
+        print(f"Running qft with additional parameters:\n\t weights: {parameters[0]}\n\t biases: {parameters[1]}")
+
     qft_rotations(circuit, n, p, minRotation=minRotation, suppressPrint=suppressPrint)
     swap_registers(circuit, n)
     # self.measure(circuit,n)
@@ -543,7 +546,7 @@ class qft_framework():
         Args:
             y (signal): signal instance used for circuit configuration
         """
-        self.transform(y,int(y.size / 3))
+        self.transform(y,int(len(y) / 3))
 
 
     
@@ -785,14 +788,14 @@ class qft_framework():
         return circuit
 
     def processQFT(self, y:np.array):
-        n_samples = y.size
+        n_samples = len(y)
         assert isPow2(n_samples)
 
         nQubits = int((log2(n_samples)/log2(2)))
         if not self.suppressPrint:
             print(f"Using {nQubits} Qubits to encode {n_samples} Samples")     
 
-        if y.max() == 0.0:
+        if max(y) == 0.0:
             if self.fixZeroSignal:
                 print(f"Warning: Signal's max value is zero and therefore amplitude initialization will fail. Setting signal to constant-one to continue")
                 y = np.ones(n_samples)
@@ -803,6 +806,8 @@ class qft_framework():
                 return y_hat
 
         # Normalize ampl, which is required for squared sum of amps=1
+        if y.dtype == np.float32:
+            print("Carefull; you're using float32 for normalization. This might cause an issue with qiskits required precision")
         ampls = y / np.linalg.norm(y)
         q = QuantumRegister(nQubits,'q')
 
@@ -940,14 +945,14 @@ class qft_framework():
     #     pass
 
     def processIQFT(self, y:np.array):
-        n_samples = y.size
+        n_samples = len(y)
         assert isPow2(n_samples)
 
         n_qubits = int((log2(n_samples)/log2(2)))
         if not self.suppressPrint:
             print(f"Using {n_qubits} Qubits to encode {n_samples} Samples")     
 
-        if y.max() == 0.0:
+        if max(y) == 0.0:
             y_hat = np.zeros(2**n_qubits)
             return y_hat
 
