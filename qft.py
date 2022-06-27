@@ -225,6 +225,7 @@ def qft_rotations(circuit, n, p, minRotation=0, suppressPrint=True):
         # epsilon += 0.03 #enable for error
         return circuit
     n -= 1
+
     circuit.h(n) # apply hadamard
     
     rotGateSaveCounter = 0
@@ -244,7 +245,7 @@ def qft_rotations(circuit, n, p, minRotation=0, suppressPrint=True):
     # the next qubits (we reduced n by one earlier in the function)
     if n != 0 and rotGateSaveCounter != 0 and not suppressPrint:
         print(f"Saved {rotGateSaveCounter} rotation gates which is {int(100*rotGateSaveCounter/n)}% of {n} qubits")
-    qft_rotations(circuit, n, minRotation=minRotation, suppressPrint=suppressPrint)
+    qft_rotations(circuit, n, p, minRotation=minRotation, suppressPrint=suppressPrint)
     
 def swap_registers(circuit, n):
     for qubit in range(n//2):
@@ -253,9 +254,9 @@ def swap_registers(circuit, n):
 
 def qft(circuit, n, parameters=None, minRotation=0, suppressPrint=False):
     """QFT on the first n qubits in circuit"""
-    P = (np.ones(n), np.zeros(n)) if parameters is None else parameters
+    p = (np.ones(n), np.zeros(n)) if parameters is None else parameters
 
-    qft_rotations(circuit, n, P, minRotation=minRotation, suppressPrint=suppressPrint)
+    qft_rotations(circuit, n, p, minRotation=minRotation, suppressPrint=suppressPrint)
     swap_registers(circuit, n)
     # self.measure(circuit,n)
     return circuit
@@ -269,12 +270,14 @@ class qft_framework():
                         simulation:bool=True,
                         noiseMitigationOpt:int=0, filterResultCounts=None,
                         useNoiseModel:bool=False, noiseModel=None, backend=None, 
+                        parameters=None,
                         transpileOnce:bool=False, transpOptLvl:int=1):
                         
         self.suppressPrint = suppressPrint
         self.numOfShots = numOfShots
         self.minRotation = minRotation
         self.draw = draw
+        self.parameters = parameters
 
         # check if provided parameters are usefull
         if fixZeroSignal and signalThreshold > 0:
@@ -808,7 +811,7 @@ class qft_framework():
             # setup the transpiled circuit storage for the generic qft circuit
             self.transpiledQ = QuantumRegister(nQubits,'q')
             self.transpiledQC = QuantumCircuit(self.transpiledQ)
-            self.transpiledQC = qft(self.transpiledQC, nQubits, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
+            self.transpiledQC = qft(self.transpiledQC, nQubits, parameters=self.parameters, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
             self.transpiledQC.measure_all()
     
 
@@ -863,7 +866,7 @@ class qft_framework():
             # for 2^n amplitudes, we have n qubits for initialization
             # this means that the binary representation happens exactly here
             qc.initialize(ampls, [q[i] for i in range(nQubits)])
-            qc = qft(qc, nQubits, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
+            qc = qft(qc, nQubits, parameters=self.parameters, minRotation=self.minRotation, suppressPrint=self.suppressPrint)
             qc.measure_all()
             qc = transpile(qc, self.backend, optimization_level=self.transpOptLvl) # opt level 0,1..3. 3: heaviest opt
 
