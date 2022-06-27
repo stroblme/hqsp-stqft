@@ -11,11 +11,11 @@ def calcThreshold(y):
 def filterByThreshold(y, threshold):
     global ctr
     #shortcut, so that we don't need to iterate the whole signal
-    if y.max() < threshold:
+    if max(y) < threshold:
         ctr += 1
         # print("Values too small")
         # print(ctr)
-        return np.zeros(y.size)
+        return np.zeros(len(y))
 
 
     # y = np.where(abs(y) < threshold, 0, y)  
