@@ -167,6 +167,8 @@ class frontend():
 
         return {'x1Data':x1Data, 'yData':yData, 'x2Data':x2Data, 'subplot':subplot, 'plotType':plotType, 'log':log, 'xlabel':xlabel, 'ylabel':ylabel, 'title':title}
 
+
+
 class signal(frontend):
     def __init__(self, samplingRate:int=40, amplification:int=1, duration:int=2, nSamples:int=80, signalType:str='sin', path:str='') -> None:
         """Signal Init
@@ -206,6 +208,7 @@ class signal(frontend):
         self.t = np.arange(0,self.duration,self.samplingInterval)
         self.f = None
 
+        
 
     # def __getattr__(self, attr):
     #     return getattr(self.y, attr)
@@ -314,7 +317,7 @@ class signal(frontend):
             segment = self.y[currentHop:currentHop+nSamplesWindow]  # get the current segment
             
             #usefull when splitting and overlapping overshoots the available samples
-            if segment.size < window.size:
+            if len(segment) < len(window):
                 segment = self.y[-nSamplesWindow:]
 
             windowed = segment * window                       # multiply by the half cosine function
@@ -370,6 +373,7 @@ class signal(frontend):
             title=type(self).__name__
 
         return self._show(yData, xData, title, xlabel, ylabel, subplot=subplot, plotType="plot")
+
 
 class transform(frontend):
     def __init__(self, transformation, **kwargs):
