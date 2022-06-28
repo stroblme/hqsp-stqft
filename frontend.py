@@ -278,7 +278,7 @@ class signal(frontend):
         self.phases.append(phase)
 
     def externalSample(self, y, t, f=None):
-        self.y = y
+        self.y = np.array(y).astype(np.float64) # make sure that we cast to float64 here caus later on this might yield a precision error in qiskit otherwise
         self.t = t
         self.f = f
         self.setNSamples(0,t.size)
