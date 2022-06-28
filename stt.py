@@ -7,7 +7,7 @@ class stt_framework():
         self.transformationInst = transformation(**kwargs)
 
     def stt_transform(self, y_signal:signal, nSamplesWindow:int=2**10, overlapFactor:int=0, windowType:str=None, suppressPrint:bool=False):
-        
+
         y_split_list = y_signal.split(nSamplesWindow, overlapFactor=overlapFactor, windowType=windowType)
         # y_split_list = y_signal.split(nSamplesWindow)
         nParts = len(y_split_list)
