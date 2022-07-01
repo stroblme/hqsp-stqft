@@ -256,8 +256,8 @@ def qft(circuit, n, parameters=None, minRotation=0, suppressPrint=False):
     """QFT on the first n qubits in circuit"""
     p = (np.ones(n), np.zeros(n)) if parameters is None else parameters
 
-    if parameters is not None:
-        print(f"Running qft with additional parameters:\n\t weights: {parameters[0]}\n\t biases: {parameters[1]}")
+    # if parameters is not None:
+    #     print(f"Running qft with additional parameters:\n\t weights: {parameters[0]}\n\t biases: {parameters[1]}")
 
     qft_rotations(circuit, n, p, minRotation=minRotation, suppressPrint=suppressPrint)
     swap_registers(circuit, n)
