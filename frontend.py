@@ -170,7 +170,7 @@ class frontend():
 
 
 class signal(frontend):
-    def __init__(self, samplingRate:int=40, amplification:int=1, duration:int=2, nSamples:int=80, signalType:str='sin', path:str='') -> None:
+    def __init__(self, samplingRate:int=40, amplification:int=1, duration:int=2, nSamples:int=80, signalType:str='sin', path:str='', suppressPrint:bool=True):
         """Signal Init
 
         Args:
@@ -179,6 +179,7 @@ class signal(frontend):
             duration (int, optional): Duration of the created signal. Defaults to 2.
             nSamples ([type], optional): Sample length of the signal. Defaults to 80.
         """
+        self.suppressPrint = suppressPrint
         # Set the class attributes
         self.amplification = amplification
         self.setSamplingRate(samplingRate)
@@ -203,8 +204,9 @@ class signal(frontend):
             self.lockSampling = False
         self.shape = self.y.shape
 
-        print(f"Signal duration set to {self.duration}s, resulting in {self.nSamples} samples")
-        print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
+        if not self.suppressPrint:
+            print(f"Signal duration set to {self.duration}s, resulting in {self.nSamples} samples")
+            print(f"Sampling Rate is {self.samplingRate} with an amplification of {self.amplification}")
         self.t = np.arange(0,self.duration,self.samplingInterval)
         self.f = None
 
@@ -292,13 +294,13 @@ class signal(frontend):
 
         if windowType == 'hanning':
             window = np.hanning(nSamplesWindow)
-            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hanning window")
+            if overlapFactor!=0.5 and not self.suppressPrint: print("Suggest an overlap factor of 0.5 in combination with hanning window")
         elif windowType == 'hamming':
             window = np.hamming(nSamplesWindow)
-            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
+            if overlapFactor!=0.5 and not self.suppressPrint: print("Suggest an overlap factor of 0.5 in combination with hamming window")
         elif windowType == 'blackman':
             window = np.blackman(nSamplesWindow)
-            if overlapFactor!=0.5: print("Suggest an overlap factor of 0.5 in combination with hamming window")
+            if overlapFactor!=0.5 and not self.suppressPrint: print("Suggest an overlap factor of 0.5 in combination with hamming window")
         elif windowType == 'kaiser':
             window = np.kaiser(nSamplesWindow, 8.6-overlapFactor*5.2) #starting from 8.6=blackman over 6=hanning and 5=hamming downtp 0=rect
             print(f"Using {8.6-overlapFactor*5.2} as beta value for window type 'kaiser'")
@@ -326,7 +328,8 @@ class signal(frontend):
             y.externalSample(windowed, self.t[currentHop:currentHop+nSamplesWindow])
             y_split_list.append(y)
 
-        print(f"Signal divided into {nParts-1} parts with a window length of {nSamplesWindow} each")
+        if not self.suppressPrint:
+            print(f"Signal divided into {nParts-1} parts with a window length of {nSamplesWindow} each")
 
 
         return y_split_list
